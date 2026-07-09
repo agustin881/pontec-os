@@ -112,7 +112,7 @@
 <!-- ── Sistema ── -->
 <div id="os-view">
   <nav id="side" aria-label="Apps">
-    <div id="brand">PONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v5</span></div>
+    <div id="brand">PONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v6</span></div>
     <div id="botones"></div>
     <div class="abajo">
       <div id="quien"></div>
@@ -172,9 +172,11 @@ var APPS = [
     url:'https://depositoml-frontend.vercel.app/' },
   { id:'promos',       nombre:'Promociones', ico:'\uD83D\uDCB8',
     url:'https://margenml-frontend.vercel.app/#promos' },
+  { id:'respondia',    nombre:'RespondIA', ico:'\uD83D\uDCAC',
+    url:'https://respondia-frontend.vercel.app/' },
   { id:'asistente',    nombre:'Asistente', ico:'\uD83E\uDD16', panel:true }
 ];
-var APP_NOMBRES = {rentabilidad:'Rentabilidad', logistica:'Logistica', promos:'Promociones', asistente:'Asistente'};
+var APP_NOMBRES = {rentabilidad:'Rentabilidad', logistica:'Logistica', promos:'Promociones', respondia:'RespondIA', asistente:'Asistente'};
 
 var _sb=null, MI_ROL='operador', MI_EMAIL='', MI_APPS=null, _usr=[];
 function getSb(){ if(!_sb && window.supabase){ _sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY); } return _sb; }
@@ -184,8 +186,8 @@ async function authHeaders(){
   return t ? { Authorization:'Bearer '+t } : {};
 }
 function appsPorRol(rol){
-  if(rol==='admin') return ['rentabilidad','logistica','promos','asistente'];
-  if(rol==='encargado') return ['rentabilidad','logistica','promos'];
+  if(rol==='admin') return ['rentabilidad','logistica','promos','respondia','asistente'];
+  if(rol==='encargado') return ['rentabilidad','logistica','promos','respondia'];
   return ['rentabilidad','logistica'];
 }
 
@@ -312,7 +314,7 @@ function toggleAppsOS(ix){
   var u=_usr[ix];
   var marcadas=(u.apps&&u.apps.length)?u.apps:appsPorRol(u.rol);
   var box=document.getElementById('u-apps-chk-'+ix);
-  box.innerHTML=['rentabilidad','logistica','promos','asistente'].map(function(a){
+  box.innerHTML=['rentabilidad','logistica','promos','respondia','asistente'].map(function(a){
     return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;color:#c9d4e8">'
       +'<input type="checkbox" value="'+a+'"'+(marcadas.indexOf(a)>-1?' checked':'')+'> '+APP_NOMBRES[a]+'</label>';
   }).join('');
