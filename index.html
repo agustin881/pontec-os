@@ -68,6 +68,17 @@
   select{background:#0b1220;color:var(--texto);border:1px solid var(--borde);border-radius:6px;padding:6px}
   .nota{font-size:12px;color:var(--texto2)}
 
+  /* ── Chat del Asistente ── */
+  #panel-asistente{flex:1;display:none;flex-direction:column;padding:14px;max-width:820px;width:100%;margin:0 auto;min-height:0}
+  #chat-msgs{flex:1;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:6px;min-height:0}
+  .msg{max-width:82%;padding:10px 13px;border-radius:12px;font-size:13px;white-space:pre-wrap;line-height:1.45;word-break:break-word}
+  .msg.user{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:4px}
+  .msg.bot{align-self:flex-start;background:var(--card);border:1px solid var(--borde);border-bottom-left-radius:4px}
+  .conf-btns{margin-top:10px;display:flex;gap:8px}
+  .btn-verde{padding:7px 14px;border:none;border-radius:6px;background:var(--verde);color:#06210f;font-weight:700;cursor:pointer}
+  #chat-form{display:flex;gap:8px;margin-top:10px}
+  #chat-in{flex:1;padding:11px;border-radius:10px;border:1px solid var(--borde);background:#0b1220;color:var(--texto);font-size:13px}
+
   @media (max-width:720px){
     #os-view.on{flex-direction:column}
     #side{width:100%;min-width:0;flex-direction:row;align-items:center;overflow-x:auto;border-right:none;border-bottom:1px solid var(--borde);padding:8px}
@@ -101,7 +112,7 @@
 <!-- ── Sistema ── -->
 <div id="os-view">
   <nav id="side" aria-label="Apps">
-    <div id="brand">PONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v4</span></div>
+    <div id="brand">PONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v5</span></div>
     <div id="botones"></div>
     <div class="abajo">
       <div id="quien"></div>
@@ -115,6 +126,14 @@
       <a id="abrir" href="#" target="_blank" rel="noopener">Abrir aparte &#8599;</a>
     </div>
     <iframe id="visor" title="App" allow="clipboard-write"></iframe>
+
+    <div id="panel-asistente">
+      <div id="chat-msgs"></div>
+      <div id="chat-form">
+        <input id="chat-in" placeholder="Escribi tu orden... (ej: sacale el descuento al OFI210-NE)">
+        <button class="btn-azul" onclick="enviarChat()">Enviar</button>
+      </div>
+    </div>
 
     <div id="panel-usuarios">
       <div class="caja">
@@ -153,7 +172,7 @@ var APPS = [
     url:'https://depositoml-frontend.vercel.app/' },
   { id:'promos',       nombre:'Promociones', ico:'\uD83D\uDCB8',
     url:'https://margenml-frontend.vercel.app/#promos' },
-  { id:'asistente',    nombre:'Asistente', ico:'\uD83E\uDD16', off:true }
+  { id:'asistente',    nombre:'Asistente', ico:'\uD83E\uDD16', panel:true }
 ];
 var APP_NOMBRES = {rentabilidad:'Rentabilidad', logistica:'Logistica', promos:'Promociones', asistente:'Asistente'};
 
@@ -229,8 +248,10 @@ function _activar(id){
 function abrirApp(id){
   var a=null; APPS.forEach(function(x){ if(x.id===id) a=x; });
   if(!a||a.off) return;
+  if(a.panel){ abrirAsistente(); try{ localStorage.setItem('pontecos_app',id); }catch(e){} return; }
   _activar(id);
   document.getElementById('panel-usuarios').style.display='none';
+  document.getElementById('panel-asistente').style.display='none';
   var visor=document.getElementById('visor'); visor.style.display='';
   document.getElementById('titulo').textContent=a.nombre;
   var abrir=document.getElementById('abrir'); abrir.style.display=''; abrir.href=a.url;
@@ -245,6 +266,7 @@ function abrirApp(id){
 // ── Usuarios (solo admin; el backend igual lo exige) ─────────────
 function abrirUsuarios(){
   _activar('usuarios');
+  document.getElementById('panel-asistente').style.display='none';
   document.getElementById('visor').style.display='none';
   document.getElementById('abrir').style.display='none';
   document.getElementById('hint').style.display='none';
@@ -359,6 +381,68 @@ async function borrarUsuarioOS(ix){
     renderUsuariosOS();
   }catch(e){ alert('Error: '+e.message); }
 }
+
+// ── Asistente: chat que interpreta y ejecuta ordenes ─────────────
+var _chatHist=[], _chatPend=null;
+function abrirAsistente(){
+  _activar('asistente');
+  document.getElementById('visor').style.display='none';
+  document.getElementById('abrir').style.display='none';
+  document.getElementById('hint').style.display='none';
+  document.getElementById('panel-usuarios').style.display='none';
+  document.getElementById('titulo').textContent='Asistente';
+  document.getElementById('panel-asistente').style.display='flex';
+  if(!document.getElementById('chat-msgs').children.length){
+    _burBot('Hola! Por ahora manejo los descuentos de ML. Proba con:\n- "sacale el descuento al AIR010-BL"\n- "ponele descuento al OFI210-NE a 28500"\n- "que promos tiene el HAM200-AZ?"\n- "buscame las publicaciones del GRI100-CO"\n\nAntes de tocar algo, siempre te muestro que voy a hacer y espero tu Confirmar.');
+  }
+  document.getElementById('chat-in').focus();
+}
+function _bur(t,cls){
+  var d=document.createElement('div'); d.className='msg '+cls; d.textContent=t;
+  document.getElementById('chat-msgs').appendChild(d);
+  d.scrollIntoView({block:'end'});
+  return d;
+}
+function _burBot(t){ return _bur(t,'bot'); }
+async function enviarChat(){
+  var inp=document.getElementById('chat-in'); var t=(inp.value||'').trim();
+  if(!t) return;
+  inp.value=''; _bur(t,'user');
+  _chatHist.push({rol:'user',texto:t}); _chatPend=null;
+  var esp=_burBot('...');
+  try{
+    var h=await authHeaders(); h['Content-Type']='application/json';
+    var r=await fetch(BACKEND_URL+'/api/asistente',{method:'POST',headers:h,body:JSON.stringify({mensajes:_chatHist.slice(-12)})});
+    var d=await r.json();
+    esp.remove();
+    if(d.error){ _burBot('Error: '+d.error); return; }
+    var b=_burBot(d.respuesta||'(sin respuesta)');
+    _chatHist.push({rol:'bot',texto:d.respuesta||''});
+    if(d.pendiente){
+      _chatPend=d.pendiente;
+      var caja=document.createElement('div'); caja.className='conf-btns';
+      var si=document.createElement('button'); si.textContent='Confirmar'; si.className='btn-verde';
+      var no=document.createElement('button'); no.textContent='Cancelar'; no.className='btn-gris';
+      si.onclick=function(){ caja.remove(); confirmarChat(); };
+      no.onclick=function(){ caja.remove(); _chatPend=null; _burBot('Cancelado, no toco nada.'); _chatHist.push({rol:'bot',texto:'Cancelado.'}); };
+      caja.appendChild(si); caja.appendChild(no); b.appendChild(caja);
+    }
+  }catch(e){ esp.remove(); _burBot('Error: '+e.message); }
+}
+async function confirmarChat(){
+  if(!_chatPend) return;
+  var esp=_burBot('Ejecutando...');
+  try{
+    var h=await authHeaders(); h['Content-Type']='application/json';
+    var r=await fetch(BACKEND_URL+'/api/asistente',{method:'POST',headers:h,body:JSON.stringify({confirmar:_chatPend})});
+    var d=await r.json();
+    esp.remove();
+    _burBot(d.error?('Error: '+d.error):(d.respuesta||'Listo.'));
+    _chatHist.push({rol:'bot',texto:d.respuesta||'Listo.'});
+  }catch(e){ esp.remove(); _burBot('Error: '+e.message); }
+  _chatPend=null;
+}
+document.getElementById('chat-in').addEventListener('keydown',function(e){ if(e.key==='Enter') enviarChat(); });
 
 // ── SSO: las apps embebidas piden la sesion y el hub se la pasa ───
 // Solo responde a los origenes de SUS apps (nunca a un tercero).
