@@ -1,0 +1,1993 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#12151f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RespondIA">
+<link rel="icon" href="data:image/svg+xml,%3Csvg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg' style='width:100%;height:100%;display:block'%3E%3Cpath fill='%231f6bf2' d='M24 46 C24 24 36 20 50 20 L70 20 C90 20 98 30 98 46 L98 48 C98 61 92 68 84 70 L97 95 C99 99 98 104 92 104 L86 104 C83 104 81 102 80 100 L64 75 L47 98 Q45 100 41 100 L34 100 C27 100 24 95 24 88 Z'/%3E%3Cpath fill='%23fff' d='M54 32 L74 32 C86 32 90 39 90 46 C90 53 86 60 74 60 L61 60 L42 80 L44 57 C41 55 40 51 40 46 C40 36 45 32 54 32 Z'/%3E%3Ccircle cx='57' cy='46' r='4.8' fill='%231f6bf2'/%3E%3Ccircle cx='67' cy='46' r='4.8' fill='%231f6bf2'/%3E%3Ccircle cx='77' cy='46' r='4.8' fill='%231f6bf2'/%3E%3C/svg%3E">
+<title>RespondIA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#eef0f6; --card:#fff; --ink:#12151f; --muted:#687080; --line:#e7e9f0;
+    --blue:#2f6bff; --blue-d:#1d54e6; --yellow:#ffd23f; --green:#0e9f6e;
+    --red:#e5484d; --amber:#f59e0b; --soft:#f4f6fb;
+    --tinta:#12151f; --tinta-2:#1b2130;
+    --r:16px;
+    --sh:0 1px 2px rgba(18,21,31,.05),0 10px 28px -14px rgba(18,21,31,.14);
+    --sh-up:0 2px 4px rgba(18,21,31,.06),0 16px 36px -14px rgba(47,107,255,.18);
+    --display:'Sora',sans-serif;
+    --grad-top:#f6f8fd; --sel:#dbe6ff;
+  }
+  /* ===== TEMA OSCURO: mismas variables, paleta nocturna ===== */
+  html[data-theme="dark"]{
+    --bg:#0e1119; --card:#161b27; --ink:#e8ebf4; --muted:#98a0b3; --line:#242b3c;
+    --blue:#5b8cff; --blue-d:#3f6ef0; --green:#2fbf87; --red:#ff6b70; --amber:#ffb84d;
+    --soft:#1d2333;
+    --tinta:#0a0d14; --tinta-2:#131826;
+    --sh:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.6);
+    --sh-up:0 2px 4px rgba(0,0,0,.4),0 16px 36px -14px rgba(91,140,255,.25);
+    --grad-top:#12161f; --sel:#2a3c66;
+  }
+  html[data-theme="dark"] .conf{filter:saturate(.9) brightness(1.1)}
+  html[data-theme="dark"] img.thumb{opacity:.92}
+  *{box-sizing:border-box}
+  html{scrollbar-color:#c9cede transparent}
+  body{margin:0;color:var(--ink);
+    background:linear-gradient(180deg,var(--grad-top) 0%,var(--bg) 260px);
+    font-family:'Instrument Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  ::selection{background:var(--sel)}
+  button{font-family:inherit;cursor:pointer;border:none}
+  a{color:var(--blue);text-decoration:none}
+  a:hover{text-decoration:underline;text-underline-offset:2px}
+  :focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:6px}
+
+  /* ===== cabina de mando (barra superior en tinta) ===== */
+  header{position:sticky;top:0;z-index:30;
+    background:linear-gradient(180deg,var(--tinta) 0%,var(--tinta-2) 100%);
+    border-bottom:1px solid rgba(255,255,255,.06);
+    box-shadow:0 6px 24px -12px rgba(18,21,31,.5)}
+  .bar{max-width:1020px;margin:0 auto;padding:11px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;
+    color:#fff;font-family:var(--display);font-size:17px}
+  .brand .dot{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;
+    filter:drop-shadow(0 0 10px rgba(31,107,242,.55))}
+  .brand span[style]{color:#7d87a0!important}
+  .grow{flex:1}
+  header select{background:var(--tinta-2);color:#fff;border:1px solid #2c3448;border-radius:10px;
+    padding:8px 12px;font-weight:600}
+  header select:focus{border-color:var(--blue)}
+  header .camp{background:#242c40;color:#aeb7cc}
+  header .camp a{color:#8fb0ff}
+  header .camp.alerta{background:#3d1f24;color:#ff8d95}
+
+  select,input,textarea{font-family:inherit;font-size:14px;color:var(--ink);
+    border:1px solid var(--line);border-radius:10px;padding:8px 11px;background:#fff;outline:none;
+    transition:border-color .15s,box-shadow .15s}
+  select:focus,input:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(47,107,255,.12)}
+  .gear{background:var(--soft);border-radius:9px;padding:8px 11px;font-size:16px}
+
+  /* ===== tablero de cifras ===== */
+  .stats{max-width:1020px;margin:0 auto;padding:14px 18px 0;display:flex;gap:10px;flex-wrap:wrap}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 16px;min-width:100px;
+    box-shadow:var(--sh);transition:transform .15s,box-shadow .15s,border-color .15s;position:relative;overflow:hidden}
+  .stat::after{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--blue),#7aa5ff);opacity:0;transition:opacity .15s}
+  .stat:hover{transform:translateY(-2px);box-shadow:var(--sh-up);border-color:#d8e2ff}
+  .stat:hover::after{opacity:1}
+  .stat b{display:block;font-size:22px;font-weight:800;letter-spacing:-.02em;
+    font-family:var(--display);font-variant-numeric:tabular-nums}
+  .stat span{font-size:12px;color:var(--muted);font-weight:500}
+  .stat.bf{border-style:dashed;color:var(--blue);border-color:#b9ccff;background:#f7faff}
+
+  /* ===== pestañas ===== */
+  nav{max-width:1020px;margin:16px auto 0;padding:0 18px;display:flex;gap:2px;
+    border-bottom:1px solid rgba(255,255,255,.1)}
+  .tab{background:transparent;color:#96a0b8;font-weight:600;padding:10px 15px 12px;
+    border-radius:10px 10px 0 0;position:relative;transition:color .15s;font-size:14.5px}
+  .tab:hover{color:#fff}
+  .tab.on{color:#fff;font-weight:700}
+  .tab.on::after{content:'';position:absolute;left:12px;right:12px;bottom:-1px;height:3px;
+    border-radius:3px 3px 0 0;background:#4a90ff;box-shadow:0 0 12px rgba(74,144,255,.7)}
+
+  main{max-width:1020px;margin:0 auto;padding:18px}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+  .chip{background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 14px;
+    font-size:13px;font-weight:600;color:var(--muted);transition:all .15s}
+  .chip:hover{border-color:#c9d4f2;color:var(--ink)}
+  .chip.on{background:var(--ink);color:#fff;border-color:var(--ink);box-shadow:0 4px 12px -4px rgba(18,21,31,.4)}
+  .btn{background:linear-gradient(135deg,var(--blue),var(--blue-d));color:#fff;font-weight:650;
+    border-radius:11px;padding:10px 17px;font-size:14px;
+    box-shadow:0 4px 14px -6px rgba(47,107,255,.55);
+    transition:transform .12s,box-shadow .15s,filter .15s}
+  .btn:hover{filter:brightness(1.07);box-shadow:0 6px 18px -6px rgba(47,107,255,.65)}
+  .btn:active{transform:scale(.97)}
+  .btn.ghost{background:var(--soft);color:var(--ink);box-shadow:none}
+  .btn.ghost:hover{background:#eaeef8;filter:none}
+  .btn.sm{padding:7px 13px;font-size:13px}
+
+  /* ===== tarjeta de pregunta ===== */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);
+    padding:18px;margin-bottom:14px;transition:box-shadow .18s,border-color .18s}
+  .card:hover{border-color:#dbe2f5;box-shadow:var(--sh-up)}
+  .meta{display:flex;gap:9px;align-items:center;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-bottom:10px}
+  .sku{font-weight:700;color:var(--ink);background:var(--soft);padding:3px 9px;border-radius:7px;
+    font-family:var(--display);font-size:11.5px;letter-spacing:.02em}
+  .q{font-size:16.5px;font-weight:600;margin:0 0 12px;font-family:var(--display);letter-spacing:-.01em;line-height:1.4}
+  .ans{background:linear-gradient(180deg,#f7f9fd,var(--soft));border:1px solid #eef1f8;border-radius:12px;padding:13px 15px;position:relative}
+  .ans .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-bottom:6px;display:flex;gap:8px;align-items:center}
+  .conf{font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:999px;color:#fff;letter-spacing:.04em}
+  .conf.alta{background:var(--green);box-shadow:0 2px 8px -2px rgba(14,159,110,.5)}
+  .conf.media{background:var(--amber);box-shadow:0 2px 8px -2px rgba(245,158,11,.5)}
+  .conf.baja{background:var(--red);box-shadow:0 2px 8px -2px rgba(229,72,77,.5)}
+  .real{margin-top:10px;font-size:13.5px;color:var(--muted)}
+  .real b{color:var(--ink)}
+  .acts{display:flex;gap:8px;margin-top:13px;align-items:center;flex-wrap:wrap}
+  .ico{border-radius:10px;padding:8px 15px;font-weight:650;font-size:13.5px;background:var(--soft);color:var(--ink);
+    transition:all .15s}
+  .ico:hover{background:#eaeef8}
+  .ico.good.on{background:var(--green);color:#fff;box-shadow:0 4px 12px -4px rgba(14,159,110,.5)}
+  .ico.bad.on{background:var(--red);color:#fff;box-shadow:0 4px 12px -4px rgba(229,72,77,.5)}
+  .fix{margin-top:12px;display:none}
+  .fix.show{display:block;animation:desplegar .18s ease-out}
+  @keyframes desplegar{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+  .fix textarea{width:100%;min-height:70px;resize:vertical}
+  .fixrow{display:flex;gap:10px;align-items:center;margin-top:9px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+  .done{opacity:.55;transition:opacity .3s}
+  .badge-ok{font-size:12px;font-weight:700;color:var(--green)}
+
+  /* ===== reglas y listas ===== */
+  .row{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-bottom:10px;
+    display:flex;gap:12px;align-items:flex-start;transition:border-color .15s,box-shadow .15s}
+  .row:hover{border-color:#dbe2f5;box-shadow:var(--sh)}
+  .row .body{flex:1}
+  .tag{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:3px 9px;border-radius:7px;background:var(--soft);color:var(--muted)}
+  .tag.g{background:#e9f0ff;color:var(--blue)} .tag.s{background:#fff4cf;color:#8a6d00}
+  .form{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:16px;display:grid;gap:10px;box-shadow:var(--sh)}
+  .form label{font-size:12px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px;letter-spacing:.02em}
+  .form b{font-family:var(--display)}
+  .grid2{display:grid;grid-template-columns:160px 1fr;gap:10px}
+  .empty{text-align:center;color:var(--muted);padding:52px 16px}
+  .empty .big{font-size:36px;margin-bottom:8px}
+
+  /* ===== modal y login ===== */
+  .modal{position:fixed;inset:0;background:rgba(14,17,26,.5);backdrop-filter:blur(3px);display:none;place-items:center;z-index:50;padding:16px}
+  .modal.show{display:grid}
+  .sheet{background:#fff;border-radius:18px;padding:24px;max-width:430px;width:100%;display:grid;gap:12px;box-shadow:0 24px 60px -20px rgba(18,21,31,.4)}
+  .sheet h3{margin:0;font-family:var(--display)}
+  .hint{font-size:12.5px;color:var(--muted)}
+  .login-overlay{display:none;position:fixed;inset:0;z-index:200;align-items:center;justify-content:center;
+    background:radial-gradient(900px 500px at 50% -10%,#233052 0%,var(--tinta) 55%)}
+  .login-overlay.show{display:flex}
+  .login-card{background:#fff;border:none;border-radius:22px;
+    box-shadow:0 30px 80px -20px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.08);
+    padding:32px 30px;width:350px;max-width:92vw;display:flex;flex-direction:column;gap:11px;
+    animation:entrar .35s cubic-bezier(.2,.9,.3,1.2)}
+  @keyframes entrar{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+  .login-card h2{font-family:var(--display);letter-spacing:-.02em}
+  .login-card input{border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;background:var(--soft)}
+  .login-card input:focus{background:#fff}
+
+  /* ===== selector de rango ===== */
+  .rango-wrap{position:relative}
+  .rango-btn{background:#fff;border:1px solid var(--line);border-radius:11px;padding:9px 14px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;white-space:nowrap;transition:border-color .15s}
+  .rango-btn:hover{border-color:#c9d4f2}
+  .rango-pop{display:none;position:absolute;top:calc(100% + 6px);right:0;z-index:50;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 40px -16px rgba(18,21,31,.3);padding:6px;min-width:215px}
+  .rango-pop.open{display:block;animation:desplegar .15s ease-out}
+  .rango-pop>button{display:block;width:100%;text-align:left;background:none;border:none;padding:9px 12px;border-radius:9px;font-size:14px;cursor:pointer;color:var(--ink)}
+  .rango-pop>button:hover{background:var(--soft)}
+  .rango-pop.cal{background:#141926;border:1px solid #2a3247;color:#dfe5f2;min-width:278px;padding:13px}
+  .cal-head{display:flex;justify-content:space-between;align-items:center;font-family:var(--display);font-weight:700;font-size:14.5px;margin-bottom:9px;color:#fff}
+  .cal-head button{background:none;border:none;color:#8fa0c4;font-size:15px;padding:4px 10px;border-radius:8px;cursor:pointer}
+  .cal-head button:hover{background:#232c44;color:#fff}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+  .cal-dow{font-size:10.5px;color:#7d89a8;text-align:center;padding:3px 0 6px;font-weight:800;letter-spacing:.04em}
+  .cal-d{height:31px;border-radius:8px;display:grid;place-items:center;font-size:12.5px;cursor:pointer;color:#cdd6ea;transition:background .1s}
+  .cal-d:hover{background:#26304c}
+  .cal-d.off{opacity:.22;pointer-events:none}
+  .cal-d.in{background:#1e2a4a;border-radius:0}
+  .cal-d.sel{background:var(--blue);color:#fff;font-weight:800;box-shadow:0 0 12px rgba(47,107,255,.5)}
+  .cal-pista{font-size:11.5px;color:#7aa5ff;text-align:center;margin-top:8px}
+  .cal-quick{display:flex;gap:6px;margin-top:11px;flex-wrap:wrap;border-top:1px solid #232c44;padding-top:11px}
+  .cal-quick button{background:#232c44;color:#cdd6ea;border:none;border-radius:9px;padding:6px 12px;font-size:12.5px;font-weight:650;cursor:pointer}
+  .cal-quick button:hover{background:#2c3855}
+  .cal-quick .limpiar{margin-left:auto;color:#ff8d95;background:transparent;border:1px solid #4a2a30}
+  .rango-custom{border-top:1px solid var(--line);margin-top:5px;padding:9px 8px 4px}
+  .rango-custom input[type=date]{border:1px solid var(--line);border-radius:8px;padding:6px;font-size:13px;flex:1;min-width:0}
+
+  .camp{background:var(--soft);border-radius:11px;padding:7px 12px;font-size:15px;font-weight:800;color:var(--muted);display:flex;align-items:center;gap:4px;transition:transform .15s}
+  .camp:hover{transform:scale(1.05)}
+  .camp.alerta{background:#fdecea;color:var(--red);animation:parpadeo 1.1s ease-in-out infinite}
+  @keyframes parpadeo{0%,100%{opacity:1}50%{opacity:.45}}
+
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:#c9cede;border-radius:99px;border:2px solid var(--bg)}
+  ::-webkit-scrollbar-track{background:transparent}
+
+  /* =====================================================================
+     MODO CELULAR (≤640px): mismo panel, experiencia de app
+     - Pestañas pasan a barra fija abajo (estilo app) con iconos
+     - Tarjetas y botones a tamaño de dedo
+     - Stats y filtros con scroll horizontal
+     ===================================================================== */
+  @media(max-width:640px){
+    body{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+
+    /* --- barra superior compacta --- */
+    .bar{padding:9px 12px;gap:8px}
+    .brand{font-size:15px}
+    .brand .dot{width:28px;height:28px}
+    header select{max-width:44vw;font-size:13px;padding:7px 9px}
+    header .camp{display:none} /* la campanita informativa no entra; las notificaciones ya avisan */
+
+    /* --- pestañas -> barra de navegación abajo, fija, estilo app --- */
+    nav{position:fixed;left:0;right:0;bottom:0;top:auto;margin:0;padding:4px 2px calc(6px + env(safe-area-inset-bottom));
+      background:linear-gradient(180deg,var(--tinta-2),var(--tinta));border-top:1px solid rgba(255,255,255,.12);
+      border-bottom:none;z-index:45;display:flex;justify-content:space-around;gap:0;
+      overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+    nav::-webkit-scrollbar{display:none}
+    .tab{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:56px;
+      padding:7px 4px 5px;font-size:10px;font-weight:600;border-radius:10px;letter-spacing:0}
+    .tab::before{font-size:19px;line-height:1}
+    .tab[data-t="revisar"]::before{content:'💬'}
+    .tab[data-t="metricas"]::before{content:'📊'}
+    .tab[data-t="reglas"]::before{content:'📐'}
+    .tab[data-t="sugerencias"]::before{content:'💡'}
+    .tab[data-t="tareas"]::before{content:'✅'}
+    .tab[data-t="ajustes"]::before{content:'⚙️'}
+    .tab[data-t="duelo"]::before{content:'🥊'}
+    .tab.on{color:#fff;background:rgba(74,144,255,.16)}
+    .tab.on::after{display:none}
+
+    /* --- tablero de cifras: fila deslizable --- */
+    .stats{padding:10px 12px 0;gap:8px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+    .stats::-webkit-scrollbar{display:none}
+    .stat{min-width:92px;padding:9px 12px;flex:none}
+    .stat b{font-size:19px}
+
+    /* --- contenido --- */
+    main{padding:12px}
+    .toolbar{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px}
+    .toolbar::-webkit-scrollbar{display:none}
+    .chip{flex:none;padding:8px 14px}
+    .card{padding:13px;border-radius:14px}
+    .card img.thumb{width:44px;height:44px}
+    .meta{font-size:12px}
+    .q{font-size:15px}
+
+    /* --- botones a tamaño de dedo --- */
+    .acts{gap:8px}
+    .ico{padding:11px 14px;font-size:14px;flex:1;min-width:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .btn{padding:12px 16px;font-size:15px}
+
+    /* --- formularios: 16px evita el zoom automatico de iPhone --- */
+    select,input,textarea{font-size:16px}
+    textarea{min-height:110px}
+    .grid2{grid-template-columns:1fr}
+
+    /* --- modales a pantalla casi completa --- */
+    .modal>div{max-height:88vh;overflow:auto}
+  }
+  @media(max-width:560px){.stats{gap:8px}.stat{min-width:86px}}
+  /* --- TOAST: aviso flotante de exito (se va solo, sin apretar nada) --- */
+  .toast{position:fixed;top:16px;left:50%;transform:translate(-50%,-14px);z-index:99;
+    display:flex;align-items:center;gap:10px;background:var(--tinta,#12151f);color:#fff;
+    padding:11px 18px;border-radius:999px;font-weight:700;font-size:14.5px;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);opacity:0;pointer-events:none;
+    transition:opacity .22s ease, transform .22s ease}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .toast .tick{width:22px;height:22px;border-radius:50%;background:var(--green,#12b76a);
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;flex:none}
+  @media(max-width:640px){.toast{top:auto;bottom:calc(84px + env(safe-area-inset-bottom));width:max-content;max-width:88vw}}
+
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="conectarOverlay" class="login-overlay">
+  <div class="login-card" style="text-align:center">
+    <div style="font-size:38px">🔗</div>
+    <h2 style="margin:4px 0">¡Ya casi!</h2>
+    <p class="hint" style="margin:0 0 14px">Tu usuario está creado. Ahora conectá tu cuenta de Mercado Libre para que RespondIA pueda leer y responder tus preguntas.</p>
+    <button class="btn" style="width:100%" onclick="conectarML()">Conectar mi Mercado Libre</button>
+    <p class="hint" style="margin:12px 0 0">Te va a llevar a Mercado Libre para autorizar. Al volver, tocá "Ir al panel".</p>
+    <p style="margin:10px 0 0"><a href="#" onclick="salirSesion();return false" class="hint">salir</a></p>
+  </div>
+</div>
+<div id="loginOverlay" class="login-overlay">
+  <div class="login-card">
+    <div style="width:56px;height:56px;margin:0 auto 10px"><svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block"><path fill="#1f6bf2" d="M24 46 C24 24 36 20 50 20 L70 20 C90 20 98 30 98 46 L98 48 C98 61 92 68 84 70 L97 95 C99 99 98 104 92 104 L86 104 C83 104 81 102 80 100 L64 75 L47 98 Q45 100 41 100 L34 100 C27 100 24 95 24 88 Z"/><path fill="#fff" d="M54 32 L74 32 C86 32 90 39 90 46 C90 53 86 60 74 60 L61 60 L42 80 L44 57 C41 55 40 51 40 46 C40 36 45 32 54 32 Z"/><circle cx="57" cy="46" r="4.8" fill="#1f6bf2"/><circle cx="67" cy="46" r="4.8" fill="#1f6bf2"/><circle cx="77" cy="46" r="4.8" fill="#1f6bf2"/></svg></div>
+    <h2 style="text-align:center;margin:0 0 4px">RespondIA</h2>
+    <p class="hint" style="text-align:center;margin:0 0 16px">Entrá con tu usuario</p>
+    <input id="logEmail" type="email" placeholder="Email" autocomplete="username">
+    <input id="logPass" type="password" placeholder="Contraseña" autocomplete="current-password" onkeydown="if(event.key==='Enter')hacerLogin()">
+    <button class="btn" style="width:100%" onclick="hacerLogin()">Entrar</button>
+    <p id="logMsg" class="hint" style="text-align:center;min-height:18px;margin:8px 0 0"></p>
+    <p style="text-align:center;margin:10px 0 0"><a href="#" onclick="mostrarRegistro();return false" style="font-weight:700">Crear cuenta nueva</a></p>
+    <p style="text-align:center;margin:6px 0 0"><a href="#" onclick="loginConClave();return false" class="hint">Entrar con clave maestra</a> · <a href="#" onclick="mostrarSetup();return false" class="hint">Crear usuario master</a></p>
+    <div id="regBox" style="display:none;border-top:1px solid var(--line);margin-top:14px;padding-top:14px">
+      <b style="font-size:13px">Crear tu cuenta en RespondIA</b>
+      <p class="hint" style="margin:4px 0 10px">Necesitás el código de invitación que te dio tu contacto de RespondIA.</p>
+      <input id="regCodigo" placeholder="Código de invitación" style="margin-bottom:8px">
+      <input id="regEmail" type="email" placeholder="Tu email" style="margin-bottom:8px">
+      <input id="regPass" type="password" placeholder="Contraseña (mín. 8)" style="margin-bottom:8px">
+      <input id="regNombre" placeholder="Tu nombre o empresa (opcional)" style="margin-bottom:8px">
+      <button class="btn" style="width:100%" onclick="registrarse()">Crear mi cuenta</button>
+      <p id="regMsg" class="hint" style="text-align:center;min-height:16px;margin:8px 0 0"></p>
+    </div>
+    <div id="setupBox" style="display:none;border-top:1px solid var(--line);margin-top:14px;padding-top:14px">
+      <b style="font-size:13px">Crear el usuario dueño (una sola vez)</b>
+      <p class="hint" style="margin:4px 0 10px">Necesitás la clave maestra del sistema.</p>
+      <input id="suClave" type="password" placeholder="Clave maestra" style="margin-bottom:8px">
+      <input id="suEmail" type="email" placeholder="Tu email" style="margin-bottom:8px">
+      <input id="suPass" type="password" placeholder="Contraseña nueva (mín. 8)" style="margin-bottom:8px">
+      <input id="suNombre" placeholder="Tu nombre (opcional)" style="margin-bottom:8px">
+      <button class="btn" style="width:100%" onclick="crearMaster()">Crear mi usuario</button>
+      <p id="suMsg" class="hint" style="text-align:center;min-height:16px;margin:8px 0 0"></p>
+    </div>
+  </div>
+</div>
+
+<header>
+  <div class="bar">
+    <div class="brand"><span class="dot" style="background:transparent;padding:0"><svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block"><path fill="#1f6bf2" d="M24 46 C24 24 36 20 50 20 L70 20 C90 20 98 30 98 46 L98 48 C98 61 92 68 84 70 L97 95 C99 99 98 104 92 104 L86 104 C83 104 81 102 80 100 L64 75 L47 98 Q45 100 41 100 L34 100 C27 100 24 95 24 88 Z"/><path fill="#fff" d="M54 32 L74 32 C86 32 90 39 90 46 C90 53 86 60 74 60 L61 60 L42 80 L44 57 C41 55 40 51 40 46 C40 36 45 32 54 32 Z"/><circle cx="57" cy="46" r="4.8" fill="#1f6bf2"/><circle cx="67" cy="46" r="4.8" fill="#1f6bf2"/><circle cx="77" cy="46" r="4.8" fill="#1f6bf2"/></svg></span> RespondIA <span style="font-size:11px;color:var(--muted);font-weight:600">v7.4</span></div>
+    <button class="camp" id="camp" onclick="irA('sinresp')" title="Preguntas sin responder" style="display:none">🔔<span id="campN">0</span></button>
+    <div id="userBadge" class="camp" style="display:none;cursor:default" title="Sesión activa"><span style="font-size:12px;font-weight:600"></span><a href="#" onclick="salirSesion();return false" style="font-size:11px;margin-left:6px">salir</a></div>
+    <select id="cuentaSel" title="Cuenta"></select>
+    <div class="grow"></div>
+    <button class="camp" id="btnTema" onclick="alternarTema()" title="Cambiar tema claro/oscuro" style="min-width:auto">🌙</button>
+  </div>
+  <div class="stats" id="stats"></div>
+  <nav id="tabs">
+    <button class="tab on" data-t="revisar">Preguntas</button>
+    <button class="tab" data-t="metricas">Métricas</button>
+    <button class="tab" data-t="reglas">Reglas</button>
+    <button class="tab" data-t="sugerencias">Mejoras</button>
+    <button class="tab" data-t="tareas">Tareas</button>
+    <button class="tab" data-t="ajustes">Ajustes</button>
+    <button class="tab" data-t="duelo" style="display:none">🥊 Duelo</button>
+  </nav>
+</header>
+
+<main id="view"></main>
+
+<!-- conexión -->
+<div class="modal" id="cfg">
+  <div class="sheet">
+    <h3>Conexión</h3>
+    <div>
+      <label>URL del backend (Railway)</label>
+      <input id="cfgUrl" placeholder="https://tu-app.up.railway.app" style="width:100%">
+    </div>
+    <div>
+      <label>Clave de admin</label>
+      <input id="cfgClave" placeholder="tu CLAVE_PANEL" style="width:100%">
+    </div>
+    <p class="hint">Se guarda solo en este navegador. Es la misma clave que pusiste en Railway.</p>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn ghost" onclick="closeCfg()">Cancelar</button>
+      <button class="btn" onclick="saveCfg()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- estado ----------
+let CFG = { url:'https://respondia-production.up.railway.app', clave:'' };
+const URL_FABRICA = 'https://respondia-production.up.railway.app';
+try { CFG = JSON.parse(localStorage.getItem('pq_cfg')) || CFG; } catch(e){}
+if(!CFG.url) CFG.url = URL_FABRICA;
+let cuentaId = null;
+let tab = 'revisar';
+let filtro = 'sin';   // sin | todas | mal | cola
+let busca = '';
+let fHasta = hoyISO();
+let fDesde = isoBA(new Date(Date.now()-6*86400000));
+let autoOn = false;
+function isoBA(d){ return new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Argentina/Buenos_Aires'}).format(d); }
+function hoyISO(){ return isoBA(new Date()); }
+function aplicarFiltros(){
+  pagOffset=0;
+  busca = document.getElementById('fBusca').value.trim();
+  renderRevisar();
+}
+function limpiarFiltros(){ pagOffset=0; busca=''; fDesde=''; fHasta=''; rangoLabel=''; loadStats(); renderRevisar(); }
+let rangoLabel='Últimos 7 días';
+const MESES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const MESES_L=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+function fmtCorta(iso){ return iso.slice(8)+' '+MESES[parseInt(iso.slice(5,7))-1]; }
+function etiquetaRango(){
+  if(rangoLabel) return rangoLabel;
+  if(fDesde && fHasta) return fmtCorta(fDesde)+' \u2192 '+fmtCorta(fHasta);
+  if(fDesde) return 'desde '+fmtCorta(fDesde);
+  return 'Todas las fechas';
+}
+let calMes=null, calSel=null;
+function toggleRango(e){
+  e.stopPropagation();
+  const p=document.getElementById('rangoPop'); if(!p) return;
+  const abriendo=!p.classList.contains('open');
+  p.classList.toggle('open');
+  if(abriendo){
+    const base=fHasta||hoyISO();
+    calMes=new Date(parseInt(base.slice(0,4)), parseInt(base.slice(5,7))-1, 1);
+    calSel=null; renderCal();
+  }
+}
+document.addEventListener('click',e=>{ const p=document.getElementById('rangoPop'); if(p&&!e.target.closest('.rango-wrap')) p.classList.remove('open'); });
+function calNav(d,ev){ ev.stopPropagation(); calMes.setMonth(calMes.getMonth()+d); renderCal(); }
+function renderCal(){
+  const box=document.getElementById('calBox'); if(!box) return;
+  const y=calMes.getFullYear(), m=calMes.getMonth();
+  const hoy=hoyISO();
+  const primero=new Date(y,m,1).getDay(); // 0=Do
+  const dias=new Date(y,m+1,0).getDate();
+  let h=`<div class="cal-head">
+    <button onclick="calNav(-1,event)">\u2190</button>
+    <span>${MESES_L[m]} ${y}</span>
+    <button onclick="calNav(1,event)">\u2192</button>
+  </div><div class="cal-grid">`;
+  for(const d of ['Do','Lu','Ma','Mi','Ju','Vi','Sa']) h+=`<span class="cal-dow">${d}</span>`;
+  for(let i=0;i<primero;i++) h+='<span></span>';
+  for(let d=1;d<=dias;d++){
+    const iso=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const futuro=iso>hoy;
+    let cls='cal-d';
+    if(futuro) cls+=' off';
+    const a=calSel||fDesde, b=calSel?null:fHasta;
+    if((a&&iso===a)||(b&&iso===b)) cls+=' sel';
+    else if(a&&b&&iso>a&&iso<b) cls+=' in';
+    h+=`<span class="${cls}" onclick="calClick('${iso}',event)">${d}</span>`;
+  }
+  box.innerHTML=h+'</div>'+(calSel?'<div class="cal-pista">Eleg\u00ed el d\u00eda final del rango</div>':'');
+}
+function calClick(iso,ev){
+  ev.stopPropagation();
+  if(!calSel){ calSel=iso; renderCal(); return; }
+  let a=calSel,b=iso; if(b<a){const t=a;a=b;b=t;}
+  fDesde=a; fHasta=b; rangoLabel=''; calSel=null; pagOffset=0;
+  document.getElementById('rangoPop')?.classList.remove('open');
+  loadStats(); renderRevisar();
+}
+function setRango(tipo){
+  pagOffset=0;
+  const hoy=hoyISO();
+  if(tipo==='hoy'){ fDesde=hoy; fHasta=hoy; rangoLabel='Hoy'; }
+  else if(tipo==='7'){ fDesde=isoBA(new Date(Date.now()-6*86400000)); fHasta=hoy; rangoLabel='\u00daltimos 7 d\u00edas'; }
+  else if(tipo==='mes'){ fDesde=hoy.slice(0,8)+'01'; fHasta=hoy; rangoLabel='Este mes'; }
+  else { fDesde=''; fHasta=''; rangoLabel=''; }
+  loadStats(); renderRevisar();
+}
+// ---------- helpers ----------
+function authHeaders(extra={}){
+  const h = Object.assign({}, extra);
+  if (CFG.token) h['x-token'] = CFG.token;
+  else if (CFG.clave) h['x-clave'] = CFG.clave;
+  return h;
+}
+function api(path, opts={}){
+  const u = new URL(CFG.url.replace(/\/$/,'') + path);
+  if (cuentaId) u.searchParams.set('cuenta_id', cuentaId);
+  opts.headers = authHeaders(opts.headers||{});
+  return fetch(u, opts).then(async r=>{
+    if(r.status===401 && CFG.token){ salirSesion(false); throw new Error('sesion vencida, entra de nuevo'); }
+    if(!r.ok) throw new Error((await r.json().catch(()=>({}))).error || r.status);
+    return r.json();
+  });
+}
+function post(path, body){
+  return api(path, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+}
+const esc = s => (s||'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fecha = s => {
+  if(!s) return '';
+  const d = new Date(s);
+  const TZ = {timeZone:'America/Argentina/Buenos_Aires'};
+  const esHoy = isoBA(d) === hoyISO();
+  const dia = d.toLocaleDateString('es-AR',Object.assign({day:'2-digit',month:'short'},TZ));
+  const hora = d.toLocaleTimeString('es-AR',Object.assign({hour:'2-digit',minute:'2-digit',hour12:false},TZ));
+  return esHoy ? `hoy ${hora}` : `${dia} ${hora}`;
+};
+
+// ---------- conexión ----------
+function openCfg(){ cfgUrl.value=CFG.url; cfgClave.value=CFG.clave; cfg.classList.add('show'); }
+function closeCfg(){ cfg.classList.remove('show'); }
+function saveCfg(){
+  CFG={ url:cfgUrl.value.trim(), clave:cfgClave.value.trim() };
+  try{ localStorage.setItem('pq_cfg', JSON.stringify(CFG)); }catch(e){}
+  closeCfg(); boot();
+}
+
+// ---------- arranque ----------
+let USUARIO = null;
+// ===== TEMA CLARO/OSCURO: se aplica al instante y queda guardado por dispositivo =====
+(function(){
+  const t=localStorage.getItem('pq_tema');
+  if(t==='dark') document.documentElement.dataset.theme='dark';
+})();
+function alternarTema(){
+  const oscuro=document.documentElement.dataset.theme==='dark';
+  if(oscuro){ delete document.documentElement.dataset.theme; localStorage.setItem('pq_tema','light'); }
+  else { document.documentElement.dataset.theme='dark'; localStorage.setItem('pq_tema','dark'); }
+  pintarBotonTema();
+  try{ document.querySelector('meta[name="theme-color"]').content = oscuro ? '#12151f' : '#0a0d14'; }catch(e){}
+}
+function pintarBotonTema(){
+  const b=document.getElementById('btnTema'); if(!b) return;
+  b.textContent = document.documentElement.dataset.theme==='dark' ? '☀️' : '🌙';
+}
+document.addEventListener('DOMContentLoaded', pintarBotonTema);
+
+async function boot(){
+  if(!CFG.url){ openCfg(); return; }
+  if(!CFG.token && !CFG.clave){ mostrarLogin(); return; }
+  try{
+    const me = await api('/auth/me');
+    USUARIO = me.usuario;
+  }catch(e){ mostrarLogin(); return; }
+  if(USUARIO.rol!=='master' && !USUARIO.cuenta_id){
+    document.getElementById('conectarOverlay').classList.add('show');
+    return;
+  }
+  document.getElementById('conectarOverlay').classList.remove('show');
+  aplicarPermisosTabs();
+  try{
+    if(USUARIO.rol==='master'){
+      const cuentas = await api('/api/cuentas');
+      cuentaSel.innerHTML = cuentas.map(c=>`<option value="${c.id}">${esc(c.nombre||('Cuenta '+c.ml_user_id))}</option>`).join('');
+      if(!cuentaId && cuentas[0]) cuentaId = cuentas[0].id;
+      cuentaSel.value = cuentaId;
+      cuentaSel.style.display='';
+    } else {
+      cuentaId = USUARIO.cuenta_id; // no-master: su cuenta, sin selector
+      cuentaSel.style.display='none';
+    }
+  }catch(e){ view.innerHTML = errBox(e.message); return; }
+  refresh();
+  iniciarVivo();
+}
+
+// ===== EN VIVO: detecta preguntas nuevas sin recargar (cada 25s) =====
+// Suena un "ding", muestra notificacion del sistema y refresca la lista sola.
+let _vivoTimer=null, _vivoUltimaId=null, _vivoSinResp=null;
+function iniciarVivo(){
+  if(_vivoTimer) clearInterval(_vivoTimer);
+  try{ if('Notification' in window && Notification.permission==='default') Notification.requestPermission(); }catch(e){}
+  _vivoTimer=setInterval(latido, 25000);
+  latido();
+}
+async function latido(){
+  try{
+    const s=await api('/api/latido');
+    const esPrimera=(_vivoUltimaId===null);
+    const hayNueva=!esPrimera && s.ultima_id>_vivoUltimaId && s.sin_responder>(_vivoSinResp||0);
+    _vivoUltimaId=s.ultima_id; _vivoSinResp=s.sin_responder;
+    if(hayNueva){
+      sonarDing();
+      try{
+        if('Notification' in window && Notification.permission==='granted'){
+          const n=new Notification('Pregunta nueva en RespondIA', { body:(s.ultima_sku?('['+s.ultima_sku+'] '):'')+(s.ultima_texto||'Un comprador hizo una pregunta'), tag:'respondia-nueva' });
+          n.onclick=()=>{ window.focus(); irA('sinresp'); n.close(); };
+        }
+      }catch(e){}
+      // si estas mirando Preguntas, la lista se refresca sola (sin pisar una correccion abierta)
+      if(tab==='revisar' && !document.querySelector('.fix.show')) renderRevisar();
+    }
+  }catch(e){ /* sin conexion momentanea: probamos de nuevo en el proximo latido */ }
+}
+function sonarDing(){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type='sine'; o.frequency.value=880;
+    g.gain.setValueAtTime(0.001, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime+0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.6);
+    o.start(); o.frequency.setValueAtTime(1174, ctx.currentTime+0.12); o.stop(ctx.currentTime+0.65);
+  }catch(e){}
+}
+function mostrarLogin(){
+  document.getElementById('loginOverlay').classList.add('show');
+}
+async function hacerLogin(){
+  const email=document.getElementById('logEmail').value.trim();
+  const pass=document.getElementById('logPass').value;
+  const msg=document.getElementById('logMsg');
+  if(!email||!pass){ msg.textContent='Completa email y contrase\u00f1a'; return; }
+  msg.textContent='Entrando\u2026';
+  try{
+    const r=await fetch(CFG.url.replace(/\/$/,'')+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})}).then(x=>x.json());
+    if(!r.ok){ msg.textContent=r.error||'Error'; return; }
+    CFG.token=r.token; delete CFG.clave;
+    try{ localStorage.setItem('pq_cfg', JSON.stringify(CFG)); }catch(e){}
+    document.getElementById('loginOverlay').classList.remove('show');
+    boot();
+  }catch(e){ msg.textContent='No pude conectar: '+e.message; }
+}
+function mostrarRegistro(){
+  const b=document.getElementById('regBox');
+  b.style.display = b.style.display==='none' ? 'block' : 'none';
+  document.getElementById('setupBox').style.display='none';
+}
+async function registrarse(){
+  const codigo=document.getElementById('regCodigo').value.trim();
+  const email=document.getElementById('regEmail').value.trim();
+  const password=document.getElementById('regPass').value;
+  const nombre=document.getElementById('regNombre').value.trim();
+  const msg=document.getElementById('regMsg');
+  if(!codigo||!email||!password||password.length<8){ msg.textContent='Completá código, email y contraseña (mín. 8)'; return; }
+  msg.textContent='Creando tu cuenta…';
+  try{
+    const r=await fetch(CFG.url.replace(/\/$/,'')+'/auth/registro',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({codigo,email,password,nombre})}).then(x=>x.json());
+    if(!r.ok){ msg.textContent=r.error||'Error'; return; }
+    CFG.token=r.token; delete CFG.clave;
+    try{ localStorage.setItem('pq_cfg', JSON.stringify(CFG)); }catch(e){}
+    document.getElementById('loginOverlay').classList.remove('show');
+    boot();
+  }catch(e){ msg.textContent='No pude conectar: '+e.message; }
+}
+function conectarML(){
+  location.href = CFG.url.replace(/\/$/,'') + '/oauth?token=' + encodeURIComponent(CFG.token||'');
+}
+function mostrarSetup(){
+  const b=document.getElementById('setupBox');
+  b.style.display = b.style.display==='none' ? 'block' : 'none';
+}
+async function crearMaster(){
+  const clave=document.getElementById('suClave').value;
+  const email=document.getElementById('suEmail').value.trim();
+  const password=document.getElementById('suPass').value;
+  const nombre=document.getElementById('suNombre').value.trim();
+  const msg=document.getElementById('suMsg');
+  if(!clave||!email||!password||password.length<8){ msg.textContent='Completá clave, email y contraseña (mín. 8)'; return; }
+  msg.textContent='Creando…';
+  try{
+    const r=await fetch(CFG.url.replace(/\/$/,'')+'/auth/setup-master',{method:'POST',headers:{'Content-Type':'application/json','x-clave':clave},body:JSON.stringify({email,password,nombre})}).then(x=>x.json());
+    if(!r.ok){ msg.textContent=r.error||'Error'; return; }
+    msg.textContent='✅ Usuario creado. Entrá arriba con tu email y contraseña.';
+    document.getElementById('logEmail').value=email;
+    setTimeout(()=>{ document.getElementById('setupBox').style.display='none'; },2500);
+  }catch(e){ msg.textContent='No pude conectar: '+e.message; }
+}
+function loginConClave(){
+  const c=prompt('Clave maestra (acceso de emergencia):');
+  if(!c) return;
+  CFG.clave=c; delete CFG.token;
+  try{ localStorage.setItem('pq_cfg', JSON.stringify(CFG)); }catch(e){}
+  document.getElementById('loginOverlay').classList.remove('show');
+  boot();
+}
+function salirSesion(llamarLogout=true){
+  if(llamarLogout && CFG.token){ try{ post('/auth/logout',{}); }catch(e){} }
+  delete CFG.token; delete CFG.clave;
+  try{ localStorage.setItem('pq_cfg', JSON.stringify(CFG)); }catch(e){}
+  USUARIO=null; location.reload();
+}
+function aplicarPermisosTabs(){
+  if(!USUARIO) return;
+  const permTabs={revisar:'revisar',metricas:'metricas',reglas:'reglas',sugerencias:'mejoras',tareas:'tareas',ajustes:'ajustes'};
+  document.querySelectorAll('.tab').forEach(b=>{
+    const t=b.dataset.t;
+    let visible=true;
+    if(USUARIO.rol==='operador'){
+      const key=permTabs[t]||t;
+      visible=!!(USUARIO.permisos&&USUARIO.permisos[key]);
+    }
+    if(t==='duelo') visible=(USUARIO.rol==='master'); // el Duelo a ciegas es solo del master
+    b.style.display=visible?'':'none';
+  });
+  // si la pestania actual quedo oculta, saltar a la primera visible
+  const activa=document.querySelector('.tab[data-t="'+tab+'"]');
+  if(activa && activa.style.display==='none'){
+    const primera=[...document.querySelectorAll('.tab')].find(b=>b.style.display!=='none');
+    if(primera){ tab=primera.dataset.t; document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on')); primera.classList.add('on'); }
+  }
+  // badge de usuario logueado
+  const ub=document.getElementById('userBadge');
+  if(ub){ ub.style.display='flex'; ub.querySelector('span').textContent=USUARIO.email==='master'?'\u{1F511} master':USUARIO.email+' \u00b7 '+USUARIO.rol; }
+}
+cuentaSel = document.getElementById('cuentaSel');
+cuentaSel.onchange = e => { cuentaId = e.target.value; refresh(); };
+
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); tab=b.dataset.t; render();
+});
+
+async function refresh(){ await loadStats(); render(); }
+
+async function loadStats(){
+  try{
+    let ruta='/api/estado';
+    const ps=[];
+    if(fDesde) ps.push('desde='+fDesde);
+    if(fHasta) ps.push('hasta='+fHasta);
+    if(ps.length) ruta+='?'+ps.join('&');
+    const s = await api(ruta);
+    let html = `
+      <div class="stat" style="border-color:${s.auto_responder?'var(--green)':'var(--line)'}"><b style="font-size:13px;color:${s.auto_responder?'var(--green)':'var(--muted)'}">${s.auto_responder?'🟢 AUTO':'⚪ SOMBRA'}</b><span>${s.auto_responder?'respondiendo sola':'solo sugiere'}</span></div>
+      <div class="stat" style="cursor:pointer" onclick="irA('todas')" title="Ver todas"><b>${s.preguntas}</b><span>preguntas</span></div>
+      <div class="stat" style="cursor:pointer" onclick="irA('sin')" title="Revisar las pendientes"><b>${s.sin_revisar}</b><span>sin revisar</span></div>
+      <div class="stat" style="cursor:pointer" onclick="irA('buenas')" title="Ver las aprobadas"><b style="color:var(--green)">${s.buenas}</b><span>buenas 👍</span></div>
+      <div class="stat" style="cursor:pointer" onclick="irA('mal')" title="Ver las corregidas"><b style="color:var(--red)">${s.malas}</b><span>a corregir 👎</span></div>`;
+    if(s.programadas>0) html += `<div class="stat" style="cursor:pointer" onclick="irA('cola')"><b style="color:var(--amber)">${s.programadas}</b><span>en cola ⏱</span></div>`;
+    if(s.enviadas>0) html += `<div class="stat"><b style="color:var(--blue)">${s.enviadas}</b><span>enviadas ✈️</span></div>`;
+    if(s.conv_verificadas>0){
+      const pct = Math.round(100*s.vendidas/s.conv_verificadas);
+      html += `<div class="stat" style="cursor:pointer" onclick="irA('vendidas')" title="Ver las que terminaron en venta"><b style="color:var(--green)">💰 ${s.vendidas}</b><span>ventas (${pct}%)</span></div>`;
+    }
+    if(s.conversiones && s.conversiones.corriendo)
+      html += `<div class="stat bf"><b>${s.conversiones.revisadas}</b><span>cruzando ventas… 💰</span></div>`;
+    if(s.backfill && s.backfill.corriendo)
+      html += `<div class="stat bf"><b>${s.backfill.procesadas}</b><span>trayendo… ⏳</span></div>`;
+    if(s.refresco && s.refresco.corriendo)
+      html += `<div class="stat bf"><b>${s.refresco.items}</b><span>actualizando SKUs ⚙️</span></div>`;
+    autoOn = !!s.auto_responder;
+    window._usoMes=s.uso_mes; window._limiteMensual=s.limite_mensual;
+    window._calificadas=(s.buenas||0)+(s.malas||0);
+    actualizarCampana(s.sin_responder||0);
+    stats.innerHTML = html;
+    if((s.backfill&&s.backfill.corriendo)||(s.refresco&&s.refresco.corriendo)||(s.conversiones&&s.conversiones.corriendo)) setTimeout(loadStats, 4000);
+  }catch(e){ stats.innerHTML=''; }
+}
+
+function errBox(m){ return `<div class="empty"><div class="big">🔌</div>No me puedo conectar al backend.<br><span class="hint">${esc(m)}</span><br><br><button class="btn" onclick="openCfg()">Revisar conexión</button></div>`; }
+
+// ---------- render por tab ----------
+function render(){
+  if(tab==='revisar') return renderRevisar();
+  if(tab==='metricas') return renderMetricas();
+  if(tab==='reglas') return renderReglas();
+  if(tab==='sugerencias') return renderSugerencias();
+  if(tab==='tareas') return renderTareas();
+  if(tab==='ajustes') return renderAjustes();
+  if(tab==='duelo') return renderDuelo();
+}
+
+// ===== DUELO DE IAs (Claude vs GPT vs Gemini) — solo master =====
+let _duelo=null;
+let _vistas=[];   // ids de preguntas ya mostradas en esta sesion (para no repetir)
+async function renderDuelo(){
+  _vistas=[];     // arranca de cero cada vez que entras a la pestaña
+  view.innerHTML = `
+    <div class="form">
+      <b style="font-size:16px">🥊 Duelo de IAs — Claude vs GPT vs Gemini</b>
+      <div class="hint">Cae una pregunta real de esta cuenta respondida por las tres IA, <b>a ciegas</b>. Votás la mejor sin saber cuál es cuál. Al votar se revela quién ganó y cuánto costó cada una. Cada pelea trae una pregunta distinta.</div>
+      <div id="tanteador" style="margin-top:10px"></div>
+      <button class="btn" id="btnPelear" onclick="nuevaPelea()" style="margin-top:10px">🎲 Nueva pelea</button>
+    </div>
+    <div id="ringo"></div>`;
+  cargarTanteador();
+}
+async function cargarTanteador(){
+  const box=document.getElementById('tanteador'); if(!box) return;
+  try{
+    const t=await api('/api/duelo/tanteador');
+    const money=v=>'US$'+(Number(v)||0).toFixed(5);
+    const proj=v=>'US$'+(Number(v)||0).toFixed(2);
+    box.innerHTML=`
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div class="stat"><b>${t.gana_claude}</b><span>🟣 Claude</span></div>
+        <div class="stat"><b>${t.gana_gpt}</b><span>🟢 GPT</span></div>
+        <div class="stat"><b>${t.gana_gemini||0}</b><span>🔵 Gemini</span></div>
+        <div class="stat"><b>${t.empates}</b><span>empates</span></div>
+      </div>
+      <p class="hint" style="margin-top:8px">Costo promedio por respuesta — <b>Claude</b> ${money(t.costo_prom_claude)} · <b>GPT</b> ${money(t.costo_prom_gpt)} · <b>Gemini</b> ${money(t.costo_prom_gemini)}<br>
+      Proyectado a ${Number(t.volumen).toLocaleString('es-AR')} preguntas/mes — <b>Claude</b> ${proj(t.proy_claude)} · <b>GPT</b> ${proj(t.proy_gpt)} · <b>Gemini</b> ${proj(t.proy_gemini)}</p>`;
+  }catch(e){ box.innerHTML='<span class="hint">Sin peleas todavía.</span>'; }
+}
+async function nuevaPelea(){
+  const ring=document.getElementById('ringo');
+  const btn=document.getElementById('btnPelear');
+  ring.innerHTML='<div class="empty">Generando respuestas con las tres IA…</div>';
+  if(btn){btn.disabled=true;btn.textContent='Peleando…';}
+  try{
+    const qs=_vistas.length?('?excluir='+encodeURIComponent(_vistas.join(','))):'';
+    _duelo=await api('/api/duelo/generar'+qs);
+    if(_duelo.pregunta && _duelo.pregunta.id!=null) _vistas.push(_duelo.pregunta.id);
+    const card=(letra,d)=>`
+      <div class="form"><b>Respuesta ${letra}</b><p style="white-space:pre-wrap;margin-top:6px">${esc(d.respuesta||'(sin respuesta)')}</p></div>`;
+    ring.innerHTML=`
+      <div class="form">
+        <div class="hint">Pregunta real del comprador${_duelo.pregunta.titulo?(' · '+esc(_duelo.pregunta.titulo)):''}</div>
+        <p style="font-weight:600;margin:6px 0 0">${esc(_duelo.pregunta.texto)}</p>
+      </div>
+      ${card('A',_duelo.A)}${card('B',_duelo.B)}${card('C',_duelo.C)}
+      <div id="votos" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:4px">
+        <button class="btn" onclick="votar('A')">A</button>
+        <button class="btn" onclick="votar('B')">B</button>
+        <button class="btn" onclick="votar('C')">C</button>
+        <button class="btn ghost" onclick="votar('empate')">Empate</button>
+      </div>
+      <p class="hint" style="text-align:center;margin-top:2px">¿Cuál respondió mejor?</p>
+      <div id="revela"></div>`;
+  }catch(e){ ring.innerHTML=errBox(e.message); }
+  if(btn){btn.disabled=false;btn.textContent='🎲 Nueva pelea';}
+}
+async function votar(v){
+  if(!_duelo) return;
+  const votos=document.getElementById('votos');
+  const rev=document.getElementById('revela');
+  try{
+    const r=await post('/api/duelo/votar',{duelo_id:_duelo.duelo_id, voto:v});
+    if(votos) votos.style.display='none';
+    const money=x=>'US$'+(Number(x)||0).toFixed(5);
+    const etq=ia=>ia==='claude'?'🟣 Claude':(ia==='gpt'?'🟢 GPT':'🔵 Gemini');
+    const ganTxt=r.ganador==='empate'?'Empate':('Ganó '+etq(r.ganador));
+    rev.innerHTML=`
+      <div class="form" style="border-left:4px solid var(--green)">
+        <b>${ganTxt}</b>
+        <p class="hint" style="margin-top:6px">A era ${etq(r.revelado.A.ia)} — costo ${money(r.revelado.A.costo)}<br>B era ${etq(r.revelado.B.ia)} — costo ${money(r.revelado.B.costo)}<br>C era ${etq(r.revelado.C.ia)} — costo ${money(r.revelado.C.costo)}</p>
+        <button class="btn" onclick="nuevaPelea()" style="margin-top:8px">🎲 Otra pelea</button>
+      </div>`;
+    cargarTanteador();
+  }catch(e){ rev.innerHTML=errBox(e.message); }
+}
+
+// ===== SELECTOR DE IA + COMPARADOR (en Ajustes) =====
+async function guardarIA(){
+  const sel=document.getElementById('cIA'); if(!sel) return;
+  const btn=sel.parentElement.querySelector('button');
+  try{
+    await post('/api/cuenta/ia',{ia:sel.value});
+    if(btn){const o=btn.textContent;btn.textContent='✅ Guardado';setTimeout(()=>btn.textContent=o,1500);}
+  }catch(e){ alert('No pude guardar la IA: '+e.message); }
+}
+async function probarComparador(){
+  const box=document.getElementById('compResu'); const btn=document.getElementById('btnComp');
+  if(!box) return;
+  box.innerHTML='<div class="empty">Generando con las tres IA…</div>';
+  if(btn){btn.disabled=true;btn.textContent='Comparando…';}
+  try{
+    const r=await api('/api/comparador/generar');
+    const money=x=>'US$'+(Number(x)||0).toFixed(5);
+    const nombre=ia=>ia==='claude'?'🟣 Claude':(ia==='gpt'?'🟢 GPT':'🔵 Gemini');
+    const card=(d,ia)=>`
+      <div class="form" style="${r.mas_barato===ia?'border-left:4px solid var(--green)':''}">
+        <b>${nombre(ia)}${r.mas_barato===ia?' · más barato':''}</b>
+        <p style="white-space:pre-wrap;margin:6px 0">${esc(d.respuesta||'(sin respuesta)')}</p>
+        <div class="hint">Costo: ${money(d.costo)} · confianza ${d.confianza||'-'}</div>
+        <button class="btn sm" onclick="elegirIADesde('${ia}')" style="margin-top:6px">Usar ${nombre(ia)} en mi cuenta</button>
+      </div>`;
+    box.innerHTML=`
+      <div class="hint">Pregunta real${r.pregunta.titulo?(' · '+esc(r.pregunta.titulo)):''}: <b>${esc(r.pregunta.texto)}</b></div>
+      <div style="margin-top:8px">${card(r.claude,'claude')}${card(r.gpt,'gpt')}${card(r.gemini,'gemini')}</div>`;
+  }catch(e){ box.innerHTML=errBox(e.message); }
+  if(btn){btn.disabled=false;btn.textContent='⚔️ Comparar las 3 IAs';}
+}
+async function elegirIADesde(ia){
+  try{ await post('/api/cuenta/ia',{ia}); renderAjustes(); }
+  catch(e){ alert('No pude guardar la IA: '+e.message); }
+}
+
+// ===== REVISAR =====
+async function renderRevisar(){
+  view.innerHTML = `
+    <div class="toolbar">
+      <button class="chip ${filtro==='sinresp'?'on':''}" onclick="setFiltro('sinresp')" style="${filtro==='sinresp'?'':'border-color:var(--red);color:var(--red)'}">🔔 Sin responder</button>
+      <button class="chip ${filtro==='sin'?'on':''}" onclick="setFiltro('sin')">Sin revisar</button>
+      <button class="chip ${filtro==='mal'?'on':''}" onclick="setFiltro('mal')">👎 Corregidas</button>
+      <button class="chip ${filtro==='buenas'?'on':''}" onclick="setFiltro('buenas')">👍 Buenas</button>
+      <button class="chip ${filtro==='vendidas'?'on':''}" onclick="setFiltro('vendidas')">💰 Vendidas</button>
+      <button class="chip ${filtro==='todas'?'on':''}" onclick="setFiltro('todas')">Todas</button>
+      ${autoOn?`<button class="chip ${filtro==='cola'?'on':''}" onclick="setFiltro('cola')">⏱ En cola</button>`:''}
+    </div>
+    <div class="toolbar">
+      <input id="fBusca" placeholder="🔎 Buscar palabra, SKU o MLA…" value="${esc(busca)}" style="flex:1;min-width:170px" onkeydown="if(event.key==='Enter')aplicarFiltros()">
+      <button class="btn sm" onclick="aplicarFiltros()">Buscar</button>
+      <div class="rango-wrap">
+        <button class="rango-btn" onclick="toggleRango(event)">📅 ${etiquetaRango()} <span style="color:var(--muted)">▾</span></button>
+        <div class="rango-pop cal" id="rangoPop">
+          <div id="calBox"></div>
+          <div class="cal-quick">
+            <button onclick="setRango('hoy')">Hoy</button>
+            <button onclick="setRango('7')">Semana</button>
+            <button onclick="setRango('mes')">Mes actual</button>
+            <button class="limpiar" onclick="setRango('')">✕ Limpiar</button>
+          </div>
+        </div>
+      </div>
+      ${USUARIO&&USUARIO.rol==='master'?`<button class="btn ghost sm" onclick="exportarCSV()" title="Descargar lo que estás viendo">⬇ CSV</button>`:''}
+      ${busca?'<button class="btn ghost sm" onclick="limpiarFiltros()">✕ Limpiar</button>':''}
+    </div>
+    ${filtro==='sinresp'?`<div class="form" style="margin-bottom:12px"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between"><span class="hint">Algunas pueden estar respondidas en ML pero sin registrar acá (preguntas viejas). Sincronizá para dejar solo las que realmente faltan.</span><button class="btn ghost sm" onclick="sincronizarML()">🔄 Sincronizar con ML</button>${autoOn?`<button class="btn sm" onclick="procesarPendientes()">⚡ Responder pendientes con IA</button>`:''}</div><div id="sincroProg" class="hint"></div></div>`:''}
+    <div id="lista" class="empty">Cargando…</div>`;
+  let path='/api/preguntas?limit=100&offset='+pagOffset;
+  if(filtro==='sin') path+='&sin_revisar=1';
+  if(filtro==='cola') path+='&estado=programada';
+  if(filtro==='mal') path+='&calif=mal';
+  if(filtro==='buenas') path+='&calif=bien';
+  if(filtro==='sinresp') path+='&sin_responder=1';
+  if(filtro==='vendidas') path+='&vendidas=1';
+  if(busca)  path+='&busca='+encodeURIComponent(busca);
+  if(fDesde) path+='&desde='+fDesde;
+  if(fHasta) path+='&hasta='+fHasta;
+  let data=[];
+  try{ data = await api(path); }catch(e){ lista.innerHTML=errBox(e.message); return; }
+  ultimaData = pagOffset===0 ? data : ultimaData.concat(data);
+  if(!data.length && pagOffset===0){ lista.outerHTML=`<div id="lista" class="empty"><div class="big">\u2705</div>No hay preguntas en esta vista.</div>`; return; }
+  const htmlCards = data.map(cardHTML).join('');
+  const verMas = data.length>=100 ? `<div style="text-align:center;margin:14px 0"><button class="btn ghost" onclick="verMas()">Ver m\u00e1s \u2193</button></div>` : '';
+  if(pagOffset===0) lista.outerHTML = '<div id="lista">'+htmlCards+verMas+'</div>';
+  else { const l=document.getElementById('lista'); l.querySelector('button[onclick=\"verMas()\"]')?.parentElement?.remove(); l.insertAdjacentHTML('beforeend', htmlCards+verMas); }
+  cargarThumbs();
+}
+// ---- MINIATURAS: baja la primera foto de cada publicacion visible (en lote, con cache) ----
+const _thumbs={};
+async function cargarThumbs(){
+  const imgs=[...document.querySelectorAll('img.thumb[data-thumb]')].filter(i=>!i.src);
+  const faltan=[...new Set(imgs.map(i=>i.dataset.thumb).filter(id=>id&&!(id in _thumbs)))];
+  for(let i=0;i<faltan.length;i+=60){
+    try{ Object.assign(_thumbs, await api('/api/thumbs?items='+encodeURIComponent(faltan.slice(i,i+60).join(',')))); }catch(e){ break; }
+  }
+  imgs.forEach(img=>{
+    const u=_thumbs[img.dataset.thumb];
+    if(u){ img.src=u; img.style.display='block'; }
+  });
+}
+function setFiltro(f){ filtro=f; pagOffset=0; renderRevisar(); }
+function irA(f){
+  filtro=f; pagOffset=0; tab='revisar';
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on', x.dataset.t==='revisar'));
+  renderRevisar();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+let pagOffset=0;
+let ultimaData=[];
+function verMas(){ pagOffset+=100; renderRevisar(); }
+
+function cardHTML(q){
+  const conf = (q.ia_confianza||'media');
+  const esBot = q.respondida_por==='RespondIA';
+  const firma = q.respondida_por ? `<div style="margin-top:5px"><span style="background:${esBot?'#eef3ff':'var(--soft)'};color:${esBot?'var(--blue)':'var(--muted)'};font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px">${esBot?'🤖 Respondida por RespondIA':'✍️ Respondida por '+esc(q.respondida_por)}</span></div>` : '';
+  const real = q.respuesta_real ? `<div class="real"><b>${q.estado==='enviada'?'Respuesta enviada:':'Respondida:'}</b> ${esc(q.respuesta_real)}${firma}</div>` : '';
+  const yaCalif = q.calificacion ? `<span class="badge-ok">${q.calificacion==='bien'?'👍 marcada como buena':(q.correccion?'👎 corregida ✓':'👎 marcada mal · <b>falta escribir la corrección</b>')}</span>` : '';
+  const errEnvio = q.envio_error ? `<div class="real" style="color:var(--red)"><b>Error al enviar:</b> ${esc(q.envio_error)}</div>` : '';
+  // badge segun estado
+  let badgeEstado = '';
+  if (q.estado==='programada' && q.enviar_at){
+    const hh = new Date(q.enviar_at).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+    badgeEstado = `<span style="background:#fff6da;color:#9a7b00;font-size:12px;font-weight:800;padding:2px 9px;border-radius:999px">⏱ se envía sola a las ${hh}</span>`;
+  } else if (q.estado==='enviada'){
+    badgeEstado = `<span style="background:#eef4ff;color:var(--blue);font-size:12px;font-weight:800;padding:2px 9px;border-radius:999px">✈️ enviada</span>`;
+  }
+  const badgeVenta = q.convirtio ? (q.orden_id
+    ? `<a href="https://www.mercadolibre.com.ar/ventas/${esc(String(q.orden_id))}/detalle" target="_blank" rel="noopener" style="background:#e7f7ee;color:var(--green);font-size:12px;font-weight:800;padding:2px 9px;border-radius:999px;text-decoration:none" title="Abrir el detalle de la venta en ML">💰 terminó en venta ↗</a>`
+    : `<span style="background:#e7f7ee;color:var(--green);font-size:12px;font-weight:800;padding:2px 9px;border-radius:999px" title="El comprador compró después de preguntar">💰 terminó en venta</span>`) : '';
+  const badgeCompraPrevia = (!q.convirtio && q.orden_previa_id)
+    ? `<a href="https://www.mercadolibre.com.ar/ventas/${esc(String(q.orden_previa_id))}/detalle" target="_blank" rel="noopener" style="background:#f2ecff;color:#6d3df5;font-size:12px;font-weight:800;padding:2px 9px;border-radius:999px;text-decoration:none" title="Este comprador YA compró este producto — abrir esa venta en ML">🛒 ya lo compró · ver venta ↗</a>` : '';
+  const puedeResponder = q.estado!=='enviada' && !q.respuesta_real;
+  const iaValida = q.ia_respuesta && !String(q.ia_respuesta).startsWith('ERROR');
+  const puedeEnviar = puedeResponder && q.estado!=='historico' && iaValida; // "Está bien" la envía
+  return `<div class="card ${q.revisada?'done':''}" id="c${q.id}" data-sku="${esc(q.sku||'')}" data-item="${esc(q.item_id||'')}" data-comprador="${esc(String(q.comprador_id||''))}">
+    <div style="display:flex;gap:10px;align-items:flex-start">
+      <img class="thumb" data-thumb="${esc(q.item_id||'')}" alt="" style="width:52px;height:52px;border-radius:10px;object-fit:cover;background:var(--soft);flex:none;display:none">
+      <div style="flex:1;min-width:0">
+    <div class="meta">
+      <span class="sku">${esc(q.sku||'sin SKU')}</span>
+      <span>${esc((q.texto||'').length?'·':'')} ${fecha(q.fecha_pregunta)}</span>
+      <span>· <a href="https://articulo.mercadolibre.com.ar/${esc((q.item_id||'').replace(/^MLA/,'MLA-'))}" target="_blank" rel="noopener" title="Ver publicación">${esc(q.item_id||'')} ↗</a></span>
+      ${q.comprador_id?`<span title="Comprador (usuario de ML ${esc(String(q.comprador_id))})">· 👤 ${esc((q.comprador_nick&&q.comprador_nick!=='(sin apodo)')?q.comprador_nick:('#'+q.comprador_id))}</span>`:''}
+      ${badgeEstado}
+      ${badgeVenta}
+      ${badgeCompraPrevia}
+    </div>
+    <p class="q">${esc(q.texto)}</p>
+      </div>
+    </div>
+    <div class="ans">
+      ${q.respuesta_real
+        ? real /* ya respondida: mostramos SOLO lo que se envio (sin borrador aparte) */
+        : (q.ia_respuesta
+            ? `<div class="lbl">Respuesta de la IA <span class="conf ${conf}">${conf}</span> <span style="color:var(--muted);font-weight:400;text-transform:none">${esc(q.ia_fuente||'')}</span></div>${esc(q.ia_respuesta)}`
+            : `<div class="lbl">Respuesta hist\u00f3rica (importada)</div>`)}
+      ${errEnvio}
+    </div>
+    <div class="acts">
+      <button class="ico good ${q.calificacion==='bien'?'on':''}" onclick="calif(${q.id},'bien',${puedeEnviar})" title="${puedeEnviar?'Aprueba la respuesta de la IA y la envía al comprador en Mercado Libre':'Marca esta respuesta como buena'}">👍 ${puedeEnviar?'Está bien y enviar':'Está bien'}</button>
+      <button class="ico bad ${q.calificacion==='mal'?'on':''}" onclick="toggleFix(${q.id})">👎 Corregir</button>
+      ${q.estado==='programada' ? `<button class="ico" style="background:#fff6da;color:#9a7b00" onclick="frenar(${q.id})">✋ Frenar envío</button>` : ''}
+      ${puedeResponder ? `<button class="ico" style="background:#eef4ff;color:var(--blue)" onclick="toggleResponder(${q.id})">✈️ Responder yo</button>` : ''}
+      ${q.comprador_id?`<button class="ico" style="background:var(--soft);color:var(--ink)" onclick="verHilo(${q.id})">💬 Conversación</button>`:''}
+      ${yaCalif}
+    </div>
+    <div class="fix" id="hilo${q.id}" style="background:var(--soft);border-radius:12px;padding:0"></div>
+    <div class="fix" id="fix${q.id}">
+      <textarea id="fixt${q.id}" placeholder="¿Cómo debería haber contestado?">${esc(q.correccion||'')}</textarea>
+      <div class="fixrow">
+        <label><input type="checkbox" id="regla${q.id}"> Guardar como regla</label>
+        <select id="ambito${q.id}" onchange="ambitoCambio(${q.id})">
+          <option value="sku">Este producto exacto (${esc(q.sku||'s/d')})</option>
+          <option value="madre">Toda la familia (${esc(skuMadreJS(q.sku)||'s/d')})</option>
+          <option value="item">Todos los SKUs de esta publicación</option>
+          <option value="prefijo">Los que empiecen con…</option>
+          <option value="lista">Esta lista de SKUs (comas)</option>
+          <option value="global">Todos los productos</option>
+        </select>
+        <input id="ambextra${q.id}" style="display:none;min-width:150px" placeholder="ej: STL300  |  CAR300, OFI210">
+        ${(!q.respuesta_real && q.estado!=='enviada' && q.estado!=='historico')?`
+        <button class="btn sm" onclick="guardarFix(${q.id},true)" title="Guarda la corrección (y la regla) y la envía YA al comprador en ML">✈️ Guardar y enviar</button>
+        <button class="btn ghost sm" onclick="guardarFix(${q.id})" title="Solo guarda; la pregunta queda abierta para responder otra cosa">💾 Solo guardar</button>
+        `:`<button class="btn sm" onclick="guardarFix(${q.id})">Guardar corrección</button>`}
+      </div>
+    </div>
+    <div class="fix" id="resp${q.id}">
+      <textarea id="respt${q.id}" placeholder="Tu respuesta al comprador…">${esc(q.ia_respuesta&&!String(q.ia_respuesta).startsWith('ERROR')?q.ia_respuesta:'')}</textarea>
+      <div class="fixrow">
+        <label><input type="checkbox" id="reglaR${q.id}"> Guardar como regla</label>
+        <select id="ambitoR${q.id}" onchange="ambitoCambioR(${q.id})">
+          <option value="sku">Este producto exacto (${esc(q.sku||'s/d')})</option>
+          <option value="madre">Toda la familia (${esc(skuMadreJS(q.sku)||'s/d')})</option>
+          <option value="item">Todos los SKUs de esta publicación</option>
+          <option value="prefijo">Los que empiecen con…</option>
+          <option value="lista">Esta lista de SKUs (comas)</option>
+          <option value="global">Todos los productos</option>
+        </select>
+        <input id="ambextraR${q.id}" style="display:none;min-width:150px" placeholder="ej: STL300  |  CAR300, OFI210">
+        <span class="hint">Se envía YA a Mercado Libre como respuesta oficial.</span>
+        <button class="btn sm" id="respbtn${q.id}" onclick="responderYo(${q.id})">✈️ Enviar ahora</button>
+      </div>
+    </div>
+  </div>`;
+}
+function toggleFix(id){ document.getElementById('fix'+id).classList.toggle('show'); document.getElementById('resp'+id).classList.remove('show'); }
+function toggleResponder(id){ document.getElementById('resp'+id).classList.toggle('show'); document.getElementById('fix'+id).classList.remove('show'); }
+async function frenar(id){
+  await post('/api/frenar',{id});
+  loadStats(); renderRevisar();
+}
+// ===== Traduce errores tecnicos de ML a mensajes entendibles =====
+function errorHumano(msg){
+  const m=String(msg||'');
+  if(m.includes('not_active_item')||m.includes('Item must be active'))
+    return 'La publicación está PAUSADA o FINALIZADA: Mercado Libre no permite responder preguntas de publicaciones inactivas. Si la reactivás, volvé a la pregunta y reenviá desde "Corregir".';
+  if(m.includes('question_already_answered')||m.includes('already answered'))
+    return 'Esta pregunta YA fue respondida (quizás desde Mercado Libre directo u otra herramienta). No se puede responder dos veces.';
+  if(m.includes('question_deleted')||m.includes('not_found'))
+    return 'La pregunta ya no existe en Mercado Libre (el comprador la borró o ML la eliminó).';
+  if(m.includes('invalid_token')||m.includes('401')||m.includes('403'))
+    return 'Problema de permisos con Mercado Libre. Puede que haya que renovar la vinculación de la cuenta en Configuración.';
+  return m; // si no lo conocemos, mostramos el original
+}
+
+// ===== TOAST: confirmacion flotante con tilde verde (1 seg, se va sola) =====
+let _toastTimer=null;
+function toast(msg){
+  let t=document.getElementById('toast');
+  if(!t){
+    t=document.createElement('div'); t.id='toast'; t.className='toast';
+    t.innerHTML='<span class="tick">✓</span><span class="txt"></span>';
+    document.body.appendChild(t);
+  }
+  t.querySelector('.txt').textContent=msg;
+  clearTimeout(_toastTimer);
+  requestAnimationFrame(()=>t.classList.add('show'));
+  _toastTimer=setTimeout(()=>t.classList.remove('show'), 1100);
+}
+
+// ===== Al calificar, la tarjeta se despide (colapsa y desaparece de la lista) =====
+function despedirCard(id){
+  const el=document.getElementById('c'+id); if(!el) return;
+  el.style.overflow='hidden';
+  el.style.maxHeight=el.scrollHeight+'px';
+  el.style.transition='opacity .22s ease, transform .22s ease, max-height .3s ease .12s, margin .3s ease .12s, padding .3s ease .12s';
+  requestAnimationFrame(()=>{
+    el.style.opacity='0'; el.style.transform='translateX(16px)';
+    el.style.maxHeight='0'; el.style.margin='0'; el.style.paddingTop='0'; el.style.paddingBottom='0';
+  });
+  setTimeout(()=>el.remove(), 500);
+}
+
+function ambitoCambioR(id){
+  const v=document.getElementById('ambitoR'+id).value;
+  const ex=document.getElementById('ambextraR'+id);
+  if(v==='prefijo'||v==='lista'){ ex.style.display='inline-block'; ex.placeholder=v==='prefijo'?'ej: STL300, CAR300':'ej: CAR300, OFI210'; }
+  else ex.style.display='none';
+}
+async function responderYo(id){
+  const texto=document.getElementById('respt'+id).value.trim();
+  if(!texto){ alert('Escribí la respuesta primero'); return; }
+
+  // regla opcional: si esta tildado, armamos el cuerpo ANTES de enviar
+  let reglaBody=null;
+  if(document.getElementById('reglaR'+id)?.checked){
+    const card=document.getElementById('c'+id);
+    const sku=card?.dataset.sku||'', itemId=card?.dataset.item||'';
+    const ambito=document.getElementById('ambitoR'+id).value;
+    const extra=(document.getElementById('ambextraR'+id).value||'').trim();
+    if((ambito==='prefijo'||ambito==='lista') && !extra){ alert('Escribí el SKU/patrón o la lista para la regla'); return; }
+    reglaBody={ambito,respuesta:texto,disparador:'',origen:'respuesta'};
+    if(ambito==='sku') reglaBody.sku=sku;
+    else if(ambito==='madre') reglaBody.sku=skuMadreJS(sku);
+    else if(ambito==='item') reglaBody.item_id=itemId;
+    else if(ambito==='prefijo'||ambito==='lista') reglaBody.sku=extra;
+  }
+
+  const btn=document.getElementById('respbtn'+id); btn.disabled=true; btn.textContent='Enviando…';
+  try{
+    await post('/api/responder',{id,texto});
+    if(reglaBody){
+      try{ await post('/api/regla',reglaBody); toast('Enviada + regla guardada'); }
+      catch(e){ toast('Enviada al comprador'); alert('Se envió OK, pero la regla no se pudo guardar: '+e.message); }
+    } else {
+      toast('Enviada al comprador');
+    }
+    loadStats(); renderRevisar();
+  }catch(e){
+    btn.disabled=false; btn.textContent='✈️ Enviar ahora';
+    alert('No se pudo enviar: '+errorHumano(e.message));
+  }
+}
+async function calif(id,val,enviar){
+  if(val==='bien' && enviar){
+    if(!confirm('Se va a ENVIAR esta respuesta de la IA al comprador en Mercado Libre. ¿Confirmás?')) return;
+  }
+  try{
+    const r=await post('/api/calificar',{id,calificacion:val,enviar:!!(val==='bien'&&enviar)});
+    if(val==='bien' && enviar){
+      if(r && r.enviada){ toast('Enviada al comprador'); loadStats(); renderRevisar(); return; }
+      if(r && r.envio_error){ alert('Marcada como buena, pero NO se pudo enviar: '+errorHumano(r.envio_error)); }
+    }
+  }catch(e){ alert('Error: '+e.message); return; }
+  loadStats();
+  despedirCard(id);
+}
+let _fixOcupado=false;
+async function guardarFix(id,enviar=false){
+  if(_fixOcupado) return;
+  _fixOcupado=true;
+  const cont=document.getElementById('fix'+id);
+  const botones=cont?cont.querySelectorAll('button'):[];
+  botones.forEach(b=>{b.disabled=true;b.dataset.txt=b.textContent;b.textContent='Guardando…';b.style.opacity=.6;});
+  try{
+    await _guardarFixReal(id,enviar);
+  } finally {
+    _fixOcupado=false;
+    botones.forEach(b=>{b.disabled=false;if(b.dataset.txt)b.textContent=b.dataset.txt;b.style.opacity=1;});
+  }
+}
+async function _guardarFixReal(id,enviar=false){
+  const sku = (document.getElementById('c'+id)?.dataset?.sku) || '';
+  const itemId = (document.getElementById('c'+id)?.dataset?.item) || '';
+  const correccion = document.getElementById('fixt'+id).value.trim();
+  await post('/api/calificar',{id,calificacion:'mal',correccion});
+  if(document.getElementById('regla'+id).checked && correccion){
+    const ambito=document.getElementById('ambito'+id).value;
+    const extra=(document.getElementById('ambextra'+id)?.value||'').trim();
+    const body={ambito,respuesta:correccion,disparador:'',origen:'correccion'};
+    if(ambito==='sku') body.sku=sku;
+    else if(ambito==='madre') body.sku=skuMadreJS(sku);
+    else if(ambito==='item') body.item_id=itemId;
+    else if(ambito==='prefijo') body.sku=extra;
+    else if(ambito==='lista') body.sku=extra;
+    if((ambito==='prefijo'||ambito==='lista') && !extra){ alert('Escribí el SKU/patrón o la lista'); return; }
+    await post('/api/regla',body);
+  }
+  if(enviar){
+    if(!correccion){ alert('Escribí la corrección antes de enviar'); return; }
+    try{
+      await post('/api/responder',{id,texto:correccion});
+      toast('Enviada al comprador');
+    }catch(e){ alert('Se guardó la corrección, pero NO se pudo enviar: '+errorHumano(e.message)); }
+  }
+  loadStats();
+  if(enviar){ setTimeout(()=>renderRevisar(),400); }
+  else { despedirCard(id); }
+}
+async function verHilo(id){
+  const card=document.getElementById('c'+id);
+  const box=document.getElementById('hilo'+id);
+  if(box.classList.contains('show')){ box.classList.remove('show'); return; }
+  box.classList.add('show');
+  box.innerHTML='<div style="padding:12px"><span class="hint">Cargando conversación…</span></div>';
+  try{
+    const r=await api('/api/hilo?comprador_id='+card.dataset.comprador+'&item_id='+encodeURIComponent(card.dataset.item||'')+'&excluir='+id);
+    let h='<div style="padding:12px 14px">';
+    if(r.compro_antes) h+='<div style="background:#e7f7ee;color:var(--green);font-weight:700;font-size:13px;padding:7px 11px;border-radius:9px;margin-bottom:9px">🛒 Este comprador ya te compró antes</div>';
+    if(!r.hilo.length){ h+='<span class="hint">Sin preguntas anteriores de este comprador en esta publicación.</span>'; }
+    else {
+      h+='<div class="hint" style="margin-bottom:6px;font-weight:700">Preguntas anteriores en esta publicación:</div>';
+      h+=r.hilo.map(x=>{
+        const resp=x.correccion||x.respuesta_real||x.ia_respuesta;
+        const quien=x.respondida_por?(' · '+esc(x.respondida_por)):'';
+        return `<div style="margin-bottom:9px;padding-bottom:9px;border-bottom:1px dashed var(--line)">
+          <div style="font-size:13px"><b>❓ ${esc(x.texto||'(sin texto)')}</b> <span class="hint">${fecha(x.fecha_pregunta)}</span></div>
+          ${resp?`<div style="font-size:13px;color:var(--muted);margin-top:3px">💬 ${esc(resp)}${quien}</div>`:'<div class="hint" style="margin-top:3px">⏳ sin responder aún</div>'}
+          ${x.convirtio?'<div style="font-size:12px;color:var(--green);font-weight:700;margin-top:2px">💰 esta terminó en venta</div>':''}
+        </div>`;
+      }).join('');
+    }
+    h+='</div>';
+    box.innerHTML=h;
+  }catch(e){ box.innerHTML='<div style="padding:12px" class="hint">No pude cargar el hilo: '+esc(e.message)+'</div>'; }
+}
+function skuMadreJS(sku){ if(!sku) return null; const s=String(sku).trim(); const i=s.indexOf('-'); return i>0?s.slice(0,i):s; }
+function ambitoCambio(id){
+  const v=document.getElementById('ambito'+id).value;
+  const ex=document.getElementById('ambextra'+id);
+  if(v==='prefijo'||v==='lista'){ ex.style.display='inline-block'; ex.placeholder=v==='prefijo'?'ej: STL300, CAR300':'ej: CAR300, OFI210'; }
+  else ex.style.display='none';
+}
+
+async function sincronizarML(){
+  const prog=document.getElementById('sincroProg');
+  const u=new URL(CFG.url.replace(/\/$/,'')+'/admin/sincronizar-preguntas');
+  if(cuentaId)u.searchParams.set('cuenta_id',cuentaId);
+  try{ const r=await fetch(u,{headers:authHeaders()}).then(x=>x.json()); if(prog)prog.textContent='Sincronizando con Mercado Libre\u2026'; seguirSincro(); }
+  catch(e){ if(prog)prog.textContent='Error: '+e.message; }
+}
+async function procesarPendientes(){
+  if(!confirm('Se van a reprocesar las preguntas sin responder:\n\n· Las de confianza ALTA se encolan al automático (con tus horarios y demoras).\n· Las de confianza media/baja quedan para tu revisión.\n· Las que ya estén respondidas o borradas en ML se archivan.\n\n¿Continuar?')) return;
+  const prog=document.getElementById('sincroProg');
+  const u=new URL(CFG.url.replace(/\/$/,'')+'/admin/procesar-pendientes');
+  if(cuentaId)u.searchParams.set('cuenta_id',cuentaId);
+  try{ const r=await fetch(u,{headers:authHeaders()}).then(x=>x.json()); if(prog)prog.textContent=r.msg||'Procesando…'; seguirEncolado(); }
+  catch(e){ if(prog)prog.textContent='Error: '+e.message; }
+}
+async function seguirEncolado(){
+  const prog=document.getElementById('sincroProg'); if(!prog) return;
+  try{
+    const s=await api('/api/estado');
+    if(s.encolado && s.encolado.corriendo){
+      prog.textContent=`Procesadas ${s.encolado.revisadas} · ⏱ ${s.encolado.encoladas} encoladas al auto · 👀 ${s.encolado.revision} a revisión · 📁 ${s.encolado.archivadas} archivadas…`;
+      setTimeout(seguirEncolado,2500);
+    } else if(s.encolado && s.encolado.revisadas>0){
+      prog.innerHTML=`✅ Listo: ⏱ ${s.encolado.encoladas} encoladas (mirá "En cola"), 👀 ${s.encolado.revision} para revisión, 📁 ${s.encolado.archivadas} ya resueltas en ML.`;
+      loadStats(); setTimeout(()=>renderRevisar(),1500);
+    }
+  }catch(e){}
+}
+async function seguirSincro(){
+  const prog=document.getElementById('sincroProg'); if(!prog) return;
+  try{
+    const s=await api('/api/estado');
+    if(s.sincro && s.sincro.corriendo){
+      prog.textContent=`Revisadas ${s.sincro.revisadas} \u00b7 ${s.sincro.sincronizadas} ya estaban respondidas \u00b7 ${s.sincro.siguen} siguen pendientes\u2026`;
+      setTimeout(seguirSincro,2500);
+    } else if(s.sincro){
+      prog.innerHTML=`\u2705 Listo: ${s.sincro.sincronizadas} sincronizadas (sacadas de la bandeja), ${s.sincro.siguen} realmente sin responder.`;
+      loadStats(); setTimeout(()=>renderRevisar(),1500);
+    }
+  }catch(e){}
+}
+
+// ===== CAMPANA + SONIDO (alerta sin responder) =====
+let _sinRespPrev = null;
+function actualizarCampana(n){
+  const c=document.getElementById('camp'); if(!c) return;
+  document.getElementById('campN').textContent=n;
+  c.style.display = n>0 ? 'flex' : 'none';
+  c.classList.toggle('alerta', n>0);
+  // ding suave solo si aumento (entro una nueva sin responder)
+  if(_sinRespPrev!==null && n>_sinRespPrev) ding();
+  _sinRespPrev=n;
+}
+function ding(){
+  try{
+    const a=new (window.AudioContext||window.webkitAudioContext)();
+    const o=a.createOscillator(), g=a.createGain();
+    o.connect(g); g.connect(a.destination);
+    o.frequency.value=880; o.type='sine';
+    g.gain.setValueAtTime(.0001,a.currentTime);
+    g.gain.exponentialRampToValueAtTime(.25,a.currentTime+.02);
+    g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+.5);
+    o.start(); o.stop(a.currentTime+.5);
+  }catch(e){}
+}
+
+// ===== TAREAS (datos faltantes) =====
+async function renderTareas(){
+  view.innerHTML=`
+    <div class="toolbar">
+      <button class="btn" onclick="generarTareas()">\u26a1 Detectar datos faltantes</button>
+      <span class="hint">Busca preguntas donde falt\u00f3 un dato (peso, medidas\u2026). Con 3+ del mismo dato, crea una tarea.</span>
+    </div>
+    <div id="tareas" class="empty">Cargando\u2026</div>`;
+  let data=[]; try{ data=await api('/api/tareas'); }catch(e){ document.getElementById('tareas').innerHTML=errBox(e.message); return; }
+  const box=document.getElementById('tareas');
+  if(!data.length){ box.outerHTML=`<div id="tareas" class="empty"><div class="big">\u{1F4CB}</div>No hay tareas pendientes. Toc\u00e1 "Detectar datos faltantes".</div>`; return; }
+  const col={alta:'var(--red)',media:'var(--amber)',baja:'var(--muted)'};
+  box.outerHTML='<div id="tareas">'+data.map(t=>`
+    <div class="row" id="tarea${t.id}" style="border-left:4px solid ${col[t.prioridad]||'var(--muted)'}">
+      <div class="body">
+        <b>${esc(t.dato||'')}</b>
+        <div class="hint" style="margin-top:3px">${esc(t.titulo||t.sku||'')} \u00b7 SKU ${esc(t.sku||'')} \u00b7 preguntado ${t.frecuencia||0} veces</div>
+        ${t.ejemplo?`<div class="hint" style="font-style:italic;margin-top:2px">\u201c${esc(t.ejemplo)}\u201d</div>`:''}
+      </div>
+      <select onchange="prioridadTarea(${t.id},this.value)" title="Importancia" style="align-self:center">
+        <option value="alta" ${t.prioridad==='alta'?'selected':''}>\u{1F534} Alta</option>
+        <option value="media" ${t.prioridad==='media'?'selected':''}>\u{1F7E1} Media</option>
+        <option value="baja" ${t.prioridad==='baja'?'selected':''}>\u26aa Baja</option>
+      </select>
+      <button class="btn ghost sm" onclick="tareaEstado(${t.id},'hecha')">\u2713 Hecha</button>
+      <button class="btn ghost sm" onclick="tareaEstado(${t.id},'descartada')">\u2715</button>
+    </div>`).join('')+'</div>';
+}
+async function generarTareas(){
+  const box=document.getElementById('tareas'); if(box) box.innerHTML='<p class="hint">Analizando\u2026</p>';
+  try{ const r=await post('/api/tareas/generar',{}); }catch(e){}
+  renderTareas();
+}
+async function prioridadTarea(id,prioridad){ await post('/api/tarea',{id,prioridad}); }
+async function tareaEstado(id,estado){ await post('/api/tarea',{id,estado}); document.getElementById('tarea'+id)?.remove(); }
+
+// ===== METRICAS =====
+async function renderMetricas(){
+  view.innerHTML = '<div class="empty">Cargando m\u00e9tricas\u2026</div>';
+  let m; try{ m=await api('/api/metricas'); }catch(e){
+    view.innerHTML=`<div class="empty">No pude cargar m\u00e9tricas: ${esc(e.message)}<br><span class="hint">\u00bfCorriste respondia_metricas.sql en Supabase?</span></div>`; return;
+  }
+  const serie=m.serie||[], conf=m.confianza||{}, cal=m.calificaciones||{}, uso=m.uso_ia||{};
+  // completar 14 dias
+  const dias=[]; for(let i=13;i>=0;i--){ const d=new Date(Date.now()-i*86400000); dias.push(d.toISOString().slice(0,10)); }
+  const porDia={}; serie.forEach(s=>porDia[s.dia]={p:s.preguntas,v:s.vendidas});
+  const maxP=Math.max(1,...dias.map(d=>porDia[d]?.p||0));
+  const barras=dias.map(d=>{
+    const p=porDia[d]?.p||0, v=porDia[d]?.v||0, h=Math.round(90*p/maxP);
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px" title="${d}: ${p} preguntas, ${v} ventas">
+      <span style="font-size:10px;color:var(--muted)">${p||''}</span>
+      <div style="width:70%;max-width:26px;height:${Math.max(h,2)}px;background:var(--blue);border-radius:4px 4px 0 0;position:relative">
+        ${v?`<div style="position:absolute;bottom:0;width:100%;height:${Math.max(2,Math.round(h*v/Math.max(p,1)))}px;background:var(--green);border-radius:0"></div>`:''}
+      </div>
+      <span style="font-size:9px;color:var(--muted)">${d.slice(8)}/${d.slice(5,7)}</span>
+    </div>`;
+  }).join('');
+  const totConf=(conf.alta||0)+(conf.media||0)+(conf.baja||0)||1;
+  const confBar=(k,color)=>`<div style="display:flex;align-items:center;gap:8px;margin:4px 0">
+    <span style="width:52px;font-size:12px;font-weight:700;text-transform:capitalize">${k}</span>
+    <div style="flex:1;background:var(--soft);border-radius:4px;height:14px"><div style="width:${Math.round(100*(conf[k]||0)/totConf)}%;background:${color};height:14px;border-radius:4px"></div></div>
+    <span style="width:70px;font-size:12px;color:var(--muted)">${conf[k]||0} (${Math.round(100*(conf[k]||0)/totConf)}%)</span></div>`;
+  const revisadas=(cal.buenas||0)+(cal.malas||0);
+  const aprob=revisadas?Math.round(100*(cal.buenas||0)/revisadas):null;
+  view.innerHTML=`
+    <div class="form">
+      <b>\u{1F4C8} Preguntas por d\u00eda (14 d\u00edas)</b>
+      <p class="hint">Barras azules = preguntas; parte verde = las que terminaron en venta.</p>
+      <div style="display:flex;align-items:flex-end;gap:2px;height:130px;padding-top:8px">${barras}</div>
+    </div>
+    <div class="form">
+      <b>\u{1F3AF} Confianza de la IA</b>
+      <p class="hint">Cu\u00e1nto de lo que responde lo hace con seguridad. Solo las "alta" se enviar\u00edan solas en modo autom\u00e1tico.</p>
+      ${confBar('alta','var(--green)')}${confBar('media','var(--amber)')}${confBar('baja','var(--red)')}
+    </div>
+    <div class="stats" style="padding:0;margin-bottom:14px">
+      <div class="stat"><b>${revisadas}</b><span>revisadas por vos</span></div>
+      <div class="stat"><b style="color:${aprob===null?'var(--muted)':aprob>=80?'var(--green)':'var(--amber)'}">${aprob===null?'\u2014':aprob+'%'}</b><span>aprobaci\u00f3n \u{1F44D}</span></div>
+      <div class="stat"><b>${uso.hoy||0}</b><span>llamadas IA hoy</span></div>
+      <div class="stat"><b>${uso.mes||0}</b><span>llamadas IA este mes</span></div>
+      <div class="stat"><b>${uso.imagenes_mes||0}</b><span>con im\u00e1genes \u{1F4F7}</span></div>
+    </div>
+    <div class="form">
+      <b>\u{1F4CA} \u00bfLa IA est\u00e1 mejorando?</b>
+      <p class="hint">Por semana: verde = respuestas con confianza alta, amarillo = media, rojo = baja. Si tus reglas y correcciones funcionan, el verde tiene que crecer. Abajo, tu aprobaci\u00f3n \u{1F44D} semanal.</p>
+      <div id="evol" class="hint">Cargando\u2026</div>
+    </div>
+    <p class="hint">Costo estimado del mes: ~USD ${((uso.mes||0)*0.015+(uso.imagenes_mes||0)*0.02).toFixed(2)} (aprox, con Sonnet). El medidor por cuenta es la base para cuidar tu margen cuando vendas RespondIA.</p>`;
+  cargarEvolucion();
+}
+
+async function cargarEvolucion(){
+  const box=document.getElementById('evol'); if(!box) return;
+  let e; try{ e=await api('/api/evolucion'); }catch(err){
+    box.innerHTML='No pude cargar la evoluci\u00f3n: '+esc(err.message)+'<br><span class="hint">\u00bfCorriste respondia_evolucion.sql en Supabase?</span>'; return;
+  }
+  const gen=e.generacion||[], rev=e.revision||[];
+  if(!gen.length){ box.textContent='Todav\u00eda no hay suficientes datos por semana.'; return; }
+  const revPor={}; rev.forEach(r=>revPor[r.semana]=r);
+  const maxG=Math.max(1,...gen.map(g=>g.generadas));
+  box.innerHTML='<div style="display:flex;align-items:flex-end;gap:10px;height:150px;padding-top:6px">'+gen.map(g=>{
+    const h=Math.round(110*g.generadas/maxG);
+    const pa=g.generadas?g.alta/g.generadas:0, pm=g.generadas?g.media/g.generadas:0, pb=g.generadas?g.baja/g.generadas:0;
+    const pctAlta=Math.round(pa*100);
+    const r=revPor[g.semana];
+    const aprob=r&&(r.buenas+r.malas)>0?Math.round(100*r.buenas/(r.buenas+r.malas)):null;
+    const f=g.semana.slice(8)+'/'+g.semana.slice(5,7);
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px" title="Semana del ${g.semana}: ${g.generadas} respuestas, ${pctAlta}% alta${aprob!==null?', aprobaci\u00f3n '+aprob+'%':''}">
+      <span style="font-size:11px;font-weight:800;color:var(--green)">${pctAlta}%</span>
+      <div style="width:70%;max-width:44px;height:${Math.max(h,6)}px;display:flex;flex-direction:column;border-radius:5px;overflow:hidden">
+        <div style="flex:${pb.toFixed(3)};background:var(--red)"></div>
+        <div style="flex:${pm.toFixed(3)};background:var(--amber)"></div>
+        <div style="flex:${pa.toFixed(3)};background:var(--green)"></div>
+      </div>
+      <span style="font-size:10px;color:var(--muted)">sem ${f}</span>
+      <span style="font-size:10px;color:${aprob===null?'var(--muted)':aprob>=80?'var(--green)':'var(--amber)'}">${aprob===null?'\u2014':'\u{1F44D} '+aprob+'%'}</span>
+    </div>`;
+  }).join('')+'</div>';
+}
+
+// ===== REGLAS =====
+async function renderReglas(){
+  view.innerHTML = `
+    <div class="form">
+      <div><label>¿Para qué productos?</label>
+        <div class="grid2">
+          <select id="rAmbito" onchange="rAmbCambio()">
+            <option value="global">Todos los productos</option>
+            <option value="sku">Un SKU exacto</option>
+            <option value="madre">Toda una familia (SKU madre)</option>
+            <option value="prefijo">Los que empiecen con…</option>
+            <option value="lista">Una lista de SKUs (comas)</option>
+          </select>
+          <div id="rSkuWrap" style="display:none"><input id="rSku" placeholder="SKU / patrón / lista" style="width:100%"></div>
+        </div>
+      </div>
+      <div><label>¿Cuándo aplica? (opcional)</label><input id="rDisp" placeholder="ej: forma de envío, dónde están" style="width:100%"></div>
+      <div><label>Respuesta que querés que dé siempre</label><textarea id="rResp" style="width:100%;min-height:70px"></textarea></div>
+      <div style="text-align:right"><button class="btn" onclick="crearRegla()">Crear regla</button></div>
+    </div>
+    <div id="reglas" class="empty">Cargando…</div>`;
+  let data=[]; try{ data=await api('/api/reglas'); }catch(e){ reglas.innerHTML=errBox(e.message); return; }
+  if(!data.length){ reglas.outerHTML=`<div id="reglas" class="empty"><div class="big">📏</div>Todavía no creaste reglas.</div>`; return; }
+  window._reglas = {}; data.forEach(r=>window._reglas[r.id]=r);
+  const etiqueta=r=>({global:'TODOS',sku:r.sku,madre:r.sku+'*',item:'publicación',prefijo:r.sku+'…',lista:'lista'}[r.ambito]||r.sku||'SKU');
+  reglas.outerHTML='<div id="reglas">'+data.map(r=>`
+    <div class="row" id="regla${r.id}">
+      <span class="tag ${r.ambito==='global'?'g':'s'}">${esc(etiqueta(r))}</span>
+      <div class="body">${r.disparador?`<b>${esc(r.disparador)}:</b> `:''}${esc(r.respuesta)}</div>
+      <button class="btn ghost sm" onclick="editarRegla(${r.id})">\u270F Editar</button>
+      <button class="btn ghost sm" onclick="borrarRegla(${r.id})">Borrar</button>
+    </div>`).join('')+'</div>';
+}
+function rAmbCambio(){
+  const v=document.getElementById('rAmbito').value;
+  const w=document.getElementById('rSkuWrap');
+  w.style.display = v==='global' ? 'none' : 'block';
+  const ph={sku:'SKU exacto (ej: GRI200-NE)',madre:'SKU madre (ej: GRI200)',prefijo:'empieza con uno de (ej: STL300, CAR300)',lista:'CAR300, OFI210, STL300'};
+  if(document.getElementById('rSku')) document.getElementById('rSku').placeholder=ph[v]||'SKU';
+}
+let _reglaOcupado=false;
+async function crearRegla(){
+  if(_reglaOcupado) return;
+  _reglaOcupado=true;
+  try{ await _crearReglaReal(); } finally { _reglaOcupado=false; }
+}
+async function _crearReglaReal(){
+  const ambito=document.getElementById('rAmbito').value;
+  const body={ambito,sku:ambito!=='global'?document.getElementById('rSku').value.trim():null,disparador:document.getElementById('rDisp').value.trim(),respuesta:document.getElementById('rResp').value.trim(),tipo:'texto'};
+  if(!body.respuesta){ alert('Escribí la respuesta'); return; }
+  if(ambito!=='global' && !body.sku){ alert('Completá el SKU / patrón / lista'); return; }
+  await post('/api/regla',body); renderReglas();
+}
+async function borrarRegla(id){ if(!confirm('\u00bfBorrar esta regla?')) return; await post('/api/regla/borrar',{id}); renderReglas(); }
+function editarRegla(id){
+  const r=window._reglas[id]; if(!r) return;
+  const div=document.getElementById('regla'+id);
+  div.innerHTML=`
+    <div class="body" style="display:grid;gap:8px;width:100%">
+      <div class="grid2">
+        <select id="eAmb${id}" onchange="document.getElementById('eSkuW${id}').style.display=this.value==='sku'?'block':'none'">
+          <option value="global" ${r.ambito==='global'?'selected':''}>Todos los productos</option>
+          <option value="sku" ${r.ambito==='sku'?'selected':''}>Un SKU puntual</option>
+        </select>
+        <div id="eSkuW${id}" style="display:${r.ambito==='sku'?'block':'none'}"><input id="eSku${id}" value="${esc(r.sku||'')}" placeholder="SKU" style="width:100%"></div>
+      </div>
+      <input id="eDis${id}" value="${esc(r.disparador||'')}" placeholder="\u00bfCu\u00e1ndo aplica? (opcional)" style="width:100%">
+      <textarea id="eRes${id}" style="width:100%;min-height:70px">${esc(r.respuesta||'')}</textarea>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn ghost sm" onclick="renderReglas()">Cancelar</button>
+        <button class="btn sm" onclick="guardarRegla(${id})">\u{1F4BE} Guardar</button>
+      </div>
+    </div>`;
+}
+async function guardarRegla(id){
+  const ambito=document.getElementById('eAmb'+id).value;
+  const body={ id, ambito,
+    sku: ambito==='sku'?document.getElementById('eSku'+id).value.trim():null,
+    disparador: document.getElementById('eDis'+id).value.trim(),
+    respuesta: document.getElementById('eRes'+id).value.trim() };
+  if(!body.respuesta){ alert('La respuesta no puede quedar vac\u00eda'); return; }
+  if(body.ambito==='sku' && !body.sku){ alert('Pon\u00e9 el SKU o cambi\u00e1 a "Todos los productos"'); return; }
+  try{ await post('/api/regla/editar',body); renderReglas(); }
+  catch(e){ alert('No se pudo guardar: '+e.message); }
+}
+
+// ===== SUGERENCIAS / MEJORAS =====
+let rankDias = 90;
+async function renderSugerencias(){
+  view.innerHTML = `
+    <div class="form">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between">
+        <b>\u{1F3C6} Productos con m\u00e1s preguntas</b>
+        <select id="rankSel" onchange="rankDias=parseInt(this.value);renderSugerencias()">
+          <option value="7" ${rankDias===7?'selected':''}>\u00daltimos 7 d\u00edas</option>
+          <option value="30" ${rankDias===30?'selected':''}>Este mes (30 d\u00edas)</option>
+          <option value="90" ${rankDias===90?'selected':''}>\u00daltimos 90 d\u00edas</option>
+          <option value="0" ${rankDias===0?'selected':''}>Todo el historial</option>
+        </select>
+      </div>
+      <p class="hint">Donde m\u00e1s preguntan es donde la publicaci\u00f3n menos explica \u2014 y donde m\u00e1s conviene mejorar fotos, ficha o descripci\u00f3n.</p>
+      <div id="rank" class="hint">Cargando ranking\u2026</div>
+    </div>
+    <div class="toolbar">
+      <button class="btn" onclick="generarSug()">\u26a1 Generar sugerencias con IA</button>
+      <span class="hint">Analiza lo que m\u00e1s te preguntan y arma tareas concretas de mejora.</span>
+    </div>
+    <div id="sug" class="empty">Cargando\u2026</div>`;
+
+  try{
+    const r=await api('/api/ranking?dias='+rankDias);
+    if(!r.length){ document.getElementById('rank').textContent='Sin datos en este per\u00edodo.'; }
+    else{
+      const max=r[0].preguntas;
+      document.getElementById('rank').innerHTML=r.map((p,i)=>{
+        const pct=p.preguntas?Math.round(100*(p.vendidas||0)/p.preguntas):0;
+        const barra=Math.max(4,Math.round(100*p.preguntas/max));
+        const link=p.item_id?('https://articulo.mercadolibre.com.ar/'+(p.item_id||'').replace(/^MLA/,'MLA-')):null;
+        return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)">
+          <span style="width:22px;text-align:right;font-weight:800;color:var(--muted)">${i+1}</span>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <span class="sku">${esc(p.sku_madre||'\u2014')}</span>
+              <span style="font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px">${esc(p.titulo||'')}</span>
+              ${link?`<a href="${link}" target="_blank" rel="noopener" style="font-size:12px">ver \u2197</a>`:''}
+            </div>
+            <div style="background:var(--soft);border-radius:4px;height:8px;margin-top:4px"><div style="width:${barra}%;background:var(--blue);height:8px;border-radius:4px"></div></div>
+          </div>
+          <div style="text-align:right;min-width:110px">
+            <b>${p.preguntas}</b> <span class="hint">preg.</span><br>
+            <span style="font-size:12px;color:${pct>0?'var(--green)':'var(--muted)'}">\u{1F4B0} ${p.vendidas||0} (${pct}%)</span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }catch(e){ document.getElementById('rank').innerHTML='No pude cargar el ranking: '+esc(e.message)+'<br><span class="hint">\u00bfCorriste el SQL respondia_ranking.sql en Supabase?</span>'; }
+
+  let data=[]; try{ data=await api('/api/sugerencias'); }catch(e){ document.getElementById('sug').innerHTML=errBox(e.message); return; }
+  const sugEl=document.getElementById('sug');
+  if(!data.length){ sugEl.outerHTML=`<div id="sug" class="empty"><div class="big">\u{1F4A1}</div>No hay sugerencias. Toc\u00e1 "Generar sugerencias con IA".</div>`; return; }
+  sugEl.outerHTML='<div id="sug">'+data.map(s=>`
+    <div class="row">
+      <span class="tag">${esc(s.tipo||'otro')}</span>
+      <div class="body">
+        <b>${esc(s.tarea||'')}</b>
+        <div class="hint" style="margin-top:3px">SKU ${esc(s.sku||'')} \u00b7 se pregunt\u00f3 ${s.frecuencia||0} veces \u00b7 ${esc(s.motivo||'')}</div>
+      </div>
+      <button class="btn ghost sm" onclick="sugEstado(${s.id},'hecha')">Hecha</button>
+      <button class="btn ghost sm" onclick="sugEstado(${s.id},'descartada')">\u2715</button>
+    </div>`).join('')+'</div>';
+}
+async function generarSug(){
+  sug.outerHTML='<div id="sug" class="empty">Analizando… esto puede tardar un toque ⏳</div>';
+  try{ await post('/api/sugerencias/generar',{}); }catch(e){}
+  renderSugerencias();
+}
+async function sugEstado(id,estado){ await post('/api/sugerencia/estado',{id,estado}); renderSugerencias(); }
+
+// ===== AJUSTES =====
+async function renderAjustes(){
+  let estilo='', cfg={};
+  try{ const r=await api('/api/config'); estilo=r.estilo||''; cfg=r.config||{}; }catch(e){ view.innerHTML=errBox(e.message); return; }
+  const tzs=['America/Argentina/Buenos_Aires','America/Montevideo','America/Santiago','America/Asuncion','America/Sao_Paulo','America/Lima','America/Bogota','America/Mexico_City'];
+  const franjas=(cfg.franjas&&cfg.franjas.length)?cfg.franjas:[];
+  view.innerHTML = `
+    <div class="form" style="border-left:4px solid ${cfg.auto_responder?'var(--green)':'var(--amber)'}">
+      <div style="display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap">
+        <div>
+          <b style="font-size:16px">Respuestas automáticas</b>
+          <div class="hint">${cfg.auto_responder?'ENCENDIDO: la IA envía sola las respuestas de confianza alta, según tus horarios.':'APAGADO (modo sombra): la IA sugiere pero NO envía nada. Todo queda para tu revisión.'}</div>
+        </div>
+        <button class="btn ${cfg.auto_responder?'':'ghost'}" style="${cfg.auto_responder?'background:var(--green)':''}" onclick="toggleAuto(${cfg.auto_responder?'false':'true'})">${cfg.auto_responder?'🟢 Encendido — tocar para apagar':'⚪ Apagado — tocar para encender'}</button>
+      </div>
+      ${cfg.auto_responder?'<p class="hint" style="color:var(--red)">Ojo: si tenés otro sistema respondiendo (GoBots / Real Trends), apagalo antes para que no se pisen.</p>':''}
+      ${!cfg.auto_responder&&window._calificadas!=null&&window._calificadas<30?`<p class="hint" style="color:var(--amber)">🎓 Entrenamiento: calificaste <b>${window._calificadas} de 30</b> respuestas recomendadas antes de encender. Cuanto más califiques, mejor responde.</p>`:''}
+      <div style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
+        <label>Precisión mínima para responder solo</label>
+        <div class="grid2">
+          <select id="cConfMin">
+            <option value="alta" ${(cfg.confianza_minima||'alta')!=='media'?'selected':''}>Alta — recomendado</option>
+            <option value="media" ${cfg.confianza_minima==='media'?'selected':''}>Media — más volumen, más riesgo</option>
+          </select>
+          <span class="hint">Alta: solo envía cuando la IA está muy segura; el resto queda para revisión. Media: también envía las de seguridad intermedia (respondés más, pero pueden colarse errores). Se guarda con 💾.</span>
+        </div>
+      </div>
+    </div>
+
+    ${['master','dueno','gerente'].includes(USUARIO&&USUARIO.rol)?`
+    <div class="form">
+      <b style="font-size:16px">🤖 Con qué IA responde esta cuenta</b>
+      <div class="hint">Elegí el motor que redacta las respuestas. Podés probar las dos abajo antes de decidir.</div>
+      <div class="grid2" style="margin-top:8px">
+        <select id="cIA">
+          <option value="claude" ${(cfg.ia_responde||'claude')==='claude'?'selected':''}>Claude (por defecto)</option>
+          <option value="gpt" ${cfg.ia_responde==='gpt'?'selected':''}>GPT</option>
+          <option value="gemini" ${cfg.ia_responde==='gemini'?'selected':''}>Gemini</option>
+        </select>
+        <button class="btn" onclick="guardarIA()">Guardar IA</button>
+      </div>
+      <div style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
+        <b>Probá las dos con una pregunta real tuya</b>
+        <div class="hint">Genera una respuesta con cada IA sobre una pregunta real de tu cuenta, mostrando el costo de cada una.</div>
+        <button class="btn ghost" onclick="probarComparador()" id="btnComp" style="margin-top:8px">⚔️ Comparar las 3 IAs</button>
+        <div id="compResu" style="margin-top:10px"></div>
+      </div>
+    </div>`:''}
+
+    <div class="form">
+      <b>Saludos</b>
+      <div class="grid2">
+        <div><label>Saludo inicial</label><input id="cSalIni" value="${esc(cfg.saludo_inicial||'')}" style="width:100%"></div>
+        <div><label>Cierre / firma</label><input id="cSalFin" value="${esc(cfg.saludo_final||'')}" style="width:100%"></div>
+      </div>
+      <p class="hint">La IA arranca y termina cada respuesta con estos textos.</p>
+    </div>
+
+    <div class="form">
+      <b>Horarios y demoras</b>
+      <div class="grid2">
+        <div><label>Zona horaria</label>
+          <select id="cTz" style="width:100%">${tzs.map(z=>`<option ${z===(cfg.timezone||'')?'selected':''}>${z}</option>`).join('')}</select>
+        </div>
+        <div><label>Demora si no hay franja (min)</label><input id="cDemDef" type="number" min="0" value="${cfg.demora_default_min??5}" style="width:100%"></div>
+      </div>
+      <div>
+        <label>Franjas horarias</label>
+        <div style="display:flex;gap:8px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">
+          <span style="flex:1">Desde</span><span style="flex:1">Hasta</span><span style="flex:1">Respuesta en (min)</span><span style="width:34px"></span>
+        </div>
+        <div id="franjas">${franjas.map((f,i)=>franjaRow(f,i)).join('')}</div>
+        <button class="btn ghost sm" onclick="agregarFranja()">+ Agregar franja</button>
+      </div>
+      <div>
+        <label>Fuera de todas las franjas</label>
+        <select id="cFuera" style="width:100%">
+          <option value="esperar" ${cfg.fuera_de_franja!=='revision'?'selected':''}>Esperar y enviar cuando abra la próxima franja</option>
+          <option value="revision" ${cfg.fuera_de_franja==='revision'?'selected':''}>No enviar: dejar para revisión humana</option>
+        </select>
+      </div>
+      <p class="hint">Ej: de 09:00 a 20:00 responder en 5 min; de 20:00 a 23:00 en 30 min. Las franjas pueden cruzar medianoche (22:00 a 06:00).</p>
+    </div>
+
+    <div class="form">
+      <b>Protección anti-pelea con el bot</b>
+      <div class="grid2">
+        <div><label>Máx. respuestas seguidas al mismo cliente (mismo producto)</label><input id="cMax" type="number" min="0" value="${cfg.max_respuestas_seguidas??2}" style="width:100%"></div>
+        <div><label>Ventana de conversación (días)</label><input id="cVent" type="number" min="1" value="${cfg.ventana_hilo_dias??7}" style="width:100%"></div>
+      </div>
+      <p class="hint">Si el mismo comprador ya recibió ese máximo de respuestas sobre el mismo producto en esos días, la próxima NO se responde sola: queda para una persona. Además, la IA siempre lee las consultas anteriores del comprador para responder con contexto.</p>
+    </div>
+
+    <div class="form">
+      <b>🤷 Cuando falta información</b>
+      <p class="hint">Si la IA no tiene el dato que preguntan (una medida, compatibilidad, etc.), puede responder con este mensaje tuyo. Consejo: invitá a que <b>vuelvan a preguntar</b> en tu horario (en ML cada pregunta se responde una sola vez, y antes de comprar no existe la mensajería interna).</p>
+      <textarea id="cMsgSinDato" style="width:100%;min-height:70px" placeholder='Ej: ¡Hola! Gracias por tu consulta. Ese dato queremos confirmártelo con precisión desde nuestro depósito. Volvé a consultarnos de lunes a viernes de 8 a 16 hs y te lo confirmamos enseguida. ¡Saludos!'>${esc(cfg.msg_sin_dato||'')}</textarea>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:8px"><input type="checkbox" id="cAutoSinDato" ${cfg.auto_sin_dato?'checked':''}> Enviar este mensaje <b>automáticamente</b> cuando falte el dato (respeta horarios y demoras)</label>
+      <p class="hint">Sin tildar: la pregunta queda en tu bandeja con este mensaje ya escrito como borrador, listo para "Responder yo". La pregunta siempre suma a la pestaña Tareas para que cargues el dato faltante.</p>
+    </div>
+
+    <div class="form">
+      <b>Tu forma de vender</b>
+      <textarea id="estilo" style="width:100%;min-height:90px">${esc(estilo)}</textarea>
+      <p class="hint">Instrucciones de tono y criterio que la IA usa en cada respuesta.</p>
+    </div>
+
+    <div style="text-align:right;margin-bottom:16px"><button class="btn" onclick="guardarConfig()">💾 Guardar todos los ajustes</button></div>
+
+    ${USUARIO&&USUARIO.rol==='master'?`
+    <div class="form">
+      <label>📥 Importar histórico (CSV de GoBots)</label>
+      <input type="file" id="csvFiles" multiple accept=".csv">
+      <div class="grid2">
+        <span class="hint">Podés elegir varios archivos a la vez. Carga preguntas, respuestas y si generaron venta. No pisa nada de lo ya cargado.</span>
+        <button class="btn" onclick="importarCSV()">Importar</button>
+      </div>
+      <div id="impProg" class="hint"></div>`:''}
+    </div>
+    <div class="form">
+      <label>Traer preguntas históricas</label>
+      <div class="grid2">
+        <select id="bfDias"><option value="30">Último mes</option><option value="90">Últimos 3 meses</option><option value="0">Todo el historial</option></select>
+        <button class="btn ghost" onclick="correrBackfill()">Traer ahora</button>
+      </div>
+    </div>
+    <div class="form">
+      <label>💰 Cruzar preguntas con ventas</label>
+      <div class="grid2">
+        <span class="hint">Detecta qué preguntas terminaron en compra del mismo comprador. Requiere el permiso de ventas en ML.</span>
+        <button class="btn ghost" onclick="verificarConversiones()">Cruzar ahora</button>
+      </div>
+    </div>
+    ${(USUARIO && (USUARIO.rol==='master'||USUARIO.rol==='dueno'))?`
+    <div class="form">
+      <b>👥 Usuarios y colaboradores</b>
+      <p class="hint">Creá accesos para tu equipo. El gerente hace todo menos crear usuarios; al operador le elegís qué pestañas ve.</p>
+      <div id="listaUsuarios" class="hint">Cargando…</div>
+      <div style="border-top:1px solid var(--line);margin-top:10px;padding-top:12px">
+        <b style="font-size:13px">Crear colaborador</b> ${USUARIO&&USUARIO.rol==='master'?`<span class="hint">· se crea en la cuenta: <b>${esc(document.getElementById('cuentaSel')?.selectedOptions?.[0]?.text||'la seleccionada arriba')}</b></span>`:''}
+        <div class="grid2" style="margin-top:8px">
+          <input id="nuEmail" type="email" placeholder="Email">
+          <input id="nuNombre" placeholder="Nombre (opcional)">
+        </div>
+        <div class="grid2" style="margin-top:8px">
+          <input id="nuPass" type="text" placeholder="Contraseña (mín. 8)">
+          <select id="nuRol" onchange="document.getElementById('nuPerms').style.display=this.value==='operador'?'block':'none'">
+            ${USUARIO&&USUARIO.rol==='master'?`<option value="dueno">Dueño (administra su cuenta y crea usuarios)</option>`:''}
+            <option value="gerente">Gerente (todo menos crear usuarios)</option>
+            <option value="operador" selected>Operador (permisos a medida)</option>
+          </select>
+        </div>
+        <div id="nuPerms" style="margin-top:8px">
+          <label class="hint">Pestañas que puede ver el operador:</label>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px">
+            <label><input type="checkbox" id="pRevisar" checked> Revisar</label>
+            <label><input type="checkbox" id="pResponder" checked> Responder/frenar</label>
+            <label><input type="checkbox" id="pMetricas"> Métricas</label>
+            <label><input type="checkbox" id="pReglas"> Reglas</label>
+            <label><input type="checkbox" id="pMejoras"> Mejoras</label>
+            <label><input type="checkbox" id="pTareas"> Tareas</label>
+          </div>
+        </div>
+        <div style="text-align:right;margin-top:10px"><button class="btn" onclick="crearUsuario()">Crear usuario</button></div>
+        <p class="hint">Pasale el email y la contraseña a tu colaborador.</p>
+      </div>
+    </div>`:''}
+    ${USUARIO&&USUARIO.rol==='master'?`
+    <div class="form">
+      <label>📦 Plan de esta cuenta</label>
+      <p class="hint">Cuántas preguntas con IA incluye el pack mensual de esta cuenta. Al agotarse, las preguntas se guardan pero no gastan IA (se reprocesan con "Responder pendientes" al ampliar). Vacío = sin límite.</p>
+      <div class="grid2">
+        <input id="cLimite" type="number" min="0" placeholder="sin límite" value="${window._limiteMensual??''}">
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="btn sm" onclick="guardarLimite()">Guardar límite</button>
+          <span class="hint" id="usoMes">${window._usoMes!=null?('Usadas este mes: <b>'+window._usoMes+'</b>'+(window._limiteMensual!=null?' de '+window._limiteMensual:'')):''}</span>
+        </div>
+      </div>
+    </div>
+    <div class="form">
+      <label>\u{1FA7A} Salud del sistema</label>
+      <div class="grid2">
+        <span class="hint">Verifica base de datos, token de ML, permisos, funciones SQL y la IA. Te dice qu\u00e9 falla y c\u00f3mo arreglarlo.</span>
+        <button class="btn ghost" onclick="chequearSalud()">Chequear ahora</button>
+      </div>
+      <div id="saludRes"></div>
+    </div>
+    <div class="form">
+      <label>👤 Apodos de compradores</label>
+      <div class="grid2">
+        <span class="hint">Completa el nombre de usuario de ML en las preguntas viejas que muestran solo el n\u00famero (#).</span>
+        <button class="btn ghost" onclick="rellenarNicks()">Completar apodos</button>
+      </div>
+      <div id="nicksRes" class="hint"></div>
+    </div>
+    <div class="form">
+      <label>Conexión</label>
+      <p class="hint">Backend: ${esc(CFG.url||'—')} · <a href="#" onclick="openCfg();return false">cambiar</a></p>
+    </div>`:''}
+    <div class="form">
+      <p class="hint" style="margin:0">${USUARIO&&USUARIO.email!=='master'?esc(USUARIO.email)+' · '+esc(USUARIO.rol)+' · ':''}${CFG.token?'<a href="#" onclick="salirSesion();return false">cerrar sesión</a>':''}</p>
+    </div>`;
+  cargarUsuarios();
+}
+async function rellenarNicks(){
+  const box=document.getElementById('nicksRes');
+  const u=new URL(CFG.url.replace(/\/$/,'')+'/admin/rellenar-nicks');
+  if(cuentaId)u.searchParams.set('cuenta_id',cuentaId);
+  try{ const r=await fetch(u,{headers:authHeaders()}).then(x=>x.json()); if(box)box.textContent=r.msg||'Arrancó'; seguirNicks(); }
+  catch(e){ if(box)box.textContent='Error: '+e.message; }
+}
+async function seguirNicks(){
+  const box=document.getElementById('nicksRes'); if(!box) return;
+  try{
+    const s=await api('/api/estado');
+    if(s.nicksJob && s.nicksJob.corriendo){
+      box.textContent=`Completando… ${s.nicksJob.revisadas} revisadas, ${s.nicksJob.completadas} con apodo`;
+      setTimeout(seguirNicks,3000);
+    } else if(s.nicksJob && s.nicksJob.revisadas>0){
+      box.textContent=`✅ Listo: ${s.nicksJob.completadas} apodos completados de ${s.nicksJob.revisadas} revisadas.`;
+    }
+  }catch(e){}
+}
+async function hacerMaster(id,email){
+  if(!confirm('¿Promover a '+email+' a MASTER?\n\nVa a ver y administrar TODAS las cuentas del sistema, igual que vos. Solo para gente de máxima confianza.')) return;
+  try{ await post('/api/usuarios/editar',{id,rol:'master'}); alert('✓ '+email+' ahora es master'); cargarUsuarios(); }
+  catch(e){ alert('Error: '+e.message); }
+}
+async function guardarLimite(){
+  const v=document.getElementById('cLimite').value.trim();
+  try{
+    await post('/api/cuenta/limite',{limite_mensual: v===''?null:parseInt(v)});
+    alert('Límite guardado ✓'); loadStats(); renderAjustes();
+  }catch(e){ alert('Error: '+e.message); }
+}
+async function cargarUsuarios(){
+  const box=document.getElementById('listaUsuarios'); if(!box) return;
+  try{
+    const us=await api('/api/usuarios');
+    if(!us.length){ box.textContent='Todavía no hay colaboradores.'; return; }
+    box.innerHTML=us.map(u=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)">
+        <div style="flex:1"><b style="font-size:13px">${esc(u.email)}</b> <span class="hint">${esc(u.nombre||'')}</span>
+          <div class="hint">${esc(u.rol)}${u.rol==='operador'&&u.permisos?' · '+Object.keys(u.permisos).filter(k=>u.permisos[k]).join(', '):''}</div></div>
+        <span style="font-size:12px;color:${u.activo?'var(--green)':'var(--muted)'}">${u.activo?'activo':'desactivado'}</span>
+        ${u.rol!=='master'&&USUARIO.rol==='master'?`<button class="btn ghost sm" onclick="hacerMaster(${u.id},'${esc(u.email)}')" title="Promover a master (ve TODAS las cuentas)">👑</button>`:''}
+        ${u.rol!=='master'?`<button class="btn ghost sm" onclick="toggleUsuario(${u.id},${!u.activo})">${u.activo?'Desactivar':'Activar'}</button>`:''}
+      </div>`).join('');
+  }catch(e){ box.textContent='No pude cargar usuarios: '+e.message; }
+}
+async function crearUsuario(){
+  const email=document.getElementById('nuEmail').value.trim();
+  const nombre=document.getElementById('nuNombre').value.trim();
+  const password=document.getElementById('nuPass').value;
+  const rol=document.getElementById('nuRol').value;
+  if(!email||!password||password.length<8){ alert('Completá email y contraseña de al menos 8 caracteres'); return; }
+  const permisos = rol==='operador' ? {
+    revisar:document.getElementById('pRevisar').checked,
+    responder:document.getElementById('pResponder').checked,
+    metricas:document.getElementById('pMetricas').checked,
+    reglas:document.getElementById('pReglas').checked,
+    mejoras:document.getElementById('pMejoras').checked,
+    tareas:document.getElementById('pTareas').checked
+  } : {};
+  try{
+    await post('/api/usuarios',{email,nombre,password,rol,permisos});
+    alert('Usuario creado ✓\n\nPasale estos datos:\nEmail: '+email+'\nContraseña: '+password);
+    document.getElementById('nuEmail').value=''; document.getElementById('nuPass').value=''; document.getElementById('nuNombre').value='';
+    cargarUsuarios();
+  }catch(e){ alert('No se pudo crear: '+e.message); }
+}
+async function toggleUsuario(id,activo){
+  if(!activo && !confirm('¿Desactivar este usuario? No va a poder entrar más.')) return;
+  await post('/api/usuarios/editar',{id,activo});
+  cargarUsuarios();
+}
+function franjaRow(f,i){
+  return `<div class="grid2" style="grid-template-columns:1fr 1fr 1fr auto;margin-bottom:8px" data-franja>
+    <input type="time" title="desde / hasta" class="fDesde" value="${esc(f.desde||'09:00')}">
+    <input type="time" class="fHasta" value="${esc(f.hasta||'20:00')}">
+    <input type="number" title="minutos de demora antes de responder" class="fDem" min="0" value="${f.demora_min??5}" title="demora en minutos" placeholder="min">
+    <button class="btn ghost sm" onclick="this.closest('[data-franja]').remove()">✕</button>
+  </div>`;
+}
+function agregarFranja(){
+  document.getElementById('franjas').insertAdjacentHTML('beforeend', franjaRow({desde:'09:00',hasta:'20:00',demora_min:5},99));
+}
+function leerFranjas(){
+  return [...document.querySelectorAll('[data-franja]')].map(d=>({
+    desde:d.querySelector('.fDesde').value,
+    hasta:d.querySelector('.fHasta').value,
+    demora_min:parseInt(d.querySelector('.fDem').value)||0
+  })).filter(f=>f.desde&&f.hasta);
+}
+async function guardarConfig(){
+  const config={
+    saludo_inicial:document.getElementById('cSalIni').value,
+    saludo_final:document.getElementById('cSalFin').value,
+    timezone:document.getElementById('cTz').value,
+    demora_default_min:parseInt(document.getElementById('cDemDef').value)||0,
+    fuera_de_franja:document.getElementById('cFuera').value,
+    franjas:leerFranjas(),
+    max_respuestas_seguidas:parseInt(document.getElementById('cMax').value)||0,
+    ventana_hilo_dias:parseInt(document.getElementById('cVent').value)||7,
+    msg_sin_dato:document.getElementById('cMsgSinDato').value.trim(),
+    auto_sin_dato:document.getElementById('cAutoSinDato').checked,
+    confianza_minima:document.getElementById('cConfMin')?document.getElementById('cConfMin').value:'alta'
+  };
+  await post('/api/config',{estilo:document.getElementById('estilo').value, config});
+  alert('Ajustes guardados ✓'); loadStats();
+}
+async function toggleAuto(valor){
+  if((valor===true||valor==='true') && window._calificadas!=null && window._calificadas<30){
+    if(!confirm('🎓 Recomendación: calificá al menos 30 respuestas antes de encender el automático.\n\nLlevás '+window._calificadas+' de 30. Con tu feedback la IA responde mucho mejor.\n\n¿Encender igual?')) return;
+  }
+  return _toggleAutoReal(valor);
+}
+async function _toggleAutoReal(valor){
+  if(valor===true || valor==='true'){
+    const seguro=confirm('¿Encender respuestas automáticas?\n\nLa IA va a ENVIAR sola las respuestas de confianza alta a Mercado Libre, según tus horarios.\n\nSi tenés otro bot respondiendo (GoBots / Real Trends), apagalo primero para que no se pisen.');
+    if(!seguro) return;
+  }
+  await post('/api/config',{config:{auto_responder:(valor===true||valor==='true')}});
+  renderAjustes(); loadStats();
+}
+async function correrBackfill(){
+  const dias=document.getElementById('bfDias').value;
+  const u=new URL(CFG.url.replace(/\/$/,'')+'/backfill');
+  u.searchParams.set('dias',dias); if(cuentaId)u.searchParams.set('cuenta_id',cuentaId);
+  try{ const r=await fetch(u,{headers:authHeaders()}).then(x=>x.json()); alert(r.msg||'Arrancó'); loadStats(); }catch(e){ alert('Error: '+e.message); }
+}
+async function verificarConversiones(){
+  const u=new URL(CFG.url.replace(/\/$/,'')+'/admin/verificar-conversiones');
+  if(cuentaId)u.searchParams.set('cuenta_id',cuentaId);
+  try{ const r=await fetch(u,{headers:authHeaders()}).then(x=>x.json()); alert(r.msg||'Arrancó'); loadStats(); }catch(e){ alert('Error: '+e.message); }
+}
+
+async function chequearSalud(){
+  const box=document.getElementById('saludRes');
+  box.innerHTML='<p class="hint">Chequeando todo\u2026 (tarda unos segundos)</p>';
+  try{
+    const r=await api('/api/salud');
+    box.innerHTML=(r.checks||[]).map(c=>`
+      <div style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--line)">
+        <span>${c.ok?'\u2705':'\u274C'}</span>
+        <div><b style="font-size:13px">${esc(c.nombre)}</b>
+          <div class="hint">${esc(c.detalle||'')}</div>
+          ${c.solucion?`<div style="font-size:12px;color:var(--red)">\u2192 ${esc(c.solucion)}</div>`:''}
+        </div>
+      </div>`).join('') + (r.ok?'<p style="color:var(--green);font-weight:700">\u{1F389} Todo el sistema est\u00e1 sano.</p>':'');
+  }catch(e){ box.innerHTML='<p style="color:var(--red)">Error: '+esc(e.message)+'</p>'; }
+}
+
+function exportarCSV(){
+  if(!ultimaData.length){ alert('No hay preguntas cargadas para exportar'); return; }
+  const cols=['id','fecha_pregunta','sku','item_id','texto','ia_respuesta','ia_confianza','respuesta_real','calificacion','convirtio'];
+  const escCsv=v=>{ v=v==null?'':String(v); return /[";\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
+  const csv=[cols.join(';')].concat(ultimaData.map(q=>cols.map(c=>escCsv(q[c])).join(';'))).join('\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='respondia_preguntas.csv'; a.click(); URL.revokeObjectURL(a.href);
+}
+
+// ===== IMPORTADOR CSV (GoBots) =====
+// Parser CSV con soporte de comillas y separador ;
+function parseCSV(text, sep=';'){
+  const filas=[]; let fila=[], campo='', enComillas=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(enComillas){
+      if(c==='"'){ if(text[i+1]==='"'){campo+='"';i++;} else enComillas=false; }
+      else campo+=c;
+    } else {
+      if(c==='"') enComillas=true;
+      else if(c===sep){ fila.push(campo); campo=''; }
+      else if(c==='\n'){ fila.push(campo); filas.push(fila); fila=[]; campo=''; }
+      else if(c!=='\r') campo+=c;
+    }
+  }
+  if(campo!==''||fila.length){ fila.push(campo); filas.push(fila); }
+  return filas.filter(f=>f.length>1||f[0]!=='');
+}
+
+async function importarCSV(){
+  const inp=document.getElementById('csvFiles');
+  const prog=document.getElementById('impProg');
+  if(!inp.files.length){ alert('Elegí al menos un archivo CSV'); return; }
+  let todas=[];
+  for(const file of inp.files){
+    const text=await file.text();
+    const filas=parseCSV(text);
+    if(!filas.length) continue;
+    const head=filas[0].map(h=>h.trim());
+    const col=n=>head.indexOf(n);
+    const iId=col('ID Pregunta'), iItem=col('Item_id'), iPre=col('Pregunta'),
+          iRes=col('Respuesta'), iFec=col('Fecha'), iVen=col('¿Generó ventas?');
+    if(iId<0||iPre<0){ alert(file.name+': no parece un CSV de GoBots (faltan columnas)'); continue; }
+    for(let j=1;j<filas.length;j++){
+      const f=filas[j];
+      todas.push({
+        id:(f[iId]||'').trim(),
+        item_id:iItem>=0?(f[iItem]||'').trim():null,
+        texto:iPre>=0?f[iPre]:'',
+        respuesta:iRes>=0?f[iRes]:'',
+        fecha:iFec>=0?(f[iFec]||'').trim():null,
+        vendio:iVen>=0?((f[iVen]||'').trim().toLowerCase()==='si'):null
+      });
+    }
+  }
+  todas=todas.filter(f=>f.id);
+  if(!todas.length){ alert('No se encontraron filas válidas'); return; }
+  if(!confirm(`Se van a importar ${todas.length} preguntas históricas. ¿Continuar?`)) return;
+
+  let hechas=0, insertadas=0, errores=0;
+  const LOTE=400;
+  for(let i=0;i<todas.length;i+=LOTE){
+    const lote=todas.slice(i,i+LOTE);
+    try{
+      const r=await post('/api/importar',{filas:lote});
+      insertadas+=(r.insertadas||0);
+    }catch(e){ errores++; }
+    hechas+=lote.length;
+    prog.textContent=`Importando… ${hechas}/${todas.length} procesadas`;
+  }
+  prog.textContent=`✅ Listo: ${hechas} procesadas, ${insertadas} nuevas cargadas${errores?`, ${errores} lotes con error`:''}. Las repetidas se saltean solas.`;
+  loadStats();
+}
+
+boot();
+</script>
+</body>
+</html>
