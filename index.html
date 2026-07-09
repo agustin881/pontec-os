@@ -4,16 +4,29 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pontec OS</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --bg:#0b1220; --panel:#0d1526; --card:#111a2e; --borde:#243049;
-    --texto:#e6edf7; --texto2:#8b97ad; --accent:#3b82f6; --verde:#22c55e;
+    --texto:#e6edf7; --texto2:#8b97ad; --accent:#3b82f6; --verde:#22c55e; --rojo:#f87171;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%}
-  body{background:var(--bg);color:var(--texto);font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;display:flex}
+  body{background:var(--bg);color:var(--texto);font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
 
-  /* ── Barra lateral ── */
+  /* ── Login ── */
+  #login-view{height:100%;display:flex;align-items:center;justify-content:center;padding:20px}
+  #login-card{width:100%;max-width:360px;background:var(--card);border:1px solid var(--borde);border-radius:14px;padding:28px}
+  #login-card h1{font-size:22px;font-weight:800;letter-spacing:.04em;margin-bottom:4px}
+  #login-card h1 span{color:var(--accent)}
+  #login-card p{font-size:12px;color:var(--texto2);margin-bottom:20px}
+  #login-card input{width:100%;padding:11px;border-radius:8px;border:1px solid var(--borde);background:#0b1220;color:var(--texto);font-size:14px;margin-bottom:10px}
+  #login-card button{width:100%;padding:11px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-weight:700;font-size:14px;cursor:pointer}
+  #login-err{font-size:12px;color:var(--rojo);margin-top:10px;min-height:16px}
+
+  /* ── Sistema ── */
+  #os-view{display:none;height:100%}
+  #os-view.on{display:flex}
   #side{width:210px;min-width:210px;background:var(--panel);border-right:1px solid var(--borde);display:flex;flex-direction:column;padding:14px 10px}
   #brand{font-size:17px;font-weight:800;letter-spacing:.04em;padding:6px 10px 16px}
   #brand span{color:var(--accent)}
@@ -25,9 +38,11 @@
   .app-btn .ico{font-size:17px;width:22px;text-align:center}
   .app-btn.off{opacity:.45;cursor:default}
   .app-btn .pronto{font-size:9px;color:var(--texto2);border:1px solid var(--borde);border-radius:99px;padding:1px 6px;margin-left:auto}
-  #side .pie{margin-top:auto;padding:10px;font-size:10px;color:var(--texto2)}
+  #side .abajo{margin-top:auto}
+  #quien{font-size:10px;color:var(--texto2);padding:8px 10px;word-break:break-all}
+  #salir{width:100%;padding:9px;border:1px solid var(--borde);border-radius:8px;background:transparent;color:var(--texto2);font-size:12px;cursor:pointer}
+  #salir:hover{color:var(--texto);border-color:var(--accent)}
 
-  /* ── Zona principal ── */
   #main{flex:1;display:flex;flex-direction:column;min-width:0}
   #topbar{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--borde);background:var(--panel)}
   #titulo{font-size:13px;font-weight:700}
@@ -36,15 +51,33 @@
   #hint{display:none;font-size:12px;color:#0b1220;background:#f59e0b;border-radius:7px;padding:5px 10px;font-weight:700}
   #visor{flex:1;border:none;width:100%;background:var(--bg)}
 
-  /* ── Celular: la barra pasa arriba, horizontal ── */
+  /* ── Panel Usuarios ── */
+  #panel-usuarios{flex:1;display:none;overflow:auto;padding:18px}
+  .caja{background:var(--card);border:1px solid var(--borde);border-radius:12px;max-width:820px}
+  .caja + .caja{margin-top:16px}
+  .caja .cab{font-weight:700;padding:14px 16px 4px}
+  .caja .cuerpo{padding:12px 16px 16px}
+  .fila-form{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .fila-form input,.fila-form select{padding:9px;border-radius:8px;border:1px solid var(--borde);background:#0b1220;color:var(--texto)}
+  .btn-azul{padding:9px 16px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-weight:600;cursor:pointer}
+  .btn-gris{padding:7px 12px;border:1px solid var(--borde);border-radius:6px;background:transparent;color:var(--texto2);cursor:pointer}
+  .btn-rojo{padding:6px 10px;border:1px solid #7f1d1d;border-radius:6px;background:transparent;color:var(--rojo);cursor:pointer}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{color:var(--texto2);text-align:left;font-size:11px;padding:8px 12px}
+  td{padding:10px 12px;border-top:1px solid var(--borde)}
+  select{background:#0b1220;color:var(--texto);border:1px solid var(--borde);border-radius:6px;padding:6px}
+  .nota{font-size:12px;color:var(--texto2)}
+
   @media (max-width:720px){
-    body{flex-direction:column}
+    #os-view.on{flex-direction:column}
     #side{width:100%;min-width:0;flex-direction:row;align-items:center;overflow-x:auto;border-right:none;border-bottom:1px solid var(--borde);padding:8px}
     #brand{padding:0 10px;font-size:14px;white-space:nowrap}
     .app-btn{width:auto;white-space:nowrap;border-left:none;border-bottom:3px solid transparent;border-radius:8px 8px 0 0;padding:9px 12px;margin-bottom:0}
     .app-btn.active{border-left-color:transparent;border-bottom-color:var(--accent)}
     .app-btn .pronto{display:none}
-    #side .pie{display:none}
+    #side .abajo{margin-top:0;margin-left:auto;display:flex;align-items:center}
+    #quien{display:none}
+    #salir{width:auto;padding:8px 10px;white-space:nowrap}
   }
   @media (prefers-reduced-motion:no-preference){
     .app-btn{transition:background .15s,color .15s,border-color .15s}
@@ -53,27 +86,66 @@
 </head>
 <body>
 
-<nav id="side" aria-label="Apps">
-  <div id="brand">PONTEC <span>OS</span></div>
-  <!-- Los botones se arman solos desde APPS (abajo en el script) -->
-  <div id="botones"></div>
-  <div class="pie">Pontec SA &middot; Rosario</div>
-</nav>
-
-<div id="main">
-  <div id="topbar">
-    <div id="titulo"></div>
-    <span id="hint"></span>
-    <a id="abrir" href="#" target="_blank" rel="noopener">Abrir aparte &#8599;</a>
+<!-- ── Puerta de entrada ── -->
+<div id="login-view">
+  <div id="login-card">
+    <h1>PONTEC <span>OS</span></h1>
+    <p>Entra con tu usuario del sistema</p>
+    <input id="lg-email" type="email" placeholder="Email" autocomplete="username">
+    <input id="lg-pass" type="password" placeholder="Contrasena" autocomplete="current-password">
+    <button onclick="entrar()">Entrar</button>
+    <div id="login-err"></div>
   </div>
-  <iframe id="visor" title="App" allow="clipboard-write"></iframe>
+</div>
+
+<!-- ── Sistema ── -->
+<div id="os-view">
+  <nav id="side" aria-label="Apps">
+    <div id="brand">PONTEC <span>OS</span></div>
+    <div id="botones"></div>
+    <div class="abajo">
+      <div id="quien"></div>
+      <button id="salir" onclick="salir()">Salir</button>
+    </div>
+  </nav>
+  <div id="main">
+    <div id="topbar">
+      <div id="titulo"></div>
+      <span id="hint"></span>
+      <a id="abrir" href="#" target="_blank" rel="noopener">Abrir aparte &#8599;</a>
+    </div>
+    <iframe id="visor" title="App" allow="clipboard-write"></iframe>
+
+    <div id="panel-usuarios">
+      <div class="caja">
+        <div class="cab">Crear usuario</div>
+        <div class="cuerpo">
+          <div class="fila-form">
+            <input id="u-email" type="email" placeholder="Email" style="flex:2;min-width:180px">
+            <input id="u-pass" type="text" placeholder="Contrasena (6+)" style="flex:1.5;min-width:140px">
+            <select id="u-rol"><option value="operador">operador</option><option value="encargado">encargado</option><option value="admin">admin</option></select>
+            <button id="u-crear" class="btn-azul" onclick="crearUsuarioOS()">Crear usuario</button>
+          </div>
+          <div id="u-msg" class="nota" style="margin-top:10px;min-height:16px"></div>
+          <div class="nota" style="margin-top:4px">El usuario sirve para TODO Pontec OS. Las apps que ve se manejan aca; las pestanas internas de Rentabilidad, en su pestana Usuarios.</div>
+        </div>
+      </div>
+      <div class="caja">
+        <div class="cab">Equipo</div>
+        <div id="u-lista"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
 // ══════════════════════════════════════════════════════════════════
-//  APPS DEL SISTEMA — para sumar una app nueva, agregala acá y listo.
-//  Si "Logística" abre en blanco, corregí su url por la real de Vercel.
+//  CONFIG — mismo Supabase y backend que MargenML (un solo login)
 // ══════════════════════════════════════════════════════════════════
+var SUPABASE_URL = 'https://flmmgkidltnqlsswiybp.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsbW1na2lkbHRucWxzc3dpeWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNjA4NDAsImV4cCI6MjA5NTkzNjg0MH0.IukPTOyweDDepc_VgGYNcOYK1rH-fL9-Vp6l-_uXZ5U';
+var BACKEND_URL = 'https://margenml-backend-production.up.railway.app';
+
 var APPS = [
   { id:'rentabilidad', nombre:'Rentabilidad', ico:'\uD83D\uDCCA',
     url:'https://margenml-frontend.vercel.app/' },
@@ -84,39 +156,215 @@ var APPS = [
     hint:'Entr\u00E1 a la pesta\u00F1a \uD83D\uDCB8 Promos (arriba)' },
   { id:'asistente',    nombre:'Asistente', ico:'\uD83E\uDD16', off:true }
 ];
+var APP_NOMBRES = {rentabilidad:'Rentabilidad', logistica:'Logistica', promos:'Promociones', asistente:'Asistente'};
 
-var botones = document.getElementById('botones');
-APPS.forEach(function(a){
-  var b = document.createElement('button');
-  b.className = 'app-btn' + (a.off ? ' off' : '');
-  b.id = 'btn-' + a.id;
-  b.innerHTML = '<span class="ico">' + a.ico + '</span>' + a.nombre + (a.off ? '<span class="pronto">pronto</span>' : '');
-  if (!a.off) b.onclick = function(){ abrirApp(a.id); };
-  botones.appendChild(b);
-});
-
-function abrirApp(id){
-  var a = null;
-  APPS.forEach(function(x){ if (x.id === id) a = x; });
-  if (!a || a.off) return;
-  document.querySelectorAll('.app-btn').forEach(function(b){ b.classList.remove('active'); });
-  document.getElementById('btn-' + id).classList.add('active');
-  document.getElementById('titulo').textContent = a.nombre;
-  var abrir = document.getElementById('abrir'); abrir.href = a.url;
-  var visor = document.getElementById('visor');
-  if (visor.getAttribute('src') !== a.url) visor.setAttribute('src', a.url);
-  var hint = document.getElementById('hint');
-  if (a.hint){ hint.textContent = a.hint; hint.style.display = 'inline-block';
-    clearTimeout(window._ht); window._ht = setTimeout(function(){ hint.style.display = 'none'; }, 9000);
-  } else { hint.style.display = 'none'; }
-  try{ localStorage.setItem('pontecos_app', id); }catch(e){}
+var _sb=null, MI_ROL='operador', MI_EMAIL='', MI_APPS=null, _usr=[];
+function getSb(){ if(!_sb && window.supabase){ _sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY); } return _sb; }
+async function authHeaders(){
+  var s=await getSb().auth.getSession();
+  var t=s.data.session && s.data.session.access_token;
+  return t ? { Authorization:'Bearer '+t } : {};
+}
+function appsPorRol(rol){
+  if(rol==='admin') return ['rentabilidad','logistica','promos','asistente'];
+  if(rol==='encargado') return ['rentabilidad','logistica','promos'];
+  return ['rentabilidad','logistica'];
 }
 
-// Arranca en la ultima app usada (o Rentabilidad)
-var inicial = 'rentabilidad';
-try{ inicial = localStorage.getItem('pontecos_app') || inicial; }catch(e){}
-var existe = false; APPS.forEach(function(x){ if (x.id === inicial && !x.off) existe = true; });
-abrirApp(existe ? inicial : 'rentabilidad');
+// ── Entrada / salida ─────────────────────────────────────────────
+async function entrar(){
+  var err=document.getElementById('login-err'); err.textContent='';
+  var em=(document.getElementById('lg-email').value||'').trim();
+  var pw=document.getElementById('lg-pass').value||'';
+  if(!em||!pw){ err.textContent='Completa email y contrasena.'; return; }
+  try{
+    var r=await getSb().auth.signInWithPassword({email:em,password:pw});
+    if(r.error){ err.textContent='No pudimos entrar: '+r.error.message; return; }
+    arrancar();
+  }catch(e){ err.textContent='Error: '+e.message; }
+}
+async function salir(){ try{ await getSb().auth.signOut(); }catch(e){} location.reload(); }
+document.getElementById('lg-pass').addEventListener('keydown',function(e){ if(e.key==='Enter') entrar(); });
+
+// ── Arranque del sistema ─────────────────────────────────────────
+async function arrancar(){
+  try{
+    var h=await authHeaders();
+    var r=await fetch(BACKEND_URL+'/api/mi-rol',{headers:h});
+    var d=await r.json();
+    if(d && d.rol){ MI_ROL=d.rol; MI_EMAIL=(d.email||'').toLowerCase(); MI_APPS=(d.apps&&d.apps.length)?d.apps:null; }
+  }catch(e){}
+  document.getElementById('login-view').style.display='none';
+  document.getElementById('os-view').classList.add('on');
+  document.getElementById('quien').textContent=MI_EMAIL+' \u00B7 '+MI_ROL;
+  armarSidebar();
+}
+function armarSidebar(){
+  var visibles=(MI_APPS&&MI_APPS.length)?MI_APPS:appsPorRol(MI_ROL);
+  var cont=document.getElementById('botones'); cont.innerHTML='';
+  APPS.forEach(function(a){
+    if(visibles.indexOf(a.id)===-1) return;
+    var b=document.createElement('button');
+    b.className='app-btn'+(a.off?' off':''); b.id='btn-'+a.id;
+    b.innerHTML='<span class="ico">'+a.ico+'</span>'+a.nombre+(a.off?'<span class="pronto">pronto</span>':'');
+    if(!a.off) b.onclick=function(){ abrirApp(a.id); };
+    cont.appendChild(b);
+  });
+  if(MI_ROL==='admin'){
+    var u=document.createElement('button');
+    u.className='app-btn'; u.id='btn-usuarios';
+    u.innerHTML='<span class="ico">\uD83D\uDC65</span>Usuarios';
+    u.onclick=abrirUsuarios;
+    cont.appendChild(u);
+  }
+  var inicial='rentabilidad';
+  try{ inicial=localStorage.getItem('pontecos_app')||inicial; }catch(e){}
+  var ok=false; APPS.forEach(function(x){ if(x.id===inicial && !x.off && visibles.indexOf(x.id)>-1) ok=true; });
+  if(!ok){ inicial=null; APPS.forEach(function(x){ if(!inicial && !x.off && visibles.indexOf(x.id)>-1) inicial=x.id; }); }
+  if(inicial) abrirApp(inicial); else if(MI_ROL==='admin') abrirUsuarios();
+}
+function _activar(id){
+  document.querySelectorAll('.app-btn').forEach(function(b){ b.classList.remove('active'); });
+  var b=document.getElementById('btn-'+id); if(b) b.classList.add('active');
+}
+function abrirApp(id){
+  var a=null; APPS.forEach(function(x){ if(x.id===id) a=x; });
+  if(!a||a.off) return;
+  _activar(id);
+  document.getElementById('panel-usuarios').style.display='none';
+  var visor=document.getElementById('visor'); visor.style.display='';
+  document.getElementById('titulo').textContent=a.nombre;
+  var abrir=document.getElementById('abrir'); abrir.style.display=''; abrir.href=a.url;
+  if(visor.getAttribute('src')!==a.url) visor.setAttribute('src',a.url);
+  var hint=document.getElementById('hint');
+  if(a.hint){ hint.textContent=a.hint; hint.style.display='inline-block';
+    clearTimeout(window._ht); window._ht=setTimeout(function(){ hint.style.display='none'; },9000);
+  } else { hint.style.display='none'; }
+  try{ localStorage.setItem('pontecos_app',id); }catch(e){}
+}
+
+// ── Usuarios (solo admin; el backend igual lo exige) ─────────────
+function abrirUsuarios(){
+  _activar('usuarios');
+  document.getElementById('visor').style.display='none';
+  document.getElementById('abrir').style.display='none';
+  document.getElementById('hint').style.display='none';
+  document.getElementById('titulo').textContent='Usuarios de Pontec OS';
+  document.getElementById('panel-usuarios').style.display='block';
+  renderUsuariosOS();
+}
+async function renderUsuariosOS(){
+  var cont=document.getElementById('u-lista');
+  cont.innerHTML='<div class="nota" style="padding:14px">Cargando...</div>';
+  try{
+    var h=await authHeaders();
+    var r=await fetch(BACKEND_URL+'/api/usuarios',{headers:h});
+    var d=await r.json();
+    if(d.error){ cont.innerHTML='<div style="color:var(--rojo);padding:14px">'+d.error+'</div>'; return; }
+    _usr=d.usuarios||[];
+    var rows=_usr.map(function(u,ix){
+      var esYo=(String(u.email||'').toLowerCase()===MI_EMAIL);
+      var pers=(u.apps&&u.apps.length)?' <span style="color:#f59e0b;font-size:10px">&#9733;</span>':'';
+      return '<tr>'
+        +'<td>'+u.email+(esYo?' <span class="nota" style="font-size:11px">(vos)</span>':'')+pers+'</td>'
+        +'<td><select onchange="cambiarRolOS('+ix+',this.value)" '+(esYo?'disabled':'')+'>'
+        +['admin','encargado','operador'].map(function(rl){return '<option value="'+rl+'"'+(u.rol===rl?' selected':'')+'>'+rl+'</option>';}).join('')
+        +'</select></td>'
+        +'<td style="text-align:right;white-space:nowrap">'
+        +'<button class="btn-gris" onclick="toggleAppsOS('+ix+')" style="margin-right:6px">Apps</button>'
+        +(esYo?'':'<button class="btn-rojo" onclick="borrarUsuarioOS('+ix+')">Borrar</button>')
+        +'</td></tr>'
+        +'<tr id="u-apps-'+ix+'" style="display:none"><td colspan="3" style="background:#0d1526">'
+        +'<div class="nota" style="margin-bottom:8px">Que apps ve '+u.email+' (sin marcar nada, usa las del rol):</div>'
+        +'<div id="u-apps-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div>'
+        +'<button class="btn-azul" onclick="guardarAppsOS('+ix+')" style="padding:7px 12px;margin-right:6px">Guardar</button>'
+        +'<button class="btn-gris" onclick="appsSegunRolOS('+ix+')">Volver a "segun rol"</button>'
+        +'<span id="u-apps-msg-'+ix+'" class="nota" style="margin-left:10px"></span>'
+        +'</td></tr>';
+    }).join('');
+    cont.innerHTML='<table><tr><th>Email</th><th>Rol</th><th></th></tr>'+rows+'</table>';
+  }catch(e){ cont.innerHTML='<div style="color:var(--rojo);padding:14px">Error: '+e.message+'</div>'; }
+}
+function toggleAppsOS(ix){
+  var fila=document.getElementById('u-apps-'+ix); if(!fila) return;
+  if(fila.style.display!=='none'){ fila.style.display='none'; return; }
+  var u=_usr[ix];
+  var marcadas=(u.apps&&u.apps.length)?u.apps:appsPorRol(u.rol);
+  var box=document.getElementById('u-apps-chk-'+ix);
+  box.innerHTML=['rentabilidad','logistica','promos','asistente'].map(function(a){
+    return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;color:#c9d4e8">'
+      +'<input type="checkbox" value="'+a+'"'+(marcadas.indexOf(a)>-1?' checked':'')+'> '+APP_NOMBRES[a]+'</label>';
+  }).join('');
+  fila.style.display='';
+}
+async function guardarAppsOS(ix){
+  var u=_usr[ix];
+  var box=document.getElementById('u-apps-chk-'+ix);
+  var sel=[].slice.call(box.querySelectorAll('input:checked')).map(function(c){return c.value;});
+  var msg=document.getElementById('u-apps-msg-'+ix); msg.style.color='var(--rojo)'; msg.textContent='';
+  if(!sel.length){ msg.textContent='Marca al menos una app (o usa "segun rol")'; return; }
+  try{
+    var h=await authHeaders(); h['Content-Type']='application/json';
+    var r=await fetch(BACKEND_URL+'/api/usuarios',{method:'PUT',headers:h,body:JSON.stringify({email:u.email,rol:u.rol,apps:sel})});
+    var d=await r.json();
+    if(d.error){ msg.textContent=d.error; return; }
+    msg.style.color='var(--verde)'; msg.textContent='Guardado';
+    setTimeout(renderUsuariosOS,600);
+  }catch(e){ msg.textContent='Error: '+e.message; }
+}
+async function appsSegunRolOS(ix){
+  var u=_usr[ix];
+  try{
+    var h=await authHeaders(); h['Content-Type']='application/json';
+    var r=await fetch(BACKEND_URL+'/api/usuarios',{method:'PUT',headers:h,body:JSON.stringify({email:u.email,rol:u.rol,apps:null})});
+    var d=await r.json();
+    if(d.error){ alert('Error: '+d.error); return; }
+    renderUsuariosOS();
+  }catch(e){ alert('Error: '+e.message); }
+}
+async function crearUsuarioOS(){
+  var em=(document.getElementById('u-email').value||'').trim().toLowerCase();
+  var pw=document.getElementById('u-pass').value||'';
+  var rl=document.getElementById('u-rol').value;
+  var msg=document.getElementById('u-msg'); msg.style.color='var(--rojo)'; msg.textContent='';
+  if(!em||em.indexOf('@')===-1){ msg.textContent='Email invalido'; return; }
+  if(pw.length<6){ msg.textContent='La contrasena necesita 6 caracteres o mas'; return; }
+  var btn=document.getElementById('u-crear'); btn.textContent='Creando...'; btn.disabled=true;
+  try{
+    var h=await authHeaders(); h['Content-Type']='application/json';
+    var r=await fetch(BACKEND_URL+'/api/usuarios',{method:'POST',headers:h,body:JSON.stringify({email:em,password:pw,rol:rl})});
+    var d=await r.json();
+    if(d.error){ msg.textContent=d.error; }
+    else{ msg.style.color='var(--verde)'; msg.textContent='Usuario creado: '+em+' ('+rl+')'; document.getElementById('u-email').value=''; document.getElementById('u-pass').value=''; renderUsuariosOS(); }
+  }catch(e){ msg.textContent='Error: '+e.message; }
+  btn.textContent='Crear usuario'; btn.disabled=false;
+}
+async function cambiarRolOS(ix,rol){
+  var u=_usr[ix];
+  try{
+    var h=await authHeaders(); h['Content-Type']='application/json';
+    var r=await fetch(BACKEND_URL+'/api/usuarios',{method:'PUT',headers:h,body:JSON.stringify({email:u.email,rol:rol})});
+    var d=await r.json();
+    if(d.error){ alert('Error: '+d.error); }
+    renderUsuariosOS();
+  }catch(e){ alert('Error: '+e.message); }
+}
+async function borrarUsuarioOS(ix){
+  var u=_usr[ix];
+  if(!confirm('Borrar el usuario '+u.email+'? No va a poder entrar mas a Pontec OS.')) return;
+  try{
+    var h=await authHeaders();
+    var r=await fetch(BACKEND_URL+'/api/usuarios?email='+encodeURIComponent(u.email),{method:'DELETE',headers:h});
+    var d=await r.json();
+    if(d.error) alert('Error: '+d.error);
+    renderUsuariosOS();
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+// ── Si ya hay sesion, entra derecho ──────────────────────────────
+if(window.supabase){
+  getSb().auth.getSession().then(function(s){ if(s.data.session){ arrancar(); } });
+}
 </script>
 </body>
 </html>
