@@ -27,7 +27,13 @@
   /* ── Sistema ── */
   #os-view{display:none;height:100%}
   #os-view.on{display:flex}
-  #side{width:210px;min-width:210px;background:var(--panel);border-right:1px solid var(--borde);display:flex;flex-direction:column;padding:14px 10px}
+  #side{width:58px;min-width:58px;background:var(--panel);border-right:1px solid var(--borde);display:flex;flex-direction:column;padding:14px 10px;transition:width .18s ease,min-width .18s ease;overflow:hidden}
+  #side:hover{width:210px;min-width:210px}
+  #side .lbl{white-space:nowrap}
+  #side:not(:hover) .lbl{display:none}
+  #side:not(:hover) .lbl-b{display:none}
+  #side:not(:hover) .pronto{display:none}
+  #side:not(:hover) #quien{display:none}
   #brand{font-size:17px;font-weight:800;letter-spacing:.04em;padding:6px 10px 16px}
   #brand span{color:var(--accent)}
   .app-btn{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:none;border-left:3px solid transparent;
@@ -82,6 +88,9 @@
   @media (max-width:720px){
     #os-view.on{flex-direction:column}
     #side{width:100%;min-width:0;flex-direction:row;align-items:center;overflow-x:auto;border-right:none;border-bottom:1px solid var(--borde);padding:8px}
+    #side:hover{width:100%;min-width:0}
+    #side:not(:hover) .lbl{display:inline}
+    #side:not(:hover) .lbl-b{display:inline}
     #brand{padding:0 10px;font-size:14px;white-space:nowrap}
     .app-btn{width:auto;white-space:nowrap;border-left:none;border-bottom:3px solid transparent;border-radius:8px 8px 0 0;padding:9px 12px;margin-bottom:0}
     .app-btn.active{border-left-color:transparent;border-bottom-color:var(--accent)}
@@ -112,11 +121,11 @@
 <!-- ── Sistema ── -->
 <div id="os-view">
   <nav id="side" aria-label="Apps">
-    <div id="brand">PONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v6</span></div>
+    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v7</span></span></div>
     <div id="botones"></div>
     <div class="abajo">
       <div id="quien"></div>
-      <button id="salir" onclick="salir()">Salir</button>
+      <button id="salir" onclick="salir()">&#128682;<span class="lbl"> Salir</span></button>
     </div>
   </nav>
   <div id="main">
@@ -226,14 +235,14 @@ function armarSidebar(){
     if(visibles.indexOf(a.id)===-1) return;
     var b=document.createElement('button');
     b.className='app-btn'+(a.off?' off':''); b.id='btn-'+a.id;
-    b.innerHTML='<span class="ico">'+a.ico+'</span>'+a.nombre+(a.off?'<span class="pronto">pronto</span>':'');
+    b.innerHTML='<span class="ico">'+a.ico+'</span><span class="lbl">'+a.nombre+'</span>'+(a.off?'<span class="pronto">pronto</span>':'');
     if(!a.off) b.onclick=function(){ abrirApp(a.id); };
     cont.appendChild(b);
   });
   if(MI_ROL==='admin'){
     var u=document.createElement('button');
     u.className='app-btn'; u.id='btn-usuarios';
-    u.innerHTML='<span class="ico">\uD83D\uDC65</span>Usuarios';
+    u.innerHTML='<span class="ico">\uD83D\uDC65</span><span class="lbl">Usuarios</span>';
     u.onclick=abrirUsuarios;
     cont.appendChild(u);
   }
