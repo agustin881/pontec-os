@@ -101,7 +101,7 @@
 <!-- ── Sistema ── -->
 <div id="os-view">
   <nav id="side" aria-label="Apps">
-    <div id="brand">PONTEC <span>OS</span></div>
+    <div id="brand">PONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v3</span></div>
     <div id="botones"></div>
     <div class="abajo">
       <div id="quien"></div>
@@ -360,6 +360,21 @@ async function borrarUsuarioOS(ix){
     renderUsuariosOS();
   }catch(e){ alert('Error: '+e.message); }
 }
+
+// ── SSO: las apps embebidas piden la sesion y el hub se la pasa ───
+// Solo responde a los origenes de SUS apps (nunca a un tercero).
+var ORIGENES_OK = [];
+APPS.forEach(function(a){ if(a.url){ try{ ORIGENES_OK.push(new URL(a.url).origin); }catch(e){} } });
+window.addEventListener('message', async function(ev){
+  if (ORIGENES_OK.indexOf(ev.origin) === -1) return;
+  var d = ev.data || {};
+  if (d.tipo !== 'pontecos-pedir-sesion') return;
+  try{
+    var s = await getSb().auth.getSession();
+    var ses = s.data.session;
+    if (ses && ev.source) ev.source.postMessage({ tipo:'pontecos-sesion', access_token: ses.access_token, refresh_token: ses.refresh_token }, ev.origin);
+  }catch(e){}
+});
 
 // ── Si ya hay sesion, entra derecho ──────────────────────────────
 if(window.supabase){
