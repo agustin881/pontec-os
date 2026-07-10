@@ -121,7 +121,7 @@
 <!-- ── Sistema ── -->
 <div id="os-view">
   <nav id="side" aria-label="Apps">
-    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v8</span></span></div>
+    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v9</span></span></div>
     <div id="botones"></div>
     <div class="abajo">
       <div id="quien"></div>
@@ -203,7 +203,7 @@ async function authHeaders(){
 }
 function appsPorRol(rol){
   if(rol==='admin') return ['rentabilidad','logistica','promos','respondia','asistente'];
-  if(rol==='encargado') return ['rentabilidad','logistica','promos','respondia'];
+  if(rol==='encargado') return ['rentabilidad','logistica','promos','respondia','asistente'];
   return ['rentabilidad','logistica'];
 }
 
@@ -431,7 +431,7 @@ function abrirAsistente(){
   document.getElementById('titulo').textContent='Asistente';
   document.getElementById('panel-asistente').style.display='flex';
   if(!document.getElementById('chat-msgs').children.length){
-    _burBot('Hola! Por ahora manejo los descuentos de ML. Proba con:\n- "sacale el descuento al AIR010-BL"\n- "ponele descuento al OFI210-NE a 28500"\n- "que promos tiene el HAM200-AZ?"\n- "buscame las publicaciones del GRI100-CO"\n\nAntes de tocar algo, siempre te muestro que voy a hacer y espero tu Confirmar.');
+    _burBot('Hola! Estas son mis manos hoy:\n- Descuentos: "ponele 10% al OFI210-NE por 7 dias", "sacale el descuento a estos: [lista]"\n- Ventas: "cuanto vendi del AIR010-BL este mes?"\n- Medidas: "cargale las medidas al GDN500"\n- Fotos: "copia las fotos de MLA123... a todo el OFI210-NE"\n- Consultas: "que promos tiene el HAM200-AZ?"\n\nAntes de tocar algo, siempre te muestro que voy a hacer y espero tu Confirmar.');
   }
   document.getElementById('chat-in').focus();
 }
