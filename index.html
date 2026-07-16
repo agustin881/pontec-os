@@ -44,6 +44,12 @@
   .app-btn .ico{font-size:17px;width:22px;text-align:center}
   .app-btn.off{opacity:.45;cursor:default}
   .app-btn .pronto{font-size:9px;color:var(--texto2);border:1px solid var(--borde);border-radius:99px;padding:1px 6px;margin-left:auto}
+  /* aviso con la cantidad pendiente: flota sobre el icono, se ve aunque el menu este plegado */
+  .app-btn{position:relative}
+  .app-btn .badge{position:absolute;left:23px;top:6px;background:var(--rojo);color:#0b1220;
+    font-size:9.5px;font-weight:800;line-height:1;min-width:16px;height:16px;border-radius:99px;
+    display:flex;align-items:center;justify-content:center;padding:0 4px;
+    border:2px solid var(--panel);box-shadow:0 0 0 1px rgba(248,113,113,.35)}
   #side .abajo{margin-top:auto}
   #quien{font-size:10px;color:var(--texto2);padding:8px 10px;word-break:break-all}
   #salir{width:100%;padding:9px;border:1px solid var(--borde);border-radius:8px;background:transparent;color:var(--texto2);font-size:12px;cursor:pointer}
@@ -258,6 +264,64 @@ function armarSidebar(){
   var ok=false; APPS.forEach(function(x){ if(x.id===inicial && !x.off && visibles.indexOf(x.id)>-1) ok=true; });
   if(!ok){ inicial=null; APPS.forEach(function(x){ if(!inicial && !x.off && visibles.indexOf(x.id)>-1) inicial=x.id; }); }
   if(inicial) abrirApp(inicial); else if(MI_ROL==='admin') abrirUsuarios();
+  chequearRespondia(); setInterval(chequearRespondia, 60000);
+}
+// ── Aviso de preguntas sin responder (RespondIA) ─────────────────
+// Le pide el pendiente al backend de RespondIA usando la sesion del hub (SSO).
+var RESPONDIA_API='https://respondia-production.up.railway.app';
+var _riToken=null, _riOff=false;
+async function _riSesion(){
+  if(_riToken) return _riToken;
+  try{
+    var s=await getSb().auth.getSession();
+    var at=s.data.session && s.data.session.access_token;
+    if(!at) return null;
+    var r=await fetch(RESPONDIA_API+'/auth/sso',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({access_token:at})}).then(function(x){return x.json();});
+    if(r && r.ok && r.token){ _riToken=r.token; return _riToken; }
+    _riOff=true;   // este usuario no existe en RespondIA: no insistimos mas
+  }catch(e){}
+  return null;
+}
+var _riPrev=null;
+// Si RespondIA esta a la vista, el propio panel hace su "ding": no lo duplicamos.
+function _riALaVista(){
+  var b=document.getElementById('btn-respondia');
+  return !!(b && b.classList.contains('active'));
+}
+function dingOS(){
+  try{
+    var A=window.AudioContext||window.webkitAudioContext; if(!A) return;
+    var ctx=new A(); if(ctx.state==='suspended' && ctx.resume) ctx.resume();
+    var o=ctx.createOscillator(), g=ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type='sine'; o.frequency.value=880;
+    g.gain.setValueAtTime(0.001, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime+0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.6);
+    o.start(); o.frequency.setValueAtTime(1174, ctx.currentTime+0.12); o.stop(ctx.currentTime+0.65);
+  }catch(e){}
+}
+async function chequearRespondia(){
+  if(_riOff || !document.getElementById('btn-respondia')) return;
+  try{
+    var t=await _riSesion(); if(!t) return;
+    var r=await fetch(RESPONDIA_API+'/api/latido',{headers:{'x-token':t}});
+    if(r.status===401){ _riToken=null; return; }   // sesion vencida: se renueva sola en el proximo chequeo
+    var d=await r.json();
+    var n=d.sin_responder||0;
+    badgeApp('respondia', n);
+    // suena solo cuando ENTRA una nueva (nunca en el primer chequeo del arranque)
+    if(_riPrev!==null && n>_riPrev && !_riALaVista()) dingOS();
+    _riPrev=n;
+  }catch(e){}
+}
+function badgeApp(id,n){
+  var b=document.getElementById('btn-'+id); if(!b) return;
+  var e=b.querySelector('.badge');
+  if(!n){ if(e) e.remove(); return; }
+  if(!e){ e=document.createElement('span'); e.className='badge'; b.appendChild(e); }
+  e.textContent = n>99 ? '99+' : String(n);
+  e.title = n+' pregunta'+(n===1?'':'s')+' sin responder';
 }
 function _activar(id){
   document.querySelectorAll('.app-btn').forEach(function(b){ b.classList.remove('active'); });
