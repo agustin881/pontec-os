@@ -192,6 +192,17 @@ var APPS = [
   { id:'asistente',    nombre:'Asistente', ico:'\uD83E\uDD16', panel:true }
 ];
 var APP_NOMBRES = {rentabilidad:'Rentabilidad', logistica:'Logistica', promos:'Promociones', respondia:'RespondIA', asistente:'Asistente'};
+// Que puede hacer cada usuario DENTRO del Asistente (se guarda por usuario)
+var ASIS_LISTA=['consultar','ventas','desc_poner','desc_sacar','desc_todos','smart','fotos','medidas'];
+var ASIS_NOMBRES={consultar:'Consultar publicaciones/promos', ventas:'Ver ventas y ganancias',
+  desc_poner:'Poner descuentos', desc_sacar:'Sacar descuentos',
+  desc_todos:'\u26A0 Sacar TODOS los descuentos', smart:'Campanas SMART',
+  fotos:'Copiar fotos', medidas:'Cargar medidas en ML'};
+function asisPorRolOS(rol){
+  if(rol==='admin') return ASIS_LISTA.slice();
+  if(rol==='encargado') return ['consultar','ventas'];
+  return ['consultar'];
+}
 var PEST_LISTA=['resumen','ventas','graficos','top','alertas','reclamo','config','usuarios'];
 var PEST_NOMBRES={resumen:'Resumen',ventas:'Ventas',graficos:'Graficos',top:'Top Productos',alertas:'Alertas',reclamo:'Envios mal cobrados',config:'Configuracion',usuarios:'Usuarios'};
 function pestPorRolOS(rol){
@@ -382,10 +393,12 @@ async function renderUsuariosOS(){
         +'<div id="u-apps-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div>'
         +'<div class="nota" style="margin:8px 0 8px">Adentro de <b>Rentabilidad</b> ve:</div>'
         +'<div id="u-pest-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div>'
+        +'<div class="nota" style="margin:8px 0 8px">Adentro del <b>Asistente</b> puede:</div>'
+        +'<div id="u-asis-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div>'
         +'<button class="btn-azul" onclick="guardarAppsOS('+ix+')" style="padding:7px 12px;margin-right:6px">Guardar</button>'
         +'<button class="btn-gris" onclick="appsSegunRolOS('+ix+')">Volver a "segun rol"</button>'
         +'<span id="u-apps-msg-'+ix+'" class="nota" style="margin-left:10px"></span>'
-        +'<div class="nota" style="margin-top:8px;font-size:11px">Logistica y RespondIA manejan sus permisos adentro de cada app (por ahora).</div>'
+        +'<div class="nota" style="margin-top:8px;font-size:11px">Promociones y Asistente ya NO dependen de Rentabilidad. Logistica y RespondIA manejan sus permisos adentro de cada app.</div>'
         +'</td></tr>';
     }).join('');
     cont.innerHTML='<table><tr><th>Email</th><th>Rol</th><th></th></tr>'+rows+'</table>';
@@ -408,6 +421,13 @@ function toggleAppsOS(ix){
     return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;color:#c9d4e8">'
       +'<input type="checkbox" value="'+t+'"'+(marcP.indexOf(t)>-1?' checked':'')+'> '+PEST_NOMBRES[t]+'</label>';
   }).join('');
+  var abox=document.getElementById('u-asis-chk-'+ix);
+  var marcA=(u.acciones&&u.acciones.length)?u.acciones:asisPorRolOS(u.rol);
+  abox.innerHTML=ASIS_LISTA.map(function(a){
+    var pel=(a==='desc_todos');
+    return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;color:'+(pel?'#f87171':'#c9d4e8')+'">'
+      +'<input type="checkbox" value="'+a+'"'+(marcA.indexOf(a)>-1?' checked':'')+'> '+ASIS_NOMBRES[a]+'</label>';
+  }).join('');
   fila.style.display='';
 }
 async function guardarAppsOS(ix){
@@ -416,6 +436,8 @@ async function guardarAppsOS(ix){
   var sel=[].slice.call(box.querySelectorAll('input:checked')).map(function(c){return c.value;});
   var pbox=document.getElementById('u-pest-chk-'+ix);
   var selP=[].slice.call(pbox.querySelectorAll('input:checked')).map(function(c){return c.value;});
+  var abox2=document.getElementById('u-asis-chk-'+ix);
+  var selA=[].slice.call(abox2.querySelectorAll('input:checked')).map(function(c){return c.value;});
   var msg=document.getElementById('u-apps-msg-'+ix); msg.style.color='var(--rojo)'; msg.textContent='';
   if(!sel.length){ msg.textContent='Marca al menos una app (o usa "segun rol")'; return; }
   if(sel.indexOf('rentabilidad')>-1 && !selP.length){ msg.textContent='Marca al menos una seccion de Rentabilidad'; return; }
@@ -428,7 +450,7 @@ async function guardarAppsOS(ix){
   }
   try{
     var h=await authHeaders(); h['Content-Type']='application/json';
-    var r=await fetch(BACKEND_URL+'/api/usuarios',{method:'PUT',headers:h,body:JSON.stringify({email:u.email,rol:u.rol,apps:sel,pestanas:(pest.length?pest:null)})});
+    var r=await fetch(BACKEND_URL+'/api/usuarios',{method:'PUT',headers:h,body:JSON.stringify({email:u.email,rol:u.rol,apps:sel,pestanas:(pest.length?pest:null),acciones:(selA.length?selA:null)})});
     var d=await r.json();
     if(d.error){ msg.textContent=d.error; return; }
     msg.style.color='var(--verde)'; msg.textContent='Guardado';
@@ -439,7 +461,7 @@ async function appsSegunRolOS(ix){
   var u=_usr[ix];
   try{
     var h=await authHeaders(); h['Content-Type']='application/json';
-    var r=await fetch(BACKEND_URL+'/api/usuarios',{method:'PUT',headers:h,body:JSON.stringify({email:u.email,rol:u.rol,apps:null,pestanas:null})});
+    var r=await fetch(BACKEND_URL+'/api/usuarios',{method:'PUT',headers:h,body:JSON.stringify({email:u.email,rol:u.rol,apps:null,pestanas:null,acciones:null})});
     var d=await r.json();
     if(d.error){ alert('Error: '+d.error); return; }
     renderUsuariosOS();
