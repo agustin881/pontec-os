@@ -44,12 +44,6 @@
   .app-btn .ico{font-size:17px;width:22px;text-align:center}
   .app-btn.off{opacity:.45;cursor:default}
   .app-btn .pronto{font-size:9px;color:var(--texto2);border:1px solid var(--borde);border-radius:99px;padding:1px 6px;margin-left:auto}
-  /* aviso con la cantidad pendiente: flota sobre el icono, se ve aunque el menu este plegado */
-  .app-btn{position:relative}
-  .app-btn .badge{position:absolute;left:23px;top:6px;background:var(--rojo);color:#0b1220;
-    font-size:9.5px;font-weight:800;line-height:1;min-width:16px;height:16px;border-radius:99px;
-    display:flex;align-items:center;justify-content:center;padding:0 4px;
-    border:2px solid var(--panel);box-shadow:0 0 0 1px rgba(248,113,113,.35)}
   #side .abajo{margin-top:auto}
   #quien{font-size:10px;color:var(--texto2);padding:8px 10px;word-break:break-all}
   #salir{width:100%;padding:9px;border:1px solid var(--borde);border-radius:8px;background:transparent;color:var(--texto2);font-size:12px;cursor:pointer}
@@ -127,7 +121,7 @@
 <!-- ── Sistema ── -->
 <div id="os-view">
   <nav id="side" aria-label="Apps">
-    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v9</span></span></div>
+    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v10</span></span></div>
     <div id="botones"></div>
     <div class="abajo">
       <div id="quien"></div>
@@ -192,17 +186,6 @@ var APPS = [
   { id:'asistente',    nombre:'Asistente', ico:'\uD83E\uDD16', panel:true }
 ];
 var APP_NOMBRES = {rentabilidad:'Rentabilidad', logistica:'Logistica', promos:'Promociones', respondia:'RespondIA', asistente:'Asistente'};
-// Que puede hacer cada usuario DENTRO del Asistente (se guarda por usuario)
-var ASIS_LISTA=['consultar','ventas','desc_poner','desc_sacar','desc_todos','smart','fotos','medidas'];
-var ASIS_NOMBRES={consultar:'Consultar publicaciones/promos', ventas:'Ver ventas y ganancias',
-  desc_poner:'Poner descuentos', desc_sacar:'Sacar descuentos',
-  desc_todos:'\u26A0 Sacar TODOS los descuentos', smart:'Campanas SMART',
-  fotos:'Copiar fotos', medidas:'Cargar medidas en ML'};
-function asisPorRolOS(rol){
-  if(rol==='admin') return ASIS_LISTA.slice();
-  if(rol==='encargado') return ['consultar','ventas'];
-  return ['consultar'];
-}
 var PEST_LISTA=['resumen','ventas','graficos','top','alertas','reclamo','config','usuarios'];
 var PEST_NOMBRES={resumen:'Resumen',ventas:'Ventas',graficos:'Graficos',top:'Top Productos',alertas:'Alertas',reclamo:'Envios mal cobrados',config:'Configuracion',usuarios:'Usuarios'};
 function pestPorRolOS(rol){
@@ -217,6 +200,13 @@ async function authHeaders(){
   var s=await getSb().auth.getSession();
   var t=s.data.session && s.data.session.access_token;
   return t ? { Authorization:'Bearer '+t } : {};
+}
+var LOG_PEST_LISTA=['imprimir','despachar','seguimiento','full','pagos','config'];
+var LOG_PEST_NOMBRES={imprimir:'Imprimir',despachar:'Despachar',seguimiento:'Seguimiento',full:'Env\u00EDos Full',pagos:'Pagos de env\u00EDos',config:'Configuraci\u00F3n'};
+function pestLogPorRol(rol){
+  if(rol==='admin') return LOG_PEST_LISTA.slice();
+  if(rol==='encargado') return ['imprimir','despachar','seguimiento','full','config'];
+  return ['imprimir','despachar','seguimiento'];
 }
 function appsPorRol(rol){
   if(rol==='admin') return ['rentabilidad','logistica','promos','respondia','asistente'];
@@ -275,64 +265,6 @@ function armarSidebar(){
   var ok=false; APPS.forEach(function(x){ if(x.id===inicial && !x.off && visibles.indexOf(x.id)>-1) ok=true; });
   if(!ok){ inicial=null; APPS.forEach(function(x){ if(!inicial && !x.off && visibles.indexOf(x.id)>-1) inicial=x.id; }); }
   if(inicial) abrirApp(inicial); else if(MI_ROL==='admin') abrirUsuarios();
-  chequearRespondia(); setInterval(chequearRespondia, 60000);
-}
-// ── Aviso de preguntas sin responder (RespondIA) ─────────────────
-// Le pide el pendiente al backend de RespondIA usando la sesion del hub (SSO).
-var RESPONDIA_API='https://respondia-production.up.railway.app';
-var _riToken=null, _riOff=false;
-async function _riSesion(){
-  if(_riToken) return _riToken;
-  try{
-    var s=await getSb().auth.getSession();
-    var at=s.data.session && s.data.session.access_token;
-    if(!at) return null;
-    var r=await fetch(RESPONDIA_API+'/auth/sso',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({access_token:at})}).then(function(x){return x.json();});
-    if(r && r.ok && r.token){ _riToken=r.token; return _riToken; }
-    _riOff=true;   // este usuario no existe en RespondIA: no insistimos mas
-  }catch(e){}
-  return null;
-}
-var _riPrev=null;
-// Si RespondIA esta a la vista, el propio panel hace su "ding": no lo duplicamos.
-function _riALaVista(){
-  var b=document.getElementById('btn-respondia');
-  return !!(b && b.classList.contains('active'));
-}
-function dingOS(){
-  try{
-    var A=window.AudioContext||window.webkitAudioContext; if(!A) return;
-    var ctx=new A(); if(ctx.state==='suspended' && ctx.resume) ctx.resume();
-    var o=ctx.createOscillator(), g=ctx.createGain();
-    o.connect(g); g.connect(ctx.destination);
-    o.type='sine'; o.frequency.value=880;
-    g.gain.setValueAtTime(0.001, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime+0.02);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.6);
-    o.start(); o.frequency.setValueAtTime(1174, ctx.currentTime+0.12); o.stop(ctx.currentTime+0.65);
-  }catch(e){}
-}
-async function chequearRespondia(){
-  if(_riOff || !document.getElementById('btn-respondia')) return;
-  try{
-    var t=await _riSesion(); if(!t) return;
-    var r=await fetch(RESPONDIA_API+'/api/latido',{headers:{'x-token':t}});
-    if(r.status===401){ _riToken=null; return; }   // sesion vencida: se renueva sola en el proximo chequeo
-    var d=await r.json();
-    var n=d.sin_responder||0;
-    badgeApp('respondia', n);
-    // suena solo cuando ENTRA una nueva (nunca en el primer chequeo del arranque)
-    if(_riPrev!==null && n>_riPrev && !_riALaVista()) dingOS();
-    _riPrev=n;
-  }catch(e){}
-}
-function badgeApp(id,n){
-  var b=document.getElementById('btn-'+id); if(!b) return;
-  var e=b.querySelector('.badge');
-  if(!n){ if(e) e.remove(); return; }
-  if(!e){ e=document.createElement('span'); e.className='badge'; b.appendChild(e); }
-  e.textContent = n>99 ? '99+' : String(n);
-  e.title = n+' pregunta'+(n===1?'':'s')+' sin responder';
 }
 function _activar(id){
   document.querySelectorAll('.app-btn').forEach(function(b){ b.classList.remove('active'); });
@@ -393,12 +325,12 @@ async function renderUsuariosOS(){
         +'<div id="u-apps-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div>'
         +'<div class="nota" style="margin:8px 0 8px">Adentro de <b>Rentabilidad</b> ve:</div>'
         +'<div id="u-pest-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div>'
-        +'<div class="nota" style="margin:8px 0 8px">Adentro del <b>Asistente</b> puede:</div>'
-        +'<div id="u-asis-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div>'
+        +'<div class="nota" style="margin:8px 0 8px">Adentro de <b>Logistica</b> ve:</div>'
+        +'<div id="u-plog-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div>'
         +'<button class="btn-azul" onclick="guardarAppsOS('+ix+')" style="padding:7px 12px;margin-right:6px">Guardar</button>'
         +'<button class="btn-gris" onclick="appsSegunRolOS('+ix+')">Volver a "segun rol"</button>'
         +'<span id="u-apps-msg-'+ix+'" class="nota" style="margin-left:10px"></span>'
-        +'<div class="nota" style="margin-top:8px;font-size:11px">Promociones y Asistente ya NO dependen de Rentabilidad. Logistica y RespondIA manejan sus permisos adentro de cada app.</div>'
+        +'<div class="nota" style="margin-top:8px;font-size:11px">RespondIA maneja sus permisos adentro de la app. Pagos de envios: solo quienes lo tengan tildado ven cuanto se paga por envio.</div>'
         +'</td></tr>';
     }).join('');
     cont.innerHTML='<table><tr><th>Email</th><th>Rol</th><th></th></tr>'+rows+'</table>';
@@ -421,12 +353,11 @@ function toggleAppsOS(ix){
     return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;color:#c9d4e8">'
       +'<input type="checkbox" value="'+t+'"'+(marcP.indexOf(t)>-1?' checked':'')+'> '+PEST_NOMBRES[t]+'</label>';
   }).join('');
-  var abox=document.getElementById('u-asis-chk-'+ix);
-  var marcA=(u.acciones&&u.acciones.length)?u.acciones:asisPorRolOS(u.rol);
-  abox.innerHTML=ASIS_LISTA.map(function(a){
-    var pel=(a==='desc_todos');
-    return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;color:'+(pel?'#f87171':'#c9d4e8')+'">'
-      +'<input type="checkbox" value="'+a+'"'+(marcA.indexOf(a)>-1?' checked':'')+'> '+ASIS_NOMBRES[a]+'</label>';
+  var lbox=document.getElementById('u-plog-chk-'+ix);
+  var marcL=(u.pestanas_logistica&&u.pestanas_logistica.length)?u.pestanas_logistica:pestLogPorRol(u.rol);
+  lbox.innerHTML=LOG_PEST_LISTA.map(function(t){
+    return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;color:#c9d4e8">'
+      +'<input type="checkbox" value="'+t+'"'+(marcL.indexOf(t)>-1?' checked':'')+'> '+LOG_PEST_NOMBRES[t]+'</label>';
   }).join('');
   fila.style.display='';
 }
@@ -436,11 +367,12 @@ async function guardarAppsOS(ix){
   var sel=[].slice.call(box.querySelectorAll('input:checked')).map(function(c){return c.value;});
   var pbox=document.getElementById('u-pest-chk-'+ix);
   var selP=[].slice.call(pbox.querySelectorAll('input:checked')).map(function(c){return c.value;});
-  var abox2=document.getElementById('u-asis-chk-'+ix);
-  var selA=[].slice.call(abox2.querySelectorAll('input:checked')).map(function(c){return c.value;});
+  var lbox=document.getElementById('u-plog-chk-'+ix);
+  var selL=[].slice.call(lbox.querySelectorAll('input:checked')).map(function(c){return c.value;});
   var msg=document.getElementById('u-apps-msg-'+ix); msg.style.color='var(--rojo)'; msg.textContent='';
   if(!sel.length){ msg.textContent='Marca al menos una app (o usa "segun rol")'; return; }
   if(sel.indexOf('rentabilidad')>-1 && !selP.length){ msg.textContent='Marca al menos una seccion de Rentabilidad'; return; }
+  if(sel.indexOf('logistica')>-1 && !selL.length){ msg.textContent='Marca al menos una seccion de Logistica'; return; }
   var pest=selP.slice();
   if(sel.indexOf('promos')>-1){
     if(!pest.length) pest=pestPorRolOS(u.rol);
@@ -450,7 +382,7 @@ async function guardarAppsOS(ix){
   }
   try{
     var h=await authHeaders(); h['Content-Type']='application/json';
-    var r=await fetch(BACKEND_URL+'/api/usuarios',{method:'PUT',headers:h,body:JSON.stringify({email:u.email,rol:u.rol,apps:sel,pestanas:(pest.length?pest:null),acciones:(selA.length?selA:null)})});
+    var r=await fetch(BACKEND_URL+'/api/usuarios',{method:'PUT',headers:h,body:JSON.stringify({email:u.email,rol:u.rol,apps:sel,pestanas:(pest.length?pest:null),pestanas_logistica:(selL.length?selL:null)})});
     var d=await r.json();
     if(d.error){ msg.textContent=d.error; return; }
     msg.style.color='var(--verde)'; msg.textContent='Guardado';
@@ -461,7 +393,7 @@ async function appsSegunRolOS(ix){
   var u=_usr[ix];
   try{
     var h=await authHeaders(); h['Content-Type']='application/json';
-    var r=await fetch(BACKEND_URL+'/api/usuarios',{method:'PUT',headers:h,body:JSON.stringify({email:u.email,rol:u.rol,apps:null,pestanas:null,acciones:null})});
+    var r=await fetch(BACKEND_URL+'/api/usuarios',{method:'PUT',headers:h,body:JSON.stringify({email:u.email,rol:u.rol,apps:null,pestanas:null,pestanas_logistica:null})});
     var d=await r.json();
     if(d.error){ alert('Error: '+d.error); return; }
     renderUsuariosOS();
