@@ -323,6 +323,7 @@ async function chequearRespondia(){
     var d=await r.json();
     var n=d.sin_responder||0;
     badgeApp('respondia', n);
+    badgeApp('posventa', d.pv_sin_responder||0);
     // suena solo cuando ENTRA una nueva (nunca en el primer chequeo del arranque)
     if(_riPrev!==null && n>_riPrev && !_riALaVista()) dingOS();
     _riPrev=n;
