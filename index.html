@@ -331,8 +331,13 @@ async function _riPintarPermisos(ix,email){
   if(!us){ box.innerHTML='<span class="nota">(no pude leer los usuarios de RespondIA)</span>'; return; }
   var u=us.find(function(x){return (x.email||'').toLowerCase()===String(email||'').toLowerCase();});
   if(!u){ box.innerHTML='<span class="nota">Este email no existe en RespondIA (crealo primero en RespondIA \u2192 Ajustes \u2192 Usuarios)</span>'; return; }
-  if(u.rol==='master'||u.rol==='dueno'){ box.innerHTML='<span class="nota">'+u.rol+': puede eliminar siempre</span>'; return; }
-  var chk=(u.permisos&&u.permisos.eliminar)?' checked':'';
+  if(u.rol==='master'){
+    box.innerHTML='<label style="display:flex;align-items:center;gap:5px;font-size:12px;color:#c9d4e8"><input type="checkbox" checked disabled> \uD83D\uDDD1 Eliminar preguntas en ML <span class="nota">(master: siempre activo)</span></label>';
+    return;
+  }
+  var chk = (u.rol==='dueno')
+    ? (!(u.permisos&&u.permisos.eliminar===false)?' checked':'')
+    : ((u.permisos&&u.permisos.eliminar)?' checked':'');
   box.innerHTML='<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;color:#c9d4e8">'
     +'<input type="checkbox"'+chk+' onchange="_riToggleEliminar('+u.id+',this.checked,this)"> \uD83D\uDDD1 Eliminar preguntas en ML</label>';
 }
