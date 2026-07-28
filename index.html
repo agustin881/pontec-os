@@ -314,6 +314,42 @@ function dingOS(){
     o.start(); o.frequency.setValueAtTime(1174, ctx.currentTime+0.12); o.stop(ctx.currentTime+0.65);
   }catch(e){}
 }
+var _riUsersCache=null;
+async function _riUsuarios(){
+  if(_riUsersCache) return _riUsersCache;
+  var t=await _riSesion(); if(!t) return null;
+  try{
+    var r=await fetch(RESPONDIA_API+'/api/usuarios',{headers:{'x-token':t}});
+    if(!r.ok) return null;
+    _riUsersCache=await r.json(); return _riUsersCache;
+  }catch(e){ return null; }
+}
+async function _riPintarPermisos(ix,email){
+  var box=document.getElementById('u-ri-chk-'+ix); if(!box) return;
+  box.innerHTML='<span class="nota">cargando\u2026</span>';
+  var us=await _riUsuarios();
+  if(!us){ box.innerHTML='<span class="nota">(no pude leer los usuarios de RespondIA)</span>'; return; }
+  var u=us.find(function(x){return (x.email||'').toLowerCase()===String(email||'').toLowerCase();});
+  if(!u){ box.innerHTML='<span class="nota">Este email no existe en RespondIA (crealo primero en RespondIA \u2192 Ajustes \u2192 Usuarios)</span>'; return; }
+  if(u.rol==='master'||u.rol==='dueno'){ box.innerHTML='<span class="nota">'+u.rol+': puede eliminar siempre</span>'; return; }
+  var chk=(u.permisos&&u.permisos.eliminar)?' checked':'';
+  box.innerHTML='<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;color:#c9d4e8">'
+    +'<input type="checkbox"'+chk+' onchange="_riToggleEliminar('+u.id+',this.checked,this)"> \uD83D\uDDD1 Eliminar preguntas en ML</label>';
+}
+async function _riToggleEliminar(id,valor,el){
+  var t=await _riSesion(); if(!t){ alert('Sin sesion en RespondIA'); if(el) el.checked=!valor; return; }
+  var us=_riUsersCache||[]; var u=us.find(function(x){return x.id===id;});
+  var permisos={}; if(u&&u.permisos) for(var k in u.permisos) permisos[k]=u.permisos[k];
+  permisos.eliminar=!!valor;
+  try{
+    var r=await fetch(RESPONDIA_API+'/api/usuarios/editar',{method:'POST',
+      headers:{'Content-Type':'application/json','x-token':t},
+      body:JSON.stringify({id:id,permisos:permisos})});
+    var d=await r.json();
+    if(!r.ok||d.error) throw new Error(d.error||('HTTP '+r.status));
+    if(u) u.permisos=permisos;
+  }catch(e){ alert('No se pudo guardar en RespondIA: '+e.message); if(el) el.checked=!valor; }
+}
 async function chequearRespondia(){
   if(_riOff || !document.getElementById('btn-respondia')) return;
   try{
@@ -398,6 +434,8 @@ async function renderUsuariosOS(){
         +'<div id="u-pest-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div>'
         +'<div class="nota" style="margin:8px 0 8px">Adentro del <b>Asistente</b> puede:</div>'
         +'<div id="u-asis-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div>'
+        +'<div class="nota" style="margin:8px 0 8px">Adentro de <b>RespondIA</b> puede:</div>'
+        +'<div id="u-ri-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div>'
         +'<button class="btn-azul" onclick="guardarAppsOS('+ix+')" style="padding:7px 12px;margin-right:6px">Guardar</button>'
         +'<button class="btn-gris" onclick="appsSegunRolOS('+ix+')">Volver a "segun rol"</button>'
         +'<span id="u-apps-msg-'+ix+'" class="nota" style="margin-left:10px"></span>'
@@ -431,6 +469,7 @@ function toggleAppsOS(ix){
     return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;color:'+(pel?'#f87171':'#c9d4e8')+'">'
       +'<input type="checkbox" value="'+a+'"'+(marcA.indexOf(a)>-1?' checked':'')+'> '+ASIS_NOMBRES[a]+'</label>';
   }).join('');
+  _riPintarPermisos(ix,u.email);
   fila.style.display='';
 }
 async function guardarAppsOS(ix){
