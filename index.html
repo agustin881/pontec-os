@@ -314,6 +314,28 @@ function dingOS(){
     o.start(); o.frequency.setValueAtTime(1174, ctx.currentTime+0.12); o.stop(ctx.currentTime+0.65);
   }catch(e){}
 }
+// ── Accesos jerarquicos: el sub-bloque de cada modulo aparece SOLO si el
+// modulo esta tildado. Al tildar un modulo por primera vez, todo su interior
+// arranca habilitado (despues destildas lo que no).
+function subMostrar(ix){
+  var box=document.getElementById('u-apps-chk-'+ix); if(!box) return;
+  ['rentabilidad','asistente','respondia','posventa'].forEach(function(app){
+    var chk=box.querySelector('input[value="'+app+'"]');
+    var sub=document.getElementById('u-sub-'+app+'-'+ix);
+    if(sub) sub.style.display=(chk&&chk.checked)?'':'none';
+  });
+}
+function subSync(ix,app,activo){
+  subMostrar(ix);
+  if(!activo) return;
+  // recien tildado: habilitar TODO su interior por defecto
+  if(app==='rentabilidad'){ var b=document.getElementById('u-pest-chk-'+ix); if(b) b.querySelectorAll('input').forEach(function(c){c.checked=true;}); }
+  if(app==='asistente'){ var b2=document.getElementById('u-asis-chk-'+ix); if(b2) b2.querySelectorAll('input').forEach(function(c){c.checked=true;}); }
+  if(app==='respondia'||app==='posventa'){
+    var cont=document.getElementById(app==='respondia'?('u-ri-chk-'+ix):('u-pos-chk-'+ix));
+    if(cont) cont.querySelectorAll('input:not(:checked):not(:disabled)').forEach(function(c){ c.checked=true; if(c.onchange) c.onchange(); });
+  }
+}
 var _riUsersCache=null;
 async function _riUsuarios(){
   if(_riUsersCache) return _riUsersCache;
@@ -332,20 +354,42 @@ async function _riPintarPermisos(ix,email){
   var u=us.find(function(x){return (x.email||'').toLowerCase()===String(email||'').toLowerCase();});
   if(!u){ box.innerHTML='<span class="nota">Este email no existe en RespondIA (crealo primero en RespondIA \u2192 Ajustes \u2192 Usuarios)</span>'; return; }
   if(u.rol==='master'){
-    box.innerHTML='<label style="display:flex;align-items:center;gap:5px;font-size:12px;color:#c9d4e8"><input type="checkbox" checked disabled> \uD83D\uDDD1 Eliminar preguntas en ML <span class="nota">(master: siempre activo)</span></label>';
+    box.innerHTML='<span class="nota">master: acceso total, puede todo</span>';
     return;
   }
-  var chk = (u.rol==='dueno')
-    ? (!(u.permisos&&u.permisos.eliminar===false)?' checked':'')
-    : ((u.permisos&&u.permisos.eliminar)?' checked':'');
-  box.innerHTML='<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;color:#c9d4e8">'
-    +'<input type="checkbox"'+chk+' onchange="_riToggleEliminar('+u.id+',this.checked,this)"> \uD83D\uDDD1 Eliminar preguntas en ML</label>';
+  var lbl=function(key,txt,chk){
+    return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;color:#c9d4e8">'
+      +'<input type="checkbox"'+(chk?' checked':'')+' onchange="_riTogglePerm('+u.id+',\''+key+'\',this.checked,this)"> '+txt+'</label>';
+  };
+  var p=u.permisos||{};
+  var html='';
+  if(u.rol==='operador'){
+    [['revisar','Preguntas'],['metricas','M\u00e9tricas'],['reglas','Reglas'],['mejoras','Mejoras'],
+     ['tareas','Tareas'],['ajustes','Ajustes preventa']]
+      .forEach(function(s){ html+=lbl(s[0],s[1],!!p[s[0]]); });
+  }
+  var chkE=(u.rol==='dueno') ? !(p.eliminar===false) : !!p.eliminar;
+  html+=lbl('eliminar','\uD83D\uDDD1 Eliminar preguntas',chkE);
+  box.innerHTML=html;
+  // sub-bloque de POSVENTA (granular; legado: permisos.posventa habilita todo)
+  var pbox=document.getElementById('u-pos-chk-'+ix);
+  if(pbox){
+    if(u.rol==='operador'){
+      var leg=!!p.posventa;
+      var hp='';
+      [['pv_casos','\uD83D\uDCE6 Casos'],['pv_stats','\uD83D\uDCCA M\u00e9tricas'],['pv_biblio','\uD83D\uDCC1 Biblioteca'],['pv_ajustes','\u2699\uFE0F Ajustes posventa']]
+        .forEach(function(s){ hp+=lbl(s[0],s[1], p[s[0]]!==undefined?!!p[s[0]]:leg); });
+      pbox.innerHTML=hp;
+    } else {
+      pbox.innerHTML='<span class="nota">'+u.rol+': ve todo posventa</span>';
+    }
+  }
 }
-async function _riToggleEliminar(id,valor,el){
+async function _riTogglePerm(id,key,valor,el){
   var t=await _riSesion(); if(!t){ alert('Sin sesion en RespondIA'); if(el) el.checked=!valor; return; }
   var us=_riUsersCache||[]; var u=us.find(function(x){return x.id===id;});
   var permisos={}; if(u&&u.permisos) for(var k in u.permisos) permisos[k]=u.permisos[k];
-  permisos.eliminar=!!valor;
+  permisos[key]=!!valor;
   try{
     var r=await fetch(RESPONDIA_API+'/api/usuarios/editar',{method:'POST',
       headers:{'Content-Type':'application/json','x-token':t},
@@ -435,12 +479,14 @@ async function renderUsuariosOS(){
         +'<tr id="u-apps-'+ix+'" style="display:none"><td colspan="3" style="background:#0d1526">'
         +'<div class="nota" style="margin-bottom:8px">Que apps ve '+u.email+' (sin marcar nada, usa las del rol):</div>'
         +'<div id="u-apps-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div>'
-        +'<div class="nota" style="margin:8px 0 8px">Adentro de <b>Rentabilidad</b> ve:</div>'
-        +'<div id="u-pest-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div>'
-        +'<div class="nota" style="margin:8px 0 8px">Adentro del <b>Asistente</b> puede:</div>'
-        +'<div id="u-asis-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div>'
-        +'<div class="nota" style="margin:8px 0 8px">Adentro de <b>RespondIA</b> puede:</div>'
-        +'<div id="u-ri-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div>'
+        +'<div id="u-sub-rentabilidad-'+ix+'" style="display:none"><div class="nota" style="margin:8px 0 8px">Adentro de <b>Rentabilidad</b> ve:</div>'
+        +'<div id="u-pest-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div></div>'
+        +'<div id="u-sub-asistente-'+ix+'" style="display:none"><div class="nota" style="margin:8px 0 8px">Adentro del <b>Asistente</b> puede:</div>'
+        +'<div id="u-asis-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div></div>'
+        +'<div id="u-sub-respondia-'+ix+'" style="display:none"><div class="nota" style="margin:8px 0 8px">Adentro de <b>RespondIA</b> (preguntas) puede:</div>'
+        +'<div id="u-ri-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div></div>'
+        +'<div id="u-sub-posventa-'+ix+'" style="display:none"><div class="nota" style="margin:8px 0 8px">Adentro de <b>Posventa</b> puede:</div>'
+        +'<div id="u-pos-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div></div>'
         +'<button class="btn-azul" onclick="guardarAppsOS('+ix+')" style="padding:7px 12px;margin-right:6px">Guardar</button>'
         +'<button class="btn-gris" onclick="appsSegunRolOS('+ix+')">Volver a "segun rol"</button>'
         +'<span id="u-apps-msg-'+ix+'" class="nota" style="margin-left:10px"></span>'
@@ -458,7 +504,7 @@ function toggleAppsOS(ix){
   var box=document.getElementById('u-apps-chk-'+ix);
   box.innerHTML=['rentabilidad','logistica','promos','respondia','posventa','asistente'].map(function(a){
     return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;color:#c9d4e8">'
-      +'<input type="checkbox" value="'+a+'"'+(marcadas.indexOf(a)>-1?' checked':'')+'> '+APP_NOMBRES[a]+'</label>';
+      +'<input type="checkbox" value="'+a+'"'+(marcadas.indexOf(a)>-1?' checked':'')+' onchange="subSync('+ix+',this.value,this.checked)"> '+APP_NOMBRES[a]+'</label>';
   }).join('');
   var pbox=document.getElementById('u-pest-chk-'+ix);
   var marcP=(u.pestanas&&u.pestanas.length)?u.pestanas:pestPorRolOS(u.rol);
@@ -475,6 +521,7 @@ function toggleAppsOS(ix){
       +'<input type="checkbox" value="'+a+'"'+(marcA.indexOf(a)>-1?' checked':'')+'> '+ASIS_NOMBRES[a]+'</label>';
   }).join('');
   _riPintarPermisos(ix,u.email);
+  subMostrar(ix);
   fila.style.display='';
 }
 async function guardarAppsOS(ix){
