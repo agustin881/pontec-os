@@ -89,7 +89,7 @@
   .conf-btns{margin-top:10px;display:flex;gap:8px}
   .btn-verde{padding:7px 14px;border:none;border-radius:6px;background:var(--verde);color:#06210f;font-weight:700;cursor:pointer}
   #chat-form{display:flex;gap:8px;margin-top:10px}
-  #chat-in{flex:1;padding:11px;border-radius:10px;border:1px solid var(--borde);background:#0b1220;color:var(--texto);font-size:13px}
+  #chat-in{flex:1;padding:11px;border-radius:10px;border:1px solid var(--borde);background:#0b1220;color:var(--texto);font-size:13px;resize:none;font-family:inherit;line-height:1.4;max-height:140px}
 
   @media (max-width:720px){
     #os-view.on{flex-direction:column}
@@ -145,7 +145,7 @@
     <div id="panel-asistente">
       <div id="chat-msgs"></div>
       <div id="chat-form">
-        <input id="chat-in" placeholder="Escribi tu orden... (ej: sacale el descuento al OFI210-NE)">
+        <textarea id="chat-in" rows="1" placeholder="Escribi tu orden... (ej: sacale el descuento al OFI210-NE) — Shift+Enter para renglon nuevo"></textarea>
         <button class="btn-azul" onclick="enviarChat()">Enviar</button>
       </div>
     </div>
@@ -552,7 +552,7 @@ function _burBot(t){ return _bur(t,'bot'); }
 async function enviarChat(){
   var inp=document.getElementById('chat-in'); var t=(inp.value||'').trim();
   if(!t) return;
-  inp.value=''; _bur(t,'user');
+  inp.value=''; inp.style.height='auto'; _bur(t,'user');
   _chatHist.push({rol:'user',texto:t}); _chatPend=null;
   var esp=_burBot('...');
   try{
@@ -587,7 +587,8 @@ async function confirmarChat(){
   }catch(e){ esp.remove(); _burBot('Error: '+e.message); }
   _chatPend=null;
 }
-document.getElementById('chat-in').addEventListener('keydown',function(e){ if(e.key==='Enter') enviarChat(); });
+document.getElementById('chat-in').addEventListener('keydown',function(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); enviarChat(); } });
+document.getElementById('chat-in').addEventListener('input',function(){ this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,140)+'px'; });
 
 // ── SSO: las apps embebidas piden la sesion y el hub se la pasa ───
 // Solo responde a los origenes de SUS apps (nunca a un tercero).
