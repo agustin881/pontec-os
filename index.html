@@ -127,7 +127,7 @@
 <!-- ── Sistema ── -->
 <div id="os-view">
   <nav id="side" aria-label="Apps">
-    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v11</span></span></div>
+    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v12</span></span></div>
     <div id="botones"></div>
     <div class="abajo">
       <div id="quien"></div>
@@ -220,8 +220,8 @@ async function authHeaders(){
   var t=s.data.session && s.data.session.access_token;
   return t ? { Authorization:'Bearer '+t } : {};
 }
-var LOG_PEST_LISTA=['imprimir','despachar','seguimiento','full','pagos','config'];
-var LOG_PEST_NOMBRES={imprimir:'Imprimir',despachar:'Despachar',seguimiento:'Seguimiento',full:'Herramientas (Full)',pagos:'Pagos de envios',config:'Configuracion'};
+var LOG_PEST_LISTA=['imprimir','despachar','seguimiento','full','pagos','config','wms'];
+var LOG_PEST_NOMBRES={imprimir:'Imprimir',despachar:'Despachar',seguimiento:'Seguimiento',full:'Herramientas (Full)',pagos:'Pagos de envios',config:'Configuracion',wms:'WMS (ubicaciones)'};
 function pestLogPorRol(rol){
   if(rol==='admin') return LOG_PEST_LISTA.slice();
   if(rol==='encargado') return ['imprimir','despachar','seguimiento','full','config'];
