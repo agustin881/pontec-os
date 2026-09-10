@@ -118,7 +118,10 @@
     <h1>PONTEC <span>OS</span></h1>
     <p>Entra con tu usuario del sistema</p>
     <input id="lg-email" type="email" placeholder="Email" autocomplete="username">
-    <input id="lg-pass" type="password" placeholder="Contrasena" autocomplete="current-password">
+    <div style="position:relative;margin-bottom:10px">
+      <input id="lg-pass" type="password" placeholder="Contrasena" autocomplete="current-password" style="margin-bottom:0;padding-right:44px">
+      <button type="button" id="lg-ojo" onclick="verClave()" aria-label="Mostrar contrasena" title="Mostrar contrasena" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);width:auto;background:none;border:0;padding:4px 6px;font-size:15px;line-height:1;color:#c9d4e8;cursor:pointer">&#128065;</button>
+    </div>
     <button onclick="entrar()">Entrar</button>
     <div id="login-err"></div>
   </div>
@@ -247,6 +250,17 @@ async function entrar(){
 }
 async function salir(){ try{ await getSb().auth.signOut(); }catch(e){} location.reload(); }
 document.getElementById('lg-pass').addEventListener('keydown',function(e){ if(e.key==='Enter') entrar(); });
+// Ojito: mostrar/ocultar la contrasena mientras se escribe
+function verClave(){
+  var i=document.getElementById('lg-pass'), b=document.getElementById('lg-ojo');
+  if(!i||!b) return;
+  var mostrar = i.type==='password';
+  i.type = mostrar ? 'text' : 'password';
+  b.innerHTML = mostrar ? '&#128584;' : '&#128065;';
+  var t = mostrar ? 'Ocultar contrasena' : 'Mostrar contrasena';
+  b.setAttribute('aria-label', t); b.setAttribute('title', t);
+  i.focus();
+}
 
 // ── Arranque del sistema ─────────────────────────────────────────
 async function arrancar(){
@@ -421,27 +435,27 @@ function toggleAppsOS(ix){
   var fila=document.getElementById('u-apps-'+ix); if(!fila) return;
   if(fila.style.display!=='none'){ fila.style.display='none'; return; }
   var u=_usr[ix];
-  var marcadas=(u.apps&&u.apps.length)?u.apps:appsPorRol(u.rol);
+  var marcadas=Array.isArray(u.apps)?u.apps:appsPorRol(u.rol);
   var box=document.getElementById('u-apps-chk-'+ix);
   box.innerHTML=['rentabilidad','logistica','promos','respondia','posventa','asistente'].map(function(a){
     return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;color:#c9d4e8">'
       +'<input type="checkbox" value="'+a+'"'+(marcadas.indexOf(a)>-1?' checked':'')+'> '+APP_NOMBRES[a]+'</label>';
   }).join('');
   var pbox=document.getElementById('u-pest-chk-'+ix);
-  var marcP=(u.pestanas&&u.pestanas.length)?u.pestanas:pestPorRolOS(u.rol);
+  var marcP=Array.isArray(u.pestanas)?u.pestanas:pestPorRolOS(u.rol);
   var opciones=(u.rol==='admin')?PEST_LISTA:PEST_LISTA.filter(function(t){return t!=='config'&&t!=='usuarios';});
   pbox.innerHTML=opciones.map(function(t){
     return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;color:#c9d4e8">'
       +'<input type="checkbox" value="'+t+'"'+(marcP.indexOf(t)>-1?' checked':'')+'> '+PEST_NOMBRES[t]+'</label>';
   }).join('');
   var lbox=document.getElementById('u-plog-chk-'+ix);
-  var marcL=(u.pestanas_logistica&&u.pestanas_logistica.length)?u.pestanas_logistica:pestLogPorRol(u.rol);
+  var marcL=Array.isArray(u.pestanas_logistica)?u.pestanas_logistica:pestLogPorRol(u.rol);
   lbox.innerHTML=LOG_PEST_LISTA.map(function(t){
     return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;color:#c9d4e8">'
       +'<input type="checkbox" value="'+t+'"'+(marcL.indexOf(t)>-1?' checked':'')+'> '+LOG_PEST_NOMBRES[t]+'</label>';
   }).join('');
   var abox=document.getElementById('u-asis-chk-'+ix);
-  var marcA=(u.acciones&&u.acciones.length)?u.acciones:asisPorRolOS(u.rol);
+  var marcA=Array.isArray(u.acciones)?u.acciones:asisPorRolOS(u.rol);
   abox.innerHTML=ASIS_LISTA.map(function(a){
     var pel=(a==='desc_todos');
     return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;color:'+(pel?'#f87171':'#c9d4e8')+'">'
@@ -472,7 +486,7 @@ async function guardarAppsOS(ix){
   }
   try{
     var h=await authHeaders(); h['Content-Type']='application/json';
-    var r=await fetch(BACKEND_URL+'/api/usuarios',{method:'PUT',headers:h,body:JSON.stringify({email:u.email,rol:u.rol,apps:sel,pestanas:(pest.length?pest:null),acciones:(selA.length?selA:null),pestanas_logistica:(selL.length?selL:null)})});
+    var r=await fetch(BACKEND_URL+'/api/usuarios',{method:'PUT',headers:h,body:JSON.stringify({email:u.email,rol:u.rol,apps:sel,pestanas:pest,acciones:selA,pestanas_logistica:selL})});
     var d=await r.json();
     if(d.error){ msg.textContent=d.error; return; }
     msg.style.color='var(--verde)'; msg.textContent='Guardado';
