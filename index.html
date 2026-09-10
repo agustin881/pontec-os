@@ -403,25 +403,28 @@ async function renderUsuariosOS(){
     var rows=_usr.map(function(u,ix){
       var esYo=(String(u.email||'').toLowerCase()===MI_EMAIL);
       var pers=(u.apps&&u.apps.length)?' <span style="color:#f59e0b;font-size:10px">&#9733;</span>':'';
+      var huerf=!!u.sin_rol;
+      var aviso=huerf?' <span style="background:#7c2d12;color:#fed7aa;font-size:10px;padding:1px 6px;border-radius:99px;margin-left:6px">sin permisos</span>':'';
       return '<tr>'
-        +'<td>'+u.email+(esYo?' <span class="nota" style="font-size:11px">(vos)</span>':'')+pers+'</td>'
+        +'<td>'+u.email+(esYo?' <span class="nota" style="font-size:11px">(vos)</span>':'')+pers+aviso+'</td>'
         +'<td><select onchange="cambiarRolOS('+ix+',this.value)" '+(esYo?'disabled':'')+'>'
+        +(huerf?'<option value="" selected>&mdash; elegi un rol &mdash;</option>':'')
         +['admin','encargado','operador'].map(function(rl){return '<option value="'+rl+'"'+(u.rol===rl?' selected':'')+'>'+rl+'</option>';}).join('')
         +'</select></td>'
         +'<td style="text-align:right;white-space:nowrap">'
-        +'<button class="btn-gris" onclick="toggleAppsOS('+ix+')" style="margin-right:6px">Apps</button>'
+        +(huerf?'<span class="nota" style="font-size:11px;margin-right:8px">asignale un rol para habilitarlo</span>':'<button class="btn-gris" onclick="toggleAppsOS('+ix+')" style="margin-right:6px">Apps</button>')
         +'<button class="btn-gris" onclick="cambiarClaveOS('+ix+')" style="margin-right:6px">🔑 Clave</button>'
         +(esYo?'':'<button class="btn-rojo" onclick="borrarUsuarioOS('+ix+')">Borrar</button>')
         +'</td></tr>'
         +'<tr id="u-apps-'+ix+'" style="display:none"><td colspan="3" style="background:#0d1526">'
         +'<div class="nota" style="margin-bottom:8px">Que apps ve '+u.email+' (sin marcar nada, usa las del rol):</div>'
         +'<div id="u-apps-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div>'
-        +'<div class="nota" style="margin:8px 0 8px">Adentro de <b>Rentabilidad</b> ve:</div>'
-        +'<div id="u-pest-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div>'
-        +'<div class="nota" style="margin:8px 0 8px">Adentro de <b>Logistica</b> ve:</div>'
-        +'<div id="u-plog-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div>'
-        +'<div class="nota" style="margin:8px 0 8px">Adentro del <b>Asistente</b> puede:</div>'
-        +'<div id="u-asis-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div>'
+        +'<div id="u-sec-pest-'+ix+'"><div class="nota" style="margin:8px 0 8px">Adentro de <b>Rentabilidad</b> ve:</div>'
+        +'<div id="u-pest-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div></div>'
+        +'<div id="u-sec-plog-'+ix+'"><div class="nota" style="margin:8px 0 8px">Adentro de <b>Logistica</b> ve:</div>'
+        +'<div id="u-plog-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div></div>'
+        +'<div id="u-sec-asis-'+ix+'"><div class="nota" style="margin:8px 0 8px">Adentro del <b>Asistente</b> puede:</div>'
+        +'<div id="u-asis-chk-'+ix+'" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div></div>'
         +'<button class="btn-azul" onclick="guardarAppsOS('+ix+')" style="padding:7px 12px;margin-right:6px">Guardar</button>'
         +'<button class="btn-gris" onclick="appsSegunRolOS('+ix+')">Volver a "segun rol"</button>'
         +'<span id="u-apps-msg-'+ix+'" class="nota" style="margin-left:10px"></span>'
@@ -461,7 +464,19 @@ function toggleAppsOS(ix){
     return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;color:'+(pel?'#f87171':'#c9d4e8')+'">'
       +'<input type="checkbox" value="'+a+'"'+(marcA.indexOf(a)>-1?' checked':'')+'> '+ASIS_NOMBRES[a]+'</label>';
   }).join('');
+  sincroSeccionesOS(ix);
+  box.addEventListener('change',function(){ sincroSeccionesOS(ix); });
   fila.style.display='';
+}
+// Muestra las opciones de cada app solo si esa app esta tildada arriba.
+function sincroSeccionesOS(ix){
+  var box=document.getElementById('u-apps-chk-'+ix); if(!box) return;
+  var sel=[].slice.call(box.querySelectorAll('input:checked')).map(function(c){return c.value;});
+  var mapa={ 'u-sec-pest-':'rentabilidad', 'u-sec-plog-':'logistica', 'u-sec-asis-':'asistente' };
+  Object.keys(mapa).forEach(function(pre){
+    var el=document.getElementById(pre+ix);
+    if(el) el.style.display = sel.indexOf(mapa[pre])>-1 ? '' : 'none';
+  });
 }
 async function guardarAppsOS(ix){
   var u=_usr[ix];
@@ -538,6 +553,7 @@ async function crearUsuarioOS(){
   btn.textContent='Crear usuario'; btn.disabled=false;
 }
 async function cambiarRolOS(ix,rol){
+  if(!rol) return;   // placeholder "elegi un rol" de los usuarios sin permisos
   var u=_usr[ix];
   try{
     var h=await authHeaders(); h['Content-Type']='application/json';
