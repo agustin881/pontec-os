@@ -101,6 +101,32 @@
   #chat-form{display:flex;gap:8px;margin-top:10px}
   #chat-in{flex:1;padding:11px;border-radius:10px;border:1px solid var(--borde);background:#0b1220;color:var(--texto);font-size:13px;resize:none;font-family:inherit;line-height:1.4;max-height:140px}
 
+  /* ── Mensajes: chat interno del equipo ── */
+  #panel-mensajes{flex:1;display:none;min-height:0;overflow:hidden}
+  #msg-lista{width:250px;min-width:250px;border-right:1px solid var(--borde);overflow:auto;background:var(--panel)}
+  #msg-lista .it{display:flex;align-items:center;gap:8px;padding:11px 12px;cursor:pointer;border-bottom:1px solid var(--borde);font-size:13px;color:var(--texto2);border-left:3px solid transparent}
+  #msg-lista .it:hover{background:var(--card);color:var(--texto)}
+  #msg-lista .it.sel{background:var(--card);color:var(--texto);border-left-color:var(--accent)}
+  #msg-lista .it .nom{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #msg-lista .it .pt{width:8px;height:8px;border-radius:99px;background:#39425a;flex-shrink:0}
+  #msg-lista .it .pt.on{background:var(--verde)}
+  #msg-lista .it .nb{background:var(--rojo);color:#0b1220;font-size:10px;font-weight:800;border-radius:99px;padding:1px 6px;min-width:17px;text-align:center}
+  #msg-hilo{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0}
+  #msg-cab{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--borde);font-size:13px;font-weight:700;flex-shrink:0}
+  #msg-volver{display:none;background:none;border:1px solid var(--borde);color:var(--texto2);border-radius:7px;padding:4px 9px;cursor:pointer;font-size:13px}
+  #msg-avisos{margin-left:auto;background:none;border:1px solid var(--borde);color:var(--texto2);border-radius:7px;padding:4px 9px;cursor:pointer;font-size:11px;font-weight:600}
+  #msg-avisos:hover{color:var(--texto);border-color:var(--accent)}
+  #msg-msgs{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:14px;min-height:0}
+  #msg-msgs .vacio{margin:auto;color:var(--texto2);font-size:12px;text-align:center;line-height:1.6}
+  .bu{max-width:78%;padding:8px 12px;border-radius:12px;font-size:13px;white-space:pre-wrap;word-break:break-word;line-height:1.45}
+  .bu .qui{display:block;font-size:10px;font-weight:700;opacity:.75;margin-bottom:3px}
+  .bu .hr{display:block;font-size:10px;opacity:.6;margin-top:4px;text-align:right}
+  .bu.mio{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:4px}
+  .bu.otro{align-self:flex-start;background:var(--card);border:1px solid var(--borde);border-bottom-left-radius:4px}
+  #msg-error{font-size:11px;color:var(--rojo);padding:0 14px 6px;min-height:14px}
+  #msg-form{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--borde);flex-shrink:0}
+  #msg-in{flex:1;padding:11px;border-radius:10px;border:1px solid var(--borde);background:#0b1220;color:var(--texto);font-size:13px;resize:none;font-family:inherit;line-height:1.4;max-height:120px}
+
   /* ── Celular: barra de apps ABAJO, estilo app ── */
   @media (max-width:720px){
     #os-view.on{flex-direction:column}
@@ -133,6 +159,13 @@
     #panel-usuarios td{padding:4px 0;border-top:none;text-align:left!important;white-space:normal!important}
     #panel-usuarios td button{margin:4px 6px 2px 0!important}
     #panel-asistente{padding:10px}
+    #msg-lista{width:100%;min-width:0;border-right:none}
+    #panel-mensajes.ver-hilo #msg-lista{display:none}
+    #panel-mensajes:not(.ver-hilo) #msg-hilo{display:none}
+    #msg-volver{display:inline-block}
+    #msg-msgs{padding:10px}
+    #msg-form{padding:8px 10px}
+    .bu{max-width:88%}
     #chat-form{margin-top:8px}
     /* iOS hace zoom solo si un campo tiene menos de 16px */
     input,select,textarea{font-size:16px!important}
@@ -162,7 +195,7 @@
 <!-- ── Sistema ── -->
 <div id="os-view">
   <nav id="side" aria-label="Apps">
-    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v13</span></span></div>
+    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v14</span></span></div>
     <div id="botones"></div>
     <div class="abajo">
       <div id="quien"></div>
@@ -203,6 +236,23 @@
       <div class="caja">
         <div class="cab">Equipo</div>
         <div id="u-lista"></div>
+      </div>
+    </div>
+
+    <div id="panel-mensajes">
+      <div id="msg-lista"></div>
+      <div id="msg-hilo">
+        <div id="msg-cab">
+          <button id="msg-volver" onclick="msgVolver()" aria-label="Volver">&#8592;</button>
+          <span id="msg-titulo">Todos</span>
+          <button id="msg-avisos" onclick="pedirAvisos()">Activar avisos</button>
+        </div>
+        <div id="msg-msgs"></div>
+        <div id="msg-error"></div>
+        <div id="msg-form">
+          <textarea id="msg-in" rows="1" placeholder="Escribi un mensaje..." title="Enter envia &#8212; Shift+Enter hace un renglon nuevo"></textarea>
+          <button class="btn-azul" onclick="enviarMensajeOS()">Enviar</button>
+        </div>
       </div>
     </div>
   </div>
@@ -319,6 +369,11 @@ function armarSidebar(){
     if(!a.off) b.onclick=function(){ abrirApp(a.id); };
     cont.appendChild(b);
   });
+  var bm=document.createElement('button');
+  bm.className='app-btn'; bm.id='btn-mensajes';
+  bm.innerHTML='<span class="ico">\uD83D\uDCAC</span><span class="lbl">Mensajes</span>';
+  bm.onclick=function(){ abrirMensajes(); };
+  cont.appendChild(bm);
   if(MI_ROL==='admin'){
     var u=document.createElement('button');
     u.className='app-btn'; u.id='btn-usuarios';
@@ -332,6 +387,7 @@ function armarSidebar(){
   if(!ok){ inicial=null; APPS.forEach(function(x){ if(!inicial && !x.off && visibles.indexOf(x.id)>-1) inicial=x.id; }); }
   if(inicial) abrirApp(inicial); else if(MI_ROL==='admin') abrirUsuarios();
   chequearRespondia(); setInterval(chequearRespondia, 60000);
+  chatArrancar();
 }
 // ── Aviso de preguntas sin responder (RespondIA) ─────────────────
 // Le pide el pendiente al backend de RespondIA usando la sesion del hub (SSO).
@@ -349,7 +405,8 @@ async function _riSesion(){
   }catch(e){}
   return null;
 }
-var _riPrev=null;
+var _riPrev=null, _riAviso=0;
+var RI_INSISTIR_MS=5*60*1000;   // si no responden, recordar cada 5 minutos
 // Si RespondIA esta a la vista, el propio panel hace su "ding": no lo duplicamos.
 function _riALaVista(){
   var b=document.getElementById('btn-respondia');
@@ -378,8 +435,19 @@ async function chequearRespondia(){
     var n=d.sin_responder||0;
     badgeApp('respondia', n);
     badgeApp('posventa', d.pv_sin_responder||0);
-    // suena solo cuando ENTRA una nueva (nunca en el primer chequeo del arranque)
-    if(_riPrev!==null && n>_riPrev && !_riALaVista()) dingOS();
+    // Avisa aunque la pestana de RespondIA no este abierta, y si nadie responde
+    // vuelve a avisar cada 5 minutos hasta que no quede ninguna pendiente.
+    var ahora=Date.now();
+    if(n<=0){ _riAviso=0; }
+    else if(!_riALaVista()){
+      var nueva=(_riPrev!==null && n>_riPrev);
+      if(nueva || (ahora-_riAviso)>=RI_INSISTIR_MS){
+        _riAviso=ahora; dingOS();
+        avisoNavegador('RespondIA: '+n+' pregunta'+(n===1?'':'s')+' sin responder',
+          n===1?'Hay una pregunta esperando respuesta.':('Hay '+n+' preguntas esperando respuesta.'),
+          'respondia', function(){ abrirApp('respondia'); });
+      }
+    }
     _riPrev=n;
   }catch(e){}
 }
@@ -400,6 +468,7 @@ function abrirApp(id){
   if(!a||a.off) return;
   if(a.panel){ abrirAsistente(); try{ localStorage.setItem('pontecos_app',id); }catch(e){} return; }
   _activar(id);
+  cerrarMensajes();
   document.getElementById('panel-usuarios').style.display='none';
   document.getElementById('panel-asistente').style.display='none';
   var visor=document.getElementById('visor'); visor.style.display='';
@@ -416,6 +485,7 @@ function abrirApp(id){
 // ── Usuarios (solo admin; el backend igual lo exige) ─────────────
 function abrirUsuarios(){
   _activar('usuarios');
+  cerrarMensajes();
   document.getElementById('panel-asistente').style.display='none';
   document.getElementById('visor').style.display='none';
   document.getElementById('abrir').style.display='none';
@@ -612,6 +682,7 @@ async function borrarUsuarioOS(ix){
 var _chatHist=[], _chatPend=null;
 function abrirAsistente(){
   _activar('asistente');
+  cerrarMensajes();
   document.getElementById('visor').style.display='none';
   document.getElementById('abrir').style.display='none';
   document.getElementById('hint').style.display='none';
@@ -670,6 +741,220 @@ async function confirmarChat(){
 }
 document.getElementById('chat-in').addEventListener('keydown',function(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); enviarChat(); } });
 document.getElementById('chat-in').addEventListener('input',function(){ this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,140)+'px'; });
+
+// ── Mensajes: chat interno del equipo ────────────────────────────
+// Canal "Todos" (le llega a todo el mundo) + mensajes directos a una persona.
+// El hub le pregunta al backend cada pocos segundos si hay algo nuevo; eso
+// tambien sirve de "estoy conectado" para el puntito verde de los demas.
+var _msgCon='todos', _msgEquipo=[], _msgOnline={}, _msgDesde=null;
+var _msgHist={}, _msgIds={}, _msgNoLeidos={}, _msgAbierto=false, _msgTimer=null, _msgError='';
+
+function msgNombre(email){
+  if(!email) return '?';
+  if(email===MI_EMAIL) return 'Vos';
+  return String(email).split('@')[0];
+}
+function msgHora(iso){
+  try{
+    var d=new Date(iso), h=new Date();
+    var hhmm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    if(d.toDateString()===h.toDateString()) return hhmm;
+    return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+' '+hhmm;
+  }catch(e){ return ''; }
+}
+function msgEsc(t){ var d=document.createElement('div'); d.textContent=t==null?'':String(t); return d.innerHTML; }
+
+// Aviso del navegador: se ve aunque Pontec OS este en otra pestana o minimizado.
+function pedirAvisos(){
+  try{
+    if(!('Notification' in window)){ alert('Este navegador no soporta avisos.'); return; }
+    if(Notification.permission==='granted'){ pintarBotonAvisos(); return; }
+    if(Notification.permission==='denied'){ alert('Los avisos estan bloqueados para esta pagina. Habilitalos desde el candado de la barra de direcciones.'); return; }
+    Notification.requestPermission().then(function(){ pintarBotonAvisos(); });
+  }catch(e){}
+}
+function pintarBotonAvisos(){
+  var b=document.getElementById('msg-avisos'); if(!b) return;
+  var ok=('Notification' in window) && Notification.permission==='granted';
+  b.style.display = ok ? 'none' : '';
+}
+function avisoNavegador(titulo, cuerpo, tag, alClick){
+  try{
+    if(!('Notification' in window) || Notification.permission!=='granted') return;
+    var n=new Notification(titulo, { body: cuerpo, tag: tag||'pontecos', renotify: true, icon: 'icon-192.png', badge: 'icon-192.png' });
+    n.onclick=function(){ try{ window.focus(); }catch(e){} try{ if(alClick) alClick(); }catch(e){} n.close(); };
+  }catch(e){}
+}
+
+function chatArrancar(){
+  if(_msgTimer) return;
+  cargarEquipoOS();
+  chatLatido();
+}
+function chatProgramar(){
+  clearTimeout(_msgTimer);
+  _msgTimer=setTimeout(chatLatido, _msgAbierto ? 8000 : 20000);
+}
+async function chatLatido(){
+  try{
+    var h=await authHeaders(); h['Content-Type']='application/json';
+    var r=await fetch(BACKEND_URL+'/api/chat/latido',{method:'POST',headers:h,body:JSON.stringify({desde:_msgDesde})});
+    var d=await r.json();
+    _msgError = d.error || '';
+    _msgOnline = d.online || {};
+    var lista = d.mensajes || [];
+    var tope = null;
+    lista.forEach(function(m){ if(!tope || m.creado>tope) tope=m.creado; });
+    _msgDesde = tope || d.ahora || _msgDesde;
+    lista.forEach(chatEntrante);
+    pintarListaMsg();
+    pintarErrorMsg();
+  }catch(e){}
+  chatProgramar();
+}
+// De que conversacion es este mensaje, desde mi punto de vista
+function chatConvDe(m){
+  if(m.para===null || m.para===undefined) return 'todos';
+  return (String(m.de).toLowerCase()===MI_EMAIL) ? String(m.para).toLowerCase() : String(m.de).toLowerCase();
+}
+function chatEntrante(m){
+  if(_msgIds[m.id]) return;
+  _msgIds[m.id]=1;
+  var conv=chatConvDe(m);
+  if(!_msgHist[conv]) _msgHist[conv]=[];
+  _msgHist[conv].push(m);
+  var mio=(String(m.de).toLowerCase()===MI_EMAIL);
+  if(mio){ if(_msgAbierto && _msgCon===conv) pintarHiloMsg(); return; }
+  var mirando=_msgAbierto && _msgCon===conv && document.visibilityState==='visible';
+  if(mirando){ pintarHiloMsg(); return; }
+  _msgNoLeidos[conv]=(_msgNoLeidos[conv]||0)+1;
+  dingOS();
+  var quien=msgNombre(m.de);
+  avisoNavegador(
+    conv==='todos' ? (quien+' escribio a todos') : (quien+' te escribio'),
+    String(m.texto||'').slice(0,150),
+    'chat-'+conv,
+    function(){ abrirMensajes(conv); }
+  );
+  if(_msgAbierto && _msgCon===conv) pintarHiloMsg();
+}
+async function cargarEquipoOS(){
+  try{
+    var h=await authHeaders();
+    var r=await fetch(BACKEND_URL+'/api/chat/equipo',{headers:h});
+    var d=await r.json();
+    if(d.equipo){ _msgEquipo=d.equipo; _msgOnline=d.online||_msgOnline; pintarListaMsg(); }
+  }catch(e){}
+}
+function totalNoLeidos(){
+  var t=0; Object.keys(_msgNoLeidos).forEach(function(k){ t+=_msgNoLeidos[k]||0; }); return t;
+}
+function pintarListaMsg(){
+  badgeApp('mensajes', totalNoLeidos());
+  var cont=document.getElementById('msg-lista'); if(!cont) return;
+  var filas=[];
+  filas.push(itemConv('todos','📢 Todos', null));
+  _msgEquipo.forEach(function(u){
+    if(u.email===MI_EMAIL) return;
+    filas.push(itemConv(u.email, msgNombre(u.email), u.email));
+  });
+  cont.innerHTML=filas.join('');
+}
+function itemConv(id, nombre, email){
+  var n=_msgNoLeidos[id]||0;
+  var on = email ? !!_msgOnline[email] : false;
+  return '<div class="it'+(_msgCon===id?' sel':'')+'" onclick="abrirMensajes(\''+id+'\')">'
+    + (email ? '<span class="pt'+(on?' on':'')+'" title="'+(on?'conectado':'desconectado')+'"></span>' : '<span style="width:8px"></span>')
+    + '<span class="nom">'+msgEsc(nombre)+'</span>'
+    + (n?'<span class="nb">'+(n>99?'99+':n)+'</span>':'')
+    + '</div>';
+}
+function pintarErrorMsg(){
+  var e=document.getElementById('msg-error'); if(!e) return;
+  e.textContent=_msgError||'';
+}
+function pintarHiloMsg(){
+  var cont=document.getElementById('msg-msgs'); if(!cont) return;
+  var lista=_msgHist[_msgCon]||[];
+  if(!lista.length){
+    cont.innerHTML='<div class="vacio">'+(_msgCon==='todos'
+      ? 'Todavia no hay mensajes.<br>Lo que escribas aca le llega a todo el equipo.'
+      : 'Todavia no hay mensajes con esta persona.')+'</div>';
+    return;
+  }
+  cont.innerHTML=lista.map(function(m){
+    var mio=(String(m.de).toLowerCase()===MI_EMAIL);
+    return '<div class="bu '+(mio?'mio':'otro')+'">'
+      + ((!mio && _msgCon==='todos') ? '<span class="qui">'+msgEsc(msgNombre(m.de))+'</span>' : '')
+      + msgEsc(m.texto)
+      + '<span class="hr">'+msgHora(m.creado)+'</span></div>';
+  }).join('');
+  cont.scrollTop=cont.scrollHeight;
+}
+async function cargarHiloMsg(conv){
+  var cont=document.getElementById('msg-msgs');
+  if(!_msgHist[conv]) cont.innerHTML='<div class="vacio">Cargando...</div>';
+  try{
+    var h=await authHeaders();
+    var r=await fetch(BACKEND_URL+'/api/chat/mensajes?con='+encodeURIComponent(conv),{headers:h});
+    var d=await r.json();
+    if(d.error){ _msgError=d.error; pintarErrorMsg(); if(!_msgHist[conv]) _msgHist[conv]=[]; pintarHiloMsg(); return; }
+    _msgError=''; pintarErrorMsg();
+    _msgHist[conv]=d.mensajes||[];
+    _msgHist[conv].forEach(function(m){ _msgIds[m.id]=1; });
+  }catch(e){ _msgError='No pudimos traer los mensajes: '+e.message; pintarErrorMsg(); }
+  if(_msgCon===conv) pintarHiloMsg();
+}
+function abrirMensajes(conv){
+  _activar('mensajes');
+  document.getElementById('visor').style.display='none';
+  document.getElementById('abrir').style.display='none';
+  document.getElementById('hint').style.display='none';
+  document.getElementById('panel-usuarios').style.display='none';
+  document.getElementById('panel-asistente').style.display='none';
+  document.getElementById('titulo').textContent='Mensajes';
+  var pan=document.getElementById('panel-mensajes');
+  pan.style.display='flex';
+  _msgAbierto=true;
+  if(conv) _msgCon=conv;
+  if(conv) pan.classList.add('ver-hilo');
+  _msgNoLeidos[_msgCon]=0;
+  document.getElementById('msg-titulo').textContent = _msgCon==='todos' ? 'Todos' : msgNombre(_msgCon);
+  pintarBotonAvisos();
+  pintarListaMsg();
+  pintarHiloMsg();
+  cargarHiloMsg(_msgCon);
+  if(!_msgEquipo.length) cargarEquipoOS();
+  chatProgramar();
+  try{ pedirAvisos(); }catch(e){}
+  var i=document.getElementById('msg-in'); if(i && window.innerWidth>720) i.focus();
+}
+function cerrarMensajes(){
+  _msgAbierto=false;
+  var p=document.getElementById('panel-mensajes');
+  if(p){ p.style.display='none'; p.classList.remove('ver-hilo'); }
+}
+function msgVolver(){
+  document.getElementById('panel-mensajes').classList.remove('ver-hilo');
+}
+async function enviarMensajeOS(){
+  var inp=document.getElementById('msg-in');
+  var t=(inp.value||'').trim(); if(!t) return;
+  inp.value=''; inp.style.height='auto';
+  _msgError=''; pintarErrorMsg();
+  try{
+    var h=await authHeaders(); h['Content-Type']='application/json';
+    var r=await fetch(BACKEND_URL+'/api/chat/mensajes',{method:'POST',headers:h,
+      body:JSON.stringify({para:_msgCon==='todos'?null:_msgCon, texto:t})});
+    var d=await r.json();
+    if(d.error){ _msgError=d.error; pintarErrorMsg(); inp.value=t; return; }
+    if(d.mensaje) chatEntrante(d.mensaje);
+    pintarHiloMsg();
+  }catch(e){ _msgError='No se pudo enviar: '+e.message; pintarErrorMsg(); inp.value=t; }
+}
+document.getElementById('msg-in').addEventListener('keydown',function(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); enviarMensajeOS(); } });
+document.getElementById('msg-in').addEventListener('input',function(){ this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,120)+'px'; });
+document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible'){ if(_msgAbierto){ _msgNoLeidos[_msgCon]=0; pintarListaMsg(); } chatLatido(); } });
 
 // ── SSO: las apps embebidas piden la sesion y el hub se la pasa ───
 // Solo responde a los origenes de SUS apps (nunca a un tercero).
