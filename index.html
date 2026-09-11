@@ -2,8 +2,16 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Pontec OS</title>
+<meta name="theme-color" content="#0b1220">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pontec OS">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
@@ -12,6 +20,7 @@
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%}
+  @supports (height:100dvh){ html,body{height:100dvh} }
   body{background:var(--bg);color:var(--texto);font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
 
   /* ── Login ── */
@@ -61,7 +70,8 @@
   #abrir{margin-left:auto;font-size:12px;color:var(--texto2);text-decoration:none;border:1px solid var(--borde);border-radius:7px;padding:5px 10px}
   #abrir:hover{color:var(--texto);border-color:var(--accent)}
   #hint{display:none;font-size:12px;color:#0b1220;background:#f59e0b;border-radius:7px;padding:5px 10px;font-weight:700}
-  #visor{flex:1;border:none;width:100%;background:var(--bg)}
+  #visor{flex:1;min-height:0;border:none;width:100%;background:var(--bg)}
+  #salir-top{display:none;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;border:1px solid var(--borde);border-radius:8px;background:transparent;color:var(--texto2);font-size:15px;cursor:pointer}
 
   /* ── Panel Usuarios ── */
   #panel-usuarios{flex:1;display:none;overflow:auto;padding:18px}
@@ -91,19 +101,41 @@
   #chat-form{display:flex;gap:8px;margin-top:10px}
   #chat-in{flex:1;padding:11px;border-radius:10px;border:1px solid var(--borde);background:#0b1220;color:var(--texto);font-size:13px;resize:none;font-family:inherit;line-height:1.4;max-height:140px}
 
+  /* ── Celular: barra de apps ABAJO, estilo app ── */
   @media (max-width:720px){
     #os-view.on{flex-direction:column}
-    #side{width:100%;min-width:0;flex-direction:row;align-items:center;overflow-x:auto;border-right:none;border-bottom:1px solid var(--borde);padding:8px}
+    #main{order:1;flex:1;min-height:0}
+    #side{order:2;width:100%;min-width:0;flex-direction:row;align-items:stretch;flex-shrink:0;transition:none;
+      border-right:none;border-top:1px solid var(--borde);
+      padding:3px 4px calc(3px + env(safe-area-inset-bottom));
+      overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+    #side::-webkit-scrollbar{display:none}
     #side:hover{width:100%;min-width:0}
+    #brand,#quien,#side .abajo{display:none}
     #side:not(:hover) .lbl{display:inline}
-    #side:not(:hover) .lbl-b{display:inline}
-    #brand{padding:0 10px;font-size:14px;white-space:nowrap}
-    .app-btn{width:auto;white-space:nowrap;border-left:none;border-bottom:3px solid transparent;border-radius:8px 8px 0 0;padding:9px 12px;margin-bottom:0}
-    .app-btn.active{border-left-color:transparent;border-bottom-color:var(--accent)}
+    #botones{display:flex;flex:1;justify-content:space-around;align-items:stretch;gap:0;min-width:0;width:100%}
+    .app-btn{flex:1 1 0;min-width:44px;max-width:none;min-height:54px;flex-direction:column;justify-content:center;gap:3px;
+      padding:6px 4px 5px;margin:0;border:none;border-top:3px solid transparent;border-radius:0;
+      font-size:10px;line-height:1.15;text-align:center;white-space:nowrap}
+    .app-btn .ico{font-size:21px;width:auto;line-height:1}
+    .app-btn .lbl{overflow:hidden;text-overflow:ellipsis;max-width:100%}
+    .app-btn.active{background:transparent;border-top-color:var(--accent);border-left-color:transparent}
     .app-btn .pronto{display:none}
-    #side .abajo{margin-top:0;margin-left:auto;display:flex;align-items:center}
-    #quien{display:none}
-    #salir{width:auto;padding:8px 10px;white-space:nowrap}
+    .app-btn .badge{left:auto;right:6px;top:2px}
+    #topbar{padding:8px 10px;gap:8px;padding-top:calc(8px + env(safe-area-inset-top))}
+    #titulo{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
+    #abrir{margin-left:0;padding:6px 9px;font-size:12px;white-space:nowrap}
+    #salir-top{display:inline-flex}
+    #panel-usuarios{padding:12px}
+    #panel-usuarios table,#panel-usuarios tbody,#panel-usuarios tr,#panel-usuarios td{display:block;width:100%}
+    #panel-usuarios thead{display:none}
+    #panel-usuarios tr{border-top:1px solid var(--borde);padding:8px 0}
+    #panel-usuarios td{padding:4px 0;border-top:none;text-align:left!important;white-space:normal!important}
+    #panel-usuarios td button{margin:4px 6px 2px 0!important}
+    #panel-asistente{padding:10px}
+    #chat-form{margin-top:8px}
+    /* iOS hace zoom solo si un campo tiene menos de 16px */
+    input,select,textarea{font-size:16px!important}
   }
   @media (prefers-reduced-motion:no-preference){
     .app-btn{transition:background .15s,color .15s,border-color .15s}
@@ -130,7 +162,7 @@
 <!-- ── Sistema ── -->
 <div id="os-view">
   <nav id="side" aria-label="Apps">
-    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v12</span></span></div>
+    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v13</span></span></div>
     <div id="botones"></div>
     <div class="abajo">
       <div id="quien"></div>
@@ -142,6 +174,7 @@
       <div id="titulo"></div>
       <span id="hint"></span>
       <a id="abrir" href="#" target="_blank" rel="noopener">Abrir aparte &#8599;</a>
+    <button id="salir-top" onclick="salir()" title="Salir" aria-label="Salir">&#128682;</button>
     </div>
     <iframe id="visor" title="App" allow="clipboard-write; microphone; autoplay"></iframe>
 
