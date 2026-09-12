@@ -246,7 +246,7 @@
 <!-- ── Sistema ── -->
 <div id="os-view">
   <nav id="side" aria-label="Apps">
-    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v16</span></span></div>
+    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v17</span></span></div>
     <div id="botones"></div>
     <div class="abajo">
       <div id="quien"></div>
@@ -313,6 +313,7 @@
             <thead><tr>
               <th onclick="abOrdenar('sku')">SKU</th>
               <th onclick="abOrdenar('nombre')">Producto</th>
+              <th class="oc" onclick="abOrdenar('proveedor')">Proveedor</th>
               <th class="num" onclick="abOrdenar('disponible')" title="Disponible total (General + ML Full + Z Flex, sin reservas)">Disp.</th>
               <th class="num oc" onclick="abOrdenar('d_general')">General</th>
               <th class="num oc" onclick="abOrdenar('d_full')">Full</th>
@@ -1094,10 +1095,10 @@ async function abCargar(fresco){
     var det=x.detalle||{};
     var g=function(k){ var v=det[k]; return v==null?0:(typeof v==='object'?Number(v.stock||0):Number(v)||0); };
     x.d_general=g('GENERAL'); x.d_full=g('ML FULL'); x.d_zflex=g('Z FLEX BAIRES');
-    x.en_transito=Number(x.en_transito||0); x.pedir=Number(x.pedir||0); x.compra=x.compra||'';
+    x.en_transito=Number(x.en_transito||0); x.pedir=Number(x.pedir||0); x.compra=x.compra||''; x.proveedor=x.proveedor||'';
   });
   var s=d.ultima_sync;
-  est.textContent = s && s.cuando ? ('Stock actualizado '+abHoraLocal(s.cuando)+(s.ok===false?' · con errores':'')+' · se actualiza solo cada 8 h') : 'Todavia no se sincronizo el stock';
+  est.textContent = s && s.cuando ? ('Stock actualizado '+abHoraLocal(s.cuando)+(s.ok===false?' · con errores':'')+' · se actualiza solo cada 8 h') : (d.foto ? ('Stock del '+abFecha(d.foto)+' · se actualiza solo cada 8 h') : 'Todavia no se sincronizo el stock');
   abPintar();
 }
 function abOrdenar(col){ if(_abOrden===col) _abAsc=!_abAsc; else { _abOrden=col; _abAsc=true; } abPintar(); }
@@ -1139,6 +1140,7 @@ function abPintar(){
     return '<tr class="'+(_abSel===x.sku?'sel':'')+'" onclick="abAbrirSku(\''+x.sku+'\')">'
       +'<td class="sku">'+msgEsc(x.sku)+'</td>'
       +'<td class="nom" title="'+msgEsc(x.nombre)+'">'+msgEsc(x.nombre||'')+'</td>'
+      +'<td class="oc nom" title="'+msgEsc(x.proveedor||'')+'">'+msgEsc(x.proveedor||'')+'</td>'
       +'<td class="num" title="stock total '+abN(x.stock)+'">'+abN(x.disponible)+'</td>'
       +'<td class="num oc">'+abN(x.d_general)+'</td>'
       +'<td class="num oc">'+abN(x.d_full)+'</td>'
@@ -1196,6 +1198,7 @@ async function abAbrirSku(sku){
     +'<div class="cuerpo">'
     +'<div class="nota">'+msgEsc(x.nombre||'')+'</div>'
     +'<div class="ab-kv">'
+    +(x.proveedor?'<span>Proveedor</span><span>'+msgEsc(x.proveedor)+'</span>':'')
     +'<span>General</span><span>'+abN(x.d_general)+'</span>'
     +'<span>ML Full</span><span>'+abN(x.d_full)+'</span>'
     +'<span>Z Flex Baires</span><span>'+abN(x.d_zflex)+'</span>'
