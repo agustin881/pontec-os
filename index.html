@@ -284,7 +284,7 @@
 <!-- ── Sistema ── -->
 <div id="os-view">
   <nav id="side" aria-label="Apps">
-    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v18</span></span></div>
+    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v19</span></span></div>
     <div id="botones"></div>
     <div class="abajo">
       <div id="quien"></div>
@@ -912,11 +912,11 @@ function msgHora(iso){
 function msgEsc(t){ var d=document.createElement('div'); d.textContent=t==null?'':String(t); return d.innerHTML; }
 
 // Aviso del navegador: se ve aunque Pontec OS este en otra pestana o minimizado.
-function pedirAvisos(){
+function pedirAvisos(silencioso){
   try{
-    if(!('Notification' in window)){ alert('Este navegador no soporta avisos.'); return; }
+    if(!('Notification' in window)){ if(!silencioso) alert('Este navegador no soporta avisos.'); return; }
     if(Notification.permission==='granted'){ pintarBotonAvisos(); return; }
-    if(Notification.permission==='denied'){ alert('Los avisos estan bloqueados para esta pagina. Habilitalos desde el candado de la barra de direcciones.'); return; }
+    if(Notification.permission==='denied'){ if(!silencioso) alert('Los avisos estan bloqueados para esta pagina. Habilitalos desde el candado de la barra de direcciones.'); return; }
     Notification.requestPermission().then(function(){ pintarBotonAvisos(); });
   }catch(e){}
 }
@@ -1074,7 +1074,7 @@ function abrirMensajes(conv){
   cargarHiloMsg(_msgCon);
   if(!_msgEquipo.length) cargarEquipoOS();
   chatProgramar();
-  try{ pedirAvisos(); }catch(e){}
+  try{ pedirAvisos(true); }catch(e){}   // sin alert: solo pide permiso si nunca se respondio
   var i=document.getElementById('msg-in'); if(i && window.innerWidth>720) i.focus();
 }
 function cerrarMensajes(){
