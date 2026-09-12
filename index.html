@@ -132,6 +132,7 @@
   .ab-hz{font-size:10px;color:var(--texto2)}
   #ab-lado{width:0;min-width:0;overflow:hidden;border-left:1px solid var(--borde);background:var(--panel);display:flex;flex-direction:column;transition:width .15s ease}
   #ab-lado.on{width:360px;min-width:360px}
+  #panel-abast.solo-lectura .ab-form, #panel-abast.solo-lectura .ab-lista .b{display:none}
   #ab-lado .cab{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--borde);font-weight:700;flex-shrink:0}
   #ab-lado .cab .x{margin-left:auto;background:none;border:1px solid var(--borde);color:var(--texto2);border-radius:7px;padding:3px 8px;cursor:pointer}
   #ab-lado .cuerpo{flex:1;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:14px}
@@ -245,7 +246,7 @@
 <!-- ── Sistema ── -->
 <div id="os-view">
   <nav id="side" aria-label="Apps">
-    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v15</span></span></div>
+    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v16</span></span></div>
     <div id="botones"></div>
     <div class="abajo">
       <div id="quien"></div>
@@ -298,9 +299,11 @@
           <option value="poner">Poner descuento (sobra stock)</option>
           <option value="mantener">Mantener</option>
           <option value="sin_ventas">Sin ventas</option>
+          <option value="recomprar">Recomprar (sin stock)</option>
+          <option value="llegando">Sin stock, llegando</option>
         </select>
         <button class="btn-gris" onclick="abVerProveedores()">Proveedores</button>
-        <button class="btn-gris" id="ab-sync" onclick="abSincronizarUI()">Sincronizar</button>
+        <button class="btn-gris" id="ab-sync" onclick="abSincronizarUI()">Actualizar ahora</button>
         <span id="ab-estado" class="nota"></span>
       </div>
       <div id="ab-chips"></div>
@@ -310,14 +313,20 @@
             <thead><tr>
               <th onclick="abOrdenar('sku')">SKU</th>
               <th onclick="abOrdenar('nombre')">Producto</th>
-              <th class="num" onclick="abOrdenar('disponible')">Disp.</th>
+              <th class="num" onclick="abOrdenar('disponible')" title="Disponible total (General + ML Full + Z Flex, sin reservas)">Disp.</th>
+              <th class="num oc" onclick="abOrdenar('d_general')">General</th>
+              <th class="num oc" onclick="abOrdenar('d_full')">Full</th>
+              <th class="num oc" onclick="abOrdenar('d_zflex')">Z Flex</th>
               <th class="num oc" onclick="abOrdenar('reservado')">Reserv.</th>
+              <th class="num oc" onclick="abOrdenar('en_transito')" title="Pendiente de recepcion en Contabilium + ordenes en camino cargadas">Tr&aacute;nsito</th>
               <th class="num" onclick="abOrdenar('vendidas')">Vend. 15d</th>
               <th class="num oc" onclick="abOrdenar('velocidad')">u/d&iacute;a</th>
               <th class="num" onclick="abOrdenar('cobertura')">Cobert.</th>
               <th class="oc" onclick="abOrdenar('eta')">Llega</th>
               <th class="num" onclick="abOrdenar('faltan')">Faltan</th>
               <th class="num oc" onclick="abOrdenar('ratio')">Ratio</th>
+              <th class="num" onclick="abOrdenar('pedir')" title="Cuanto pedir para cubrir plazo + colchon con la velocidad actual">Pedir</th>
+              <th onclick="abOrdenar('compra')" title="Se vende y esta sin stock (o no llega al plazo de reposicion)">Compra</th>
               <th onclick="abOrdenar('accion')">Acci&oacute;n</th>
             </tr></thead>
             <tbody id="ab-tbody"></tbody>
@@ -450,6 +459,7 @@ async function arrancar(){
 }
 function armarSidebar(){
   var visibles=(MI_APPS&&MI_APPS.length)?MI_APPS:appsPorRol(MI_ROL);
+  if(MI_ROL==='admin') visibles=APPS.map(function(a){ return a.id; });   // el admin ve todo siempre
   var cont=document.getElementById('botones'); cont.innerHTML='';
   APPS.forEach(function(a){
     if(visibles.indexOf(a.id)===-1) return;
@@ -1069,6 +1079,9 @@ function abrirAbast(){
   document.getElementById('panel-asistente').style.display='none';
   document.getElementById('titulo').textContent='Abastecimiento';
   document.getElementById('panel-abast').style.display='flex';
+  var puedeEditar=(MI_ROL==='admin'||MI_ROL==='encargado');
+  var bs=document.getElementById('ab-sync'); if(bs) bs.style.display=puedeEditar?'':'none';
+  document.getElementById('panel-abast').classList.toggle('solo-lectura', !puedeEditar);
   if(!_abDatos) abCargar(false); else abPintar();
 }
 function cerrarAbast(){ var p=document.getElementById('panel-abast'); if(p) p.style.display='none'; }
@@ -1077,8 +1090,14 @@ async function abCargar(fresco){
   var d=await abApi('/api/abast/resumen'+(fresco?'?fresco=1':''));
   if(d.error){ est.textContent=d.error; est.style.color='var(--rojo)'; return; }
   est.style.color=''; _abDatos=d;
+  (d.filas||[]).forEach(function(x){
+    var det=x.detalle||{};
+    var g=function(k){ var v=det[k]; return v==null?0:(typeof v==='object'?Number(v.stock||0):Number(v)||0); };
+    x.d_general=g('GENERAL'); x.d_full=g('ML FULL'); x.d_zflex=g('Z FLEX BAIRES');
+    x.en_transito=Number(x.en_transito||0); x.pedir=Number(x.pedir||0); x.compra=x.compra||'';
+  });
   var s=d.ultima_sync;
-  est.textContent = s && s.cuando ? ('Stock actualizado '+abFecha(s.cuando)+' '+String(s.cuando).slice(11,16)+' UTC'+(s.faltantes?(' · faltan '+s.faltantes+' SKU'):'')) : 'Todavia no se sincronizo el stock';
+  est.textContent = s && s.cuando ? ('Stock actualizado '+abHoraLocal(s.cuando)+(s.ok===false?' · con errores':'')+' · se actualiza solo cada 8 h') : 'Todavia no se sincronizo el stock';
   abPintar();
 }
 function abOrdenar(col){ if(_abOrden===col) _abAsc=!_abAsc; else { _abOrden=col; _abAsc=true; } abPintar(); }
@@ -1087,14 +1106,17 @@ function abPintar(){
   var q=(document.getElementById('ab-buscar').value||'').trim().toUpperCase();
   var f=document.getElementById('ab-filtro').value;
   var filas=_abDatos.filas.filter(function(x){
-    if(f && x.accion!==f) return false;
+    if(f==='recomprar'){ if(x.compra!=='recomprar') return false; }
+    else if(f==='llegando'){ if(x.compra!=='llegando') return false; }
+    else if(f && x.accion!==f) return false;
     if(q && x.sku.indexOf(q)===-1 && String(x.nombre||'').toUpperCase().indexOf(q)===-1) return false;
     return true;
   });
-  var cnt={sacar:0,poner:0,mantener:0,sin_ventas:0};
-  _abDatos.filas.forEach(function(x){ if(cnt[x.accion]!=null) cnt[x.accion]++; });
-  document.getElementById('ab-chips').innerHTML=['sacar','poner','mantener','sin_ventas'].map(function(k){
-    return '<button class="ab-chip'+(f===k?' on':'')+'" onclick="abFiltro(\''+k+'\')">'+AB_ACC[k]+' <b>'+cnt[k]+'</b></button>';
+  var cnt={recomprar:0,llegando:0,sacar:0,poner:0,mantener:0,sin_ventas:0};
+  _abDatos.filas.forEach(function(x){ if(cnt[x.accion]!=null) cnt[x.accion]++; if(x.compra&&cnt[x.compra]!=null) cnt[x.compra]++; });
+  var NOM={recomprar:'&#128722; Recomprar',llegando:'Llegando',sacar:AB_ACC.sacar,poner:AB_ACC.poner,mantener:AB_ACC.mantener,sin_ventas:AB_ACC.sin_ventas};
+  document.getElementById('ab-chips').innerHTML=['recomprar','llegando','sacar','poner','mantener','sin_ventas'].map(function(k){
+    return '<button class="ab-chip'+(f===k?' on':'')+'" onclick="abFiltro(\''+k+'\')">'+NOM[k]+' <b>'+cnt[k]+'</b></button>';
   }).join('')+'<span class="nota" style="align-self:center">'+_abDatos.filas.length+' productos · ventas de ML de los ultimos '+_abDatos.ventana_dias+' dias</span>';
   var col=_abOrden, asc=_abAsc?1:-1;
   filas.sort(function(a,b){
@@ -1108,7 +1130,7 @@ function abPintar(){
   var vacio=document.getElementById('ab-vacio');
   if(!filas.length){
     tb.innerHTML=''; vacio.style.display='';
-    vacio.innerHTML = _abDatos.filas.length ? 'Nada coincide con ese filtro.' : 'Todavia no hay datos.<br>Toca <b>Sincronizar</b> para traer el stock de Contabilium (tarda un par de minutos la primera vez).';
+    vacio.innerHTML = _abDatos.filas.length ? 'Nada coincide con ese filtro.' : 'Todavia no hay datos.<br>Toca <b>Actualizar ahora</b> para traer el stock de Contabilium (tarda unos 8 minutos).';
     return;
   }
   vacio.style.display='none';
@@ -1117,26 +1139,44 @@ function abPintar(){
     return '<tr class="'+(_abSel===x.sku?'sel':'')+'" onclick="abAbrirSku(\''+x.sku+'\')">'
       +'<td class="sku">'+msgEsc(x.sku)+'</td>'
       +'<td class="nom" title="'+msgEsc(x.nombre)+'">'+msgEsc(x.nombre||'')+'</td>'
-      +'<td class="num">'+abN(x.disponible)+'</td>'
+      +'<td class="num" title="stock total '+abN(x.stock)+'">'+abN(x.disponible)+'</td>'
+      +'<td class="num oc">'+abN(x.d_general)+'</td>'
+      +'<td class="num oc">'+abN(x.d_full)+'</td>'
+      +'<td class="num oc">'+abN(x.d_zflex)+'</td>'
       +'<td class="num oc">'+abN(x.reservado)+'</td>'
+      +'<td class="num oc">'+(x.en_transito?abN(x.en_transito):'<span class="ab-hz">0</span>')+'</td>'
       +'<td class="num">'+abN(x.vendidas)+'</td>'
       +'<td class="num oc">'+abN(x.velocidad,2)+'</td>'
       +'<td class="num">'+(x.cobertura===null?'∞':abN(x.cobertura)+'d')+'</td>'
       +'<td class="oc">'+(x.eta?abFecha(x.eta):'<span class="ab-hz">sin orden</span>')+'</td>'
       +'<td class="num">'+abN(x.faltan)+'d'+hz+'</td>'
       +'<td class="num oc">'+(x.ratio===null?'—':abN(x.ratio,2))+'</td>'
+      +'<td class="num">'+(x.pedir?'<b>'+abN(x.pedir)+'</b>':'<span class="ab-hz">—</span>')+'</td>'
+      +'<td>'+(x.compra?'<span class="ab-acc '+(x.compra==='recomprar'?'sacar':'mantener')+'">'+(x.compra==='recomprar'?'Recomprar':'Llegando')+'</span>':'')+'</td>'
       +'<td><span class="ab-acc '+x.accion+'">'+AB_ACC[x.accion]+'</span></td>'
       +'</tr>';
   }).join('');
 }
 function abFiltro(k){ var s=document.getElementById('ab-filtro'); s.value = s.value===k ? '' : k; abPintar(); }
+function abHoraLocal(iso){
+  try{ var d=new Date(iso); return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }catch(e){ return ''; }
+}
 async function abSincronizarUI(){
-  var b=document.getElementById('ab-sync'); b.disabled=true; b.textContent='Sincronizando...';
-  var est=document.getElementById('ab-estado'); est.textContent='Trayendo stock de Contabilium, puede tardar un par de minutos...';
-  var d=await abApi('/api/abast/sincronizar',{method:'POST',body:'{}'});
-  b.disabled=false; b.textContent='Sincronizar';
-  if(d.error){ est.textContent=d.error; est.style.color='var(--rojo)'; return; }
-  if(d.errores && d.errores.length){ est.textContent='Sincronizado con avisos: '+d.errores.slice(0,2).join(' | '); }
+  var b=document.getElementById('ab-sync'); b.disabled=true; b.textContent='Actualizando...';
+  var est=document.getElementById('ab-estado'); est.style.color=''; est.textContent='Trayendo el stock de Contabilium deposito por deposito: tarda unos 8 minutos, podes seguir usando el sistema.';
+  var fin=null;
+  abApi('/api/abast/sincronizar?forzar=1',{method:'POST',body:'{}'}).then(function(d){ fin=d; }).catch(function(e){ fin={error:e.message}; });
+  await new Promise(function(r){ setTimeout(r,3000); });
+  for(var i=0;i<120;i++){
+    if(fin && fin.error){ break; }
+    var e=await abApi('/api/abast/estado');
+    if(e && e.corriendo===false && (fin || (e.ultima_sync && (Date.now()-new Date(e.ultima_sync.cuando).getTime())<60000))){ fin=fin||e.ultima_sync||{}; break; }
+    est.textContent='Actualizando stock... ('+((i+1)*10)+' s)';
+    await new Promise(function(r){ setTimeout(r,10000); });
+  }
+  b.disabled=false; b.textContent='Actualizar ahora';
+  if(fin && fin.error){ est.textContent=fin.error; est.style.color='var(--rojo)'; return; }
+  if(fin && fin.errores && fin.errores.length){ est.textContent='Actualizado con avisos: '+fin.errores.slice(0,2).join(' | '); }
   await abCargar(true);
 }
 async function abCargarProvs(){ var d=await abApi('/api/abast/proveedores'); _abProvs=d.proveedores||[]; return _abProvs; }
@@ -1156,9 +1196,14 @@ async function abAbrirSku(sku){
     +'<div class="cuerpo">'
     +'<div class="nota">'+msgEsc(x.nombre||'')+'</div>'
     +'<div class="ab-kv">'
+    +'<span>General</span><span>'+abN(x.d_general)+'</span>'
+    +'<span>ML Full</span><span>'+abN(x.d_full)+'</span>'
+    +'<span>Z Flex Baires</span><span>'+abN(x.d_zflex)+'</span>'
     +'<span>Stock total</span><span>'+abN(x.stock)+'</span>'
-    +'<span>Reservado</span><span>'+abN(x.reservado)+'</span>'
-    +'<span>Disponible</span><span>'+abN(x.disponible)+'</span>'
+    +'<span>Reservado (ordenes sin facturar)</span><span>'+abN(x.reservado)+'</span>'
+    +'<span><b>Disponible</b></span><span><b>'+abN(x.disponible)+'</b></span>'
+    +'<span>En transito (pendiente de recepcion + en camino)</span><span>'+abN(x.en_transito)+'</span>'
+    +'<span>Sugerido pedir (plazo + 7 dias de colchon)</span><span>'+(x.pedir?abN(x.pedir)+' u':'—')+'</span>'
     +'<span>Vendidas en ML (15 dias)</span><span>'+abN(x.vendidas)+'</span>'
     +'<span>Velocidad</span><span>'+abN(x.velocidad,2)+' u/dia</span>'
     +'<span>Dias de cobertura</span><span>'+(x.cobertura===null?'∞':abN(x.cobertura))+'</span>'
