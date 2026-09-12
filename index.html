@@ -161,7 +161,43 @@
   #msg-hilo{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0}
   #msg-cab{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--borde);font-size:13px;font-weight:700;flex-shrink:0}
   #msg-volver{display:none;background:none;border:1px solid var(--borde);color:var(--texto2);border-radius:7px;padding:4px 9px;cursor:pointer;font-size:13px}
-  #msg-avisos{margin-left:auto;background:none;border:1px solid var(--borde);color:var(--texto2);border-radius:7px;padding:4px 9px;cursor:pointer;font-size:11px;font-weight:600}
+  #msg-avisos{margin-left:6px;background:none;border:1px solid var(--borde);color:var(--texto2);border-radius:7px;padding:4px 9px;cursor:pointer;font-size:11px;font-weight:600}
+  #msg-comida{margin-left:auto;background:none;border:1px solid var(--borde);color:var(--texto2);border-radius:7px;padding:4px 9px;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap}
+  #msg-comida:hover{color:var(--texto);border-color:var(--accent)}
+  /* ── Comida semanal (dentro de Mensajes) ── */
+  #comida-ov{display:none;position:fixed;inset:0;z-index:70;background:rgba(5,9,18,.62);justify-content:flex-end}
+  #comida-ov.on{display:flex}
+  #comida-pan{width:min(760px,100%);background:var(--panel);border-left:1px solid var(--borde);display:flex;flex-direction:column;min-height:0}
+  #comida-cab{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--borde);font-weight:700;flex-shrink:0}
+  #comida-cab .x{margin-left:auto;background:none;border:1px solid var(--borde);color:var(--texto2);border-radius:7px;padding:3px 8px;cursor:pointer}
+  #comida-cuerpo{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:14px}
+  .cm-dia{border:1px solid var(--borde);border-radius:10px;padding:10px 12px}
+  .cm-dia h4{font-size:13px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .cm-dia h4 .el{font-weight:600;color:var(--verde);font-size:12px;text-align:right}
+  .cm-dia h4 .el.no{color:var(--texto2);font-weight:400}
+  .cm-ops{display:flex;flex-wrap:wrap;gap:6px}
+  .cm-op{background:var(--card);border:1px solid var(--borde);color:var(--texto2);border-radius:99px;padding:6px 11px;font-size:12.5px;cursor:pointer;font-family:inherit}
+  .cm-op:hover{color:var(--texto);border-color:var(--accent)}
+  .cm-op.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .cm-op.no{border-style:dashed}
+  .cm-op:disabled{cursor:default;opacity:.7}
+  .cm-sub{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px dashed var(--borde);font-size:12px;align-items:center;color:var(--texto2)}
+  .cm-tabla{overflow:auto;border:1px solid var(--borde);border-radius:8px}
+  .cm-tabla table{border-collapse:collapse;font-size:12px;min-width:100%}
+  .cm-tabla th,.cm-tabla td{border-bottom:1px solid var(--borde);padding:6px 9px;text-align:left;white-space:nowrap}
+  .cm-tabla th{background:var(--card);color:var(--texto2);font-size:11px;text-transform:uppercase;letter-spacing:.05em;position:sticky;top:0}
+  .cm-tabla td.vacio{color:var(--texto2)}
+  .cm-tabla td.yo{color:var(--accent);font-weight:600}
+  .cm-tot{font-size:12.5px;color:var(--texto2);line-height:1.7}
+  .cm-form{display:flex;flex-direction:column;gap:10px;border:1px solid var(--borde);border-radius:10px;padding:12px}
+  .cm-form label{font-size:11px;color:var(--texto2);display:flex;flex-direction:column;gap:3px}
+  .cm-form input[type=text],.cm-form input[type=date],.cm-form textarea{padding:8px;border-radius:7px;border:1px solid var(--borde);background:#0b1220;color:var(--texto);font-size:13px;font-family:inherit}
+  .cm-form textarea{min-height:60px;resize:vertical}
+  .cm-form .chk{flex-direction:row;align-items:center;gap:6px;font-size:12.5px;color:var(--texto)}
+  .cm-card{border:1px solid var(--accent);border-radius:10px;padding:10px 12px;background:rgba(59,130,246,.10);margin-top:2px}
+  .cm-card b{display:block;margin-bottom:8px;white-space:pre-wrap}
+  .cm-card .btn-azul{background:#fff;color:#0b1220}
+  .cm-btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   #msg-avisos:hover{color:var(--texto);border-color:var(--accent)}
   #msg-msgs{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:14px;min-height:0}
   #msg-msgs .vacio{margin:auto;color:var(--texto2);font-size:12px;text-align:center;line-height:1.6}
@@ -212,6 +248,8 @@
     #msg-volver{display:inline-block}
     #msg-msgs{padding:10px}
     #msg-form{padding:8px 10px}
+    #comida-pan{width:100%;border-left:none}
+    #msg-comida{font-size:11px;padding:4px 7px}
     #ab-tabla .oc{display:none}
     #ab-buscar{width:100%;flex:1 1 100%}
     #ab-lado.on{position:fixed;inset:0;width:100%;min-width:0;z-index:50;border-left:none}
@@ -246,7 +284,7 @@
 <!-- ── Sistema ── -->
 <div id="os-view">
   <nav id="side" aria-label="Apps">
-    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v17</span></span></div>
+    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v18</span></span></div>
     <div id="botones"></div>
     <div class="abajo">
       <div id="quien"></div>
@@ -344,6 +382,7 @@
         <div id="msg-cab">
           <button id="msg-volver" onclick="msgVolver()" aria-label="Volver">&#8592;</button>
           <span id="msg-titulo">Todos</span>
+          <button id="msg-comida" onclick="abrirComida()" title="Menu de la semana: elegir que como cada dia">&#127869;&#65039; Comida</button>
           <button id="msg-avisos" onclick="pedirAvisos()">Activar avisos</button>
         </div>
         <div id="msg-msgs"></div>
@@ -354,6 +393,13 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<div id="comida-ov" onclick="if(event.target===this) cerrarComida()">
+  <div id="comida-pan">
+    <div id="comida-cab"><span>&#127869;&#65039;</span><span id="comida-tit">Comida semanal</span><button class="x" onclick="cerrarComida()">&#10005;</button></div>
+    <div id="comida-cuerpo"></div>
   </div>
 </div>
 
@@ -933,7 +979,7 @@ function chatEntrante(m){
   var quien=msgNombre(m.de);
   avisoNavegador(
     conv==='todos' ? (quien+' escribio a todos') : (quien+' te escribio'),
-    String(m.texto||'').slice(0,150),
+    msgTextoPlano(m.texto).slice(0,150),
     'chat-'+conv,
     function(){ abrirMensajes(conv); }
   );
@@ -987,7 +1033,7 @@ function pintarHiloMsg(){
     var mio=(String(m.de).toLowerCase()===MI_EMAIL);
     return '<div class="bu '+(mio?'mio':'otro')+'">'
       + ((!mio && _msgCon==='todos') ? '<span class="qui">'+msgEsc(msgNombre(m.de))+'</span>' : '')
-      + msgEsc(m.texto)
+      + msgCuerpo(m)
       + '<span class="hr">'+msgHora(m.creado)+'</span></div>';
   }).join('');
   cont.scrollTop=cont.scrollHeight;
@@ -1284,6 +1330,154 @@ async function abBorrarProv(id){
   var d=await abApi('/api/abast/proveedores/'+id,{method:'DELETE'});
   if(d.error){ alert(d.error); return; }
   _abDatos=null; abVerProveedores(); abCargar(true);
+}
+
+// ── Comida semanal: menu de la semana, cada uno elige, cuadro para pedir ──
+var _cm=null, _cmId=null;
+function msgTextoPlano(t){ return String(t||'').replace(/^\[comida:\d+\]\s*/,''); }
+function msgCuerpo(m){
+  var t=String(m.texto||''); var mm=t.match(/^\[comida:(\d+)\]\s*/);
+  if(!mm) return msgEsc(t);
+  return '<div class="cm-card"><b>'+msgEsc(t.slice(mm[0].length))+'</b><button class="btn-azul" style="padding:6px 12px" onclick="abrirComida('+mm[1]+')">Elegir mi comida</button></div>';
+}
+function cmAttr(s){ return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+function cmNombre(email){ return String(email||'').split('@')[0]; }
+async function cmApi(ruta, opts){
+  var h=await authHeaders(); h['Content-Type']='application/json';
+  var r=await fetch(BACKEND_URL+ruta, Object.assign({headers:h}, opts||{}));
+  var d=await r.json().catch(function(){ return {}; });
+  if(!r.ok && !d.error) d.error='Error '+r.status;
+  return d;
+}
+function abrirComida(id){ document.getElementById('comida-ov').classList.add('on'); cmCargar(id); }
+function cerrarComida(){ document.getElementById('comida-ov').classList.remove('on'); }
+async function cmCargar(id){
+  var c=document.getElementById('comida-cuerpo'); c.innerHTML='<div class="nota">Cargando...</div>';
+  var d=await cmApi(id?'/api/comida/'+id:'/api/comida/actual');
+  if(d.error){ c.innerHTML='<div class="nota" style="color:var(--rojo)">'+msgEsc(d.error)+'</div>'; return; }
+  _cm=d; _cmId=d.comida?d.comida.id:null; cmPintar();
+}
+// "Beshi liviano (plato / ensalada)" -> base + variantes
+function cmParse(op){
+  var m=String(op).match(/^(.*?)\s*\(([^()]*\/[^()]*)\)\s*$/);
+  if(!m) return {base:String(op).trim(), vars:[]};
+  return {base:m[1].trim(), vars:m[2].split('/').map(function(x){ return x.trim(); }).filter(Boolean)};
+}
+function cmPintar(){
+  var c=document.getElementById('comida-cuerpo'); var d=_cm;
+  if(!d||!d.comida){
+    document.getElementById('comida-tit').textContent='Comida semanal';
+    c.innerHTML='<div class="nota">Todavia no hay un menu publicado.</div>'+(d&&d.puede_crear?cmFormHTML():'');
+    return;
+  }
+  var co=d.comida, abierta=(co.estado==='abierta'), mias=d.mias||{};
+  document.getElementById('comida-tit').textContent=co.titulo||'Comida semanal';
+  var h='';
+  h+='<div class="nota">'+(abierta?'Toca lo que queres comer cada dia. Se guarda solo.':'<span style="color:var(--rojo)">El pedido esta cerrado: ya no se puede cambiar.</span>')+(co.nota?' '+msgEsc(co.nota):'')+'</div>';
+  (co.dias||[]).forEach(function(dia){
+    var mia=String(mias[dia.dia]||'');
+    var ops=(dia.opciones||[]).concat(co.extras||[]);
+    h+='<div class="cm-dia"><h4><span>'+msgEsc(dia.dia)+(dia.fecha?' <span class="nota">'+abFecha(dia.fecha)+'</span>':'')+'</span><span class="el'+(mia?'':' no')+'">'+(mia?msgEsc(mia):'sin elegir')+'</span></h4><div class="cm-ops">';
+    var elegida=null;
+    ops.forEach(function(op){
+      var p=cmParse(op); var sel=(mia===p.base||mia.indexOf(p.base+' \u2014 ')===0);
+      if(sel&&p.vars.length) elegida=p;
+      h+='<button class="cm-op'+(sel?' on':'')+'" '+(abierta?'onclick="cmElegir(\''+cmAttr(dia.dia)+'\',\''+cmAttr(op)+'\')"':'disabled')+'>'+msgEsc(p.base)+(p.vars.length?' &#9662;':'')+'</button>';
+    });
+    h+='<button class="cm-op no'+(/^no pido/i.test(mia)?' on':'')+'" '+(abierta?'onclick="cmElegirFinal(\''+cmAttr(dia.dia)+'\',\'No pido\')"':'disabled')+'>No pido</button>';
+    h+='</div>';
+    if(elegida&&abierta){
+      h+='<div class="cm-sub">'+msgEsc(elegida.base)+':'+elegida.vars.map(function(v){ var on=(mia===elegida.base+' \u2014 '+v); return '<button class="cm-op'+(on?' on':'')+'" onclick="cmElegirFinal(\''+cmAttr(dia.dia)+'\',\''+cmAttr(elegida.base+' \u2014 '+v)+'\')">'+msgEsc(v)+'</button>'; }).join('')+'</div>';
+    }
+    h+='</div>';
+  });
+  h+='<div id="cm-msg" class="ab-msg"></div>';
+  var r=d.resumen||{dias:[],filas:[],totales:[],faltan:[],respondieron:0,total_personas:0};
+  h+='<div class="ab-tit">Quien eligio que &middot; '+r.respondieron+' de '+r.total_personas+'</div>';
+  h+='<div class="cm-tabla"><table><tr><th>Nombre</th>'+r.dias.map(function(x){ return '<th>'+msgEsc(x)+'</th>'; }).join('')+'</tr>'
+    + r.filas.map(function(f){ var yo=(f.email===MI_EMAIL); return '<tr><td class="'+(yo?'yo':'')+'">'+msgEsc(cmNombre(f.email))+'</td>'+f.elecciones.map(function(e){ return '<td class="'+(e?'':'vacio')+'">'+(e?msgEsc(e):'&mdash;')+'</td>'; }).join('')+'</tr>'; }).join('')
+    + '</table></div>';
+  h+='<div class="cm-tot">'+r.totales.map(function(t){ return '<b>'+msgEsc(t.dia)+' ('+t.total+')</b>: '+(t.items.map(function(i){ return i.cantidad+' &times; '+msgEsc(i.eleccion); }).join(', ')||'&mdash;'); }).join('<br>')+'</div>';
+  if(r.faltan&&r.faltan.length) h+='<div class="nota">Sin elegir: '+r.faltan.map(function(e){ return msgEsc(cmNombre(e)); }).join(', ')+'</div>';
+  if(d.puede_crear){
+    h+='<div class="cm-btns"><button class="btn-gris" onclick="cmCsv()">Descargar Excel</button><button class="btn-gris" onclick="cmEstado(\''+(abierta?'cerrada':'abierta')+'\')">'+(abierta?'Cerrar pedido':'Reabrir pedido')+'</button><button class="btn-azul" onclick="cmNuevo()">Nueva comida semanal</button></div>';
+  }
+  c.innerHTML=h;
+}
+async function cmElegir(dia, op){
+  var p=cmParse(op);
+  if(p.vars.length){
+    var mia=String((_cm.mias||{})[dia]||'');
+    if(mia===p.base||mia.indexOf(p.base+' \u2014 ')===0){ return; }   // ya esta, solo mostrar variantes
+    await cmElegirFinal(dia, p.base);   // guarda la base; despues elige plato/ensalada
+    return;
+  }
+  await cmElegirFinal(dia, p.base);
+}
+async function cmElegirFinal(dia, texto){
+  if(!_cmId) return;
+  var m=document.getElementById('cm-msg'); if(m){ m.style.color=''; m.textContent='Guardando...'; }
+  var d=await cmApi('/api/comida/'+_cmId+'/eleccion',{method:'PUT',body:JSON.stringify({dia:dia,eleccion:texto})});
+  if(d.error){ if(m){ m.style.color='var(--rojo)'; m.textContent=d.error; } return; }
+  _cm.mias=d.mias||{};
+  // refrescar el cuadro sin pegarle de nuevo al servidor por cada click
+  var yo=MI_EMAIL, r=_cm.resumen; if(r){ var f=r.filas.find(function(x){ return x.email===yo; }); if(f){ f.elecciones=r.dias.map(function(x){ return _cm.mias[x]||''; }); } }
+  cmPintar();
+  var m2=document.getElementById('cm-msg'); if(m2){ m2.style.color='var(--verde)'; m2.textContent='Guardado'; setTimeout(function(){ if(m2.textContent==='Guardado') m2.textContent=''; },1500); }
+  if(_cm.resumen) cmApi('/api/comida/'+_cmId).then(function(d2){ if(!d2.error && _cmId===d2.comida.id){ _cm=d2; cmPintar(); } });
+}
+async function cmEstado(estado){
+  if(estado==='cerrada' && !confirm('Cerrar el pedido? Nadie va a poder cambiar su eleccion.')) return;
+  var d=await cmApi('/api/comida/'+_cmId+'/estado',{method:'POST',body:JSON.stringify({estado:estado})});
+  if(d.error){ alert(d.error); return; }
+  cmCargar(_cmId);
+}
+async function cmCsv(){
+  try{
+    var h=await authHeaders();
+    var r=await fetch(BACKEND_URL+'/api/comida/'+_cmId+'/csv',{headers:h});
+    if(!r.ok){ alert('No se pudo descargar'); return; }
+    var b=await r.blob(); var u=URL.createObjectURL(b); var a=document.createElement('a'); a.href=u; a.download='comida-'+(_cm.comida.semana||_cmId)+'.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(u); },2000);
+  }catch(e){ alert('Error: '+e.message); }
+}
+function cmProxLunes(){ var d=new Date(); var add=((8-d.getDay())%7)||7; d.setDate(d.getDate()+add); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+var CM_DIAS=['Lunes','Martes','Miercoles','Jueves','Viernes'];
+function cmFormHTML(){
+  var ult=(_cm&&_cm.comida)||null;
+  var extras=(ult&&ult.extras&&ult.extras.length)?ult.extras.join('\n'):'Pechuga con huevo\nPechuga con ensalada';
+  var prev={}; if(ult&&ult.dias) ult.dias.forEach(function(d){ prev[d.dia]=(d.opciones||[]).join('\n'); });
+  return '<div class="cm-form" id="cm-form"><div class="ab-tit">Nueva comida semanal</div>'
+    +'<label>Semana (lunes)<input type="date" id="cm-f-semana" value="'+cmProxLunes()+'"></label>'
+    +'<label>Titulo (opcional)<input type="text" id="cm-f-titulo" placeholder="Comida de la semana del ..."></label>'
+    +'<div class="nota">Una opcion por renglon. Si una opcion se puede pedir de dos formas, escribila como <b>Beshi liviano (plato / ensalada)</b> y cada uno elige.</div>'
+    +CM_DIAS.map(function(dia){ return '<label><span class="chk"><input type="checkbox" id="cm-f-chk-'+dia+'" checked> '+dia+'</span><textarea id="cm-f-op-'+dia+'" placeholder="XL\nBeshi liviano (plato / ensalada)\nSandwich (al plato / solo)\nTarta (sola / con ensalada)">'+msgEsc(prev[dia]||'')+'</textarea></label>'; }).join('')
+    +'<div class="cm-btns"><button class="btn-gris" type="button" onclick="cmCopiarLunes()">Copiar el lunes a todos los dias</button></div>'
+    +'<label>Siempre disponibles (todos los dias)<textarea id="cm-f-extras">'+msgEsc(extras)+'</textarea></label>'
+    +'<label>Nota para el equipo (opcional)<input type="text" id="cm-f-nota" placeholder="Ej: elegir antes del viernes a las 12"></label>'
+    +'<label class="chk"><input type="checkbox" id="cm-f-avisar" checked> Avisar a todo el equipo por Mensajes</label>'
+    +'<div class="cm-btns"><button class="btn-azul" type="button" onclick="cmPublicar()">Publicar menu</button><button class="btn-gris" type="button" onclick="cmPintar()">Cancelar</button><span id="cm-f-msg" class="ab-msg"></span></div>'
+    +'</div>';
+}
+function cmNuevo(){ var c=document.getElementById('comida-cuerpo'); c.innerHTML=cmFormHTML(); c.scrollTop=0; }
+function cmCopiarLunes(){ var v=document.getElementById('cm-f-op-Lunes').value; CM_DIAS.forEach(function(d){ if(d!=='Lunes') document.getElementById('cm-f-op-'+d).value=v; }); }
+async function cmPublicar(){
+  var m=document.getElementById('cm-f-msg'); m.style.color='var(--rojo)'; m.textContent='';
+  var semana=document.getElementById('cm-f-semana').value; if(!semana){ m.textContent='Falta la semana'; return; }
+  var base=new Date(semana+'T00:00:00');
+  var dias=[];
+  CM_DIAS.forEach(function(dia,i){
+    if(!document.getElementById('cm-f-chk-'+dia).checked) return;
+    var ops=document.getElementById('cm-f-op-'+dia).value.split('\n').map(function(x){ return x.trim(); }).filter(Boolean);
+    if(!ops.length) return;
+    var f=new Date(base); f.setDate(base.getDate()+i);
+    dias.push({dia:dia, fecha:f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0')+'-'+String(f.getDate()).padStart(2,'0'), opciones:ops});
+  });
+  if(!dias.length){ m.textContent='Carga al menos un dia con opciones'; return; }
+  m.style.color=''; m.textContent='Publicando...';
+  var d=await cmApi('/api/comida',{method:'POST',body:JSON.stringify({semana:semana, titulo:document.getElementById('cm-f-titulo').value, dias:dias, extras:document.getElementById('cm-f-extras').value, nota:document.getElementById('cm-f-nota').value, avisar:document.getElementById('cm-f-avisar').checked})});
+  if(d.error){ m.style.color='var(--rojo)'; m.textContent=d.error; return; }
+  if(d.aviso) chatEntrante(d.aviso);
+  cmCargar(d.comida.id);
 }
 
 // ── SSO: las apps embebidas piden la sesion y el hub se la pasa ───
