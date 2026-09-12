@@ -130,6 +130,14 @@
   .ab-acc.sin_ventas{background:transparent;color:var(--texto2);border:1px dashed var(--borde)}
   .ab-acc.inactivo{background:transparent;color:#5b6980;border:1px solid var(--borde);text-decoration:line-through}
   .ab-hz{font-size:10px;color:var(--texto2)}
+  #ab-tabla th.on{color:var(--texto)}
+  #ab-tabla th.on::after{content:' \25B2';font-size:9px;opacity:.9}
+  #ab-tabla th.on.desc::after{content:' \25BC'}
+  .ab-acc.sin_pedido{background:#3a2f0c;color:#f6d284}
+  #ab-cols{position:relative;display:inline-block}
+  #ab-cols-pop{display:none;position:absolute;right:0;top:38px;z-index:6;background:var(--panel);border:1px solid var(--borde);border-radius:10px;padding:10px 12px;min-width:210px;box-shadow:0 10px 30px rgba(0,0,0,.45);max-height:70vh;overflow:auto}
+  #ab-cols-pop.on{display:block}
+  #ab-cols-pop label{display:flex;gap:8px;align-items:center;font-size:12.5px;padding:3px 0;cursor:pointer;white-space:nowrap}
   #ab-lado{width:0;min-width:0;overflow:hidden;border-left:1px solid var(--borde);background:var(--panel);display:flex;flex-direction:column;transition:width .15s ease}
   #ab-lado.on{width:360px;min-width:360px}
   #panel-abast.solo-lectura .ab-form, #panel-abast.solo-lectura .ab-lista .b{display:none}
@@ -284,7 +292,7 @@
 <!-- ── Sistema ── -->
 <div id="os-view">
   <nav id="side" aria-label="Apps">
-    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v19</span></span></div>
+    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v20</span></span></div>
     <div id="botones"></div>
     <div class="abajo">
       <div id="quien"></div>
@@ -339,8 +347,13 @@
           <option value="sin_ventas">Sin ventas</option>
           <option value="recomprar">Recomprar (sin stock)</option>
           <option value="llegando">Sin stock, llegando</option>
+          <option value="sin_pedido">Sin pedido (se vende, hay que pedir y no hay orden)</option>
         </select>
+        <select id="ab-prov" onchange="abPintar()" title="Filtrar por proveedor"><option value="">Todos los proveedores</option></select>
+        <select id="ab-stock" onchange="abPintar()"><option value="">Con y sin stock</option><option value="con">Solo con stock</option><option value="sin">Solo sin stock</option></select>
         <button class="btn-gris" onclick="abVerProveedores()">Proveedores</button>
+        <span id="ab-cols"><button class="btn-gris" onclick="abColsToggle(event)" title="Elegir que columnas se ven">Columnas</button><div id="ab-cols-pop"></div></span>
+        <button class="btn-gris" onclick="abExportar()" title="Descarga lo que se ve en la tabla (con los filtros y columnas actuales)">Excel</button>
         <button class="btn-gris" id="ab-sync" onclick="abSincronizarUI()">Actualizar ahora</button>
         <span id="ab-estado" class="nota"></span>
       </div>
@@ -349,24 +362,24 @@
         <div id="ab-tabla-env">
           <table id="ab-tabla">
             <thead><tr>
-              <th onclick="abOrdenar('sku')">SKU</th>
-              <th onclick="abOrdenar('nombre')">Producto</th>
-              <th class="oc" onclick="abOrdenar('proveedor')">Proveedor</th>
-              <th class="num" onclick="abOrdenar('disponible')" title="Disponible total (General + ML Full + Z Flex, sin reservas)">Disp.</th>
-              <th class="num oc" onclick="abOrdenar('d_general')">General</th>
-              <th class="num oc" onclick="abOrdenar('d_full')">Full</th>
-              <th class="num oc" onclick="abOrdenar('d_zflex')">Z Flex</th>
-              <th class="num oc" onclick="abOrdenar('reservado')">Reserv.</th>
-              <th class="num oc" onclick="abOrdenar('en_transito')" title="Pendiente de recepcion en Contabilium + ordenes en camino cargadas">Tr&aacute;nsito</th>
-              <th class="num" onclick="abOrdenar('vendidas')">Vend. 15d</th>
-              <th class="num oc" onclick="abOrdenar('velocidad')">u/d&iacute;a</th>
-              <th class="num" onclick="abOrdenar('cobertura')">Cobert.</th>
-              <th class="oc" onclick="abOrdenar('eta')">Llega</th>
-              <th class="num" onclick="abOrdenar('faltan')">Faltan</th>
-              <th class="num oc" onclick="abOrdenar('ratio')">Ratio</th>
-              <th class="num" onclick="abOrdenar('pedir')" title="Cuanto pedir para cubrir plazo + colchon con la velocidad actual">Pedir</th>
-              <th onclick="abOrdenar('compra')" title="Se vende y esta sin stock (o no llega al plazo de reposicion)">Compra</th>
-              <th onclick="abOrdenar('accion')">Acci&oacute;n</th>
+              <th data-c="sku" onclick="abOrdenar('sku')">SKU</th>
+              <th data-c="nombre" onclick="abOrdenar('nombre')">Producto</th>
+              <th data-c="proveedor" class="oc" onclick="abOrdenar('proveedor')">Proveedor</th>
+              <th data-c="disponible" class="num" onclick="abOrdenar('disponible')" title="Disponible total (General + ML Full + Z Flex, sin reservas)">Disp.</th>
+              <th data-c="d_general" class="num oc" onclick="abOrdenar('d_general')">General</th>
+              <th data-c="d_full" class="num oc" onclick="abOrdenar('d_full')">Full</th>
+              <th data-c="d_zflex" class="num oc" onclick="abOrdenar('d_zflex')">Z Flex</th>
+              <th data-c="reservado" class="num oc" onclick="abOrdenar('reservado')">Reserv.</th>
+              <th data-c="en_transito" class="num oc" onclick="abOrdenar('en_transito')" title="Pendiente de recepcion en Contabilium + ordenes en camino cargadas">Tr&aacute;nsito</th>
+              <th data-c="vendidas" class="num" onclick="abOrdenar('vendidas')">Vend. 15d</th>
+              <th data-c="velocidad" class="num oc" onclick="abOrdenar('velocidad')">u/d&iacute;a</th>
+              <th data-c="cobertura" class="num" onclick="abOrdenar('cobertura')">Cobert.</th>
+              <th data-c="eta" class="oc" onclick="abOrdenar('eta')">Llega</th>
+              <th data-c="faltan" class="num" onclick="abOrdenar('faltan')">Faltan</th>
+              <th data-c="ratio" class="num oc" onclick="abOrdenar('ratio')">Ratio</th>
+              <th data-c="pedir" class="num" onclick="abOrdenar('pedir')" title="Cuanto pedir para cubrir plazo + colchon con la velocidad actual">Pedir</th>
+              <th data-c="compra" onclick="abOrdenar('compra')" title="Se vende y esta sin stock (o no llega al plazo de reposicion)">Compra</th>
+              <th data-c="accion" onclick="abOrdenar('accion')">Acci&oacute;n</th>
             </tr></thead>
             <tbody id="ab-tbody"></tbody>
           </table>
@@ -1105,7 +1118,7 @@ document.getElementById('msg-in').addEventListener('input',function(){ this.styl
 document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible'){ if(_msgAbierto){ _msgNoLeidos[_msgCon]=0; pintarListaMsg(); } chatLatido(); } });
 
 // ── Abastecimiento: cobertura de stock contra fecha de llegada ────
-var _abDatos=null, _abOrden='ratio', _abAsc=true, _abSel=null, _abProvs=[];
+var _abDatos=null, _abOrden='vendidas', _abAsc=false, _abSel=null, _abProvs=[], _abVista=[];
 var AB_ACC={sacar:'Sacar descuento', poner:'Poner descuento', mantener:'Mantener', sin_ventas:'Sin ventas', inactivo:'Inactivo'};
 function abN(v,d){ if(v===null||v===undefined) return '—'; return Number(v).toLocaleString('es-AR',{maximumFractionDigits:d==null?0:d}); }
 function abFecha(iso){ if(!iso) return '—'; var p=String(iso).slice(0,10).split('-'); return p[2]+'/'+p[1]; }
@@ -1142,37 +1155,48 @@ async function abCargar(fresco){
     var g=function(k){ var v=det[k]; return v==null?0:(typeof v==='object'?Number(v.stock||0):Number(v)||0); };
     x.d_general=g('GENERAL'); x.d_full=g('ML FULL'); x.d_zflex=g('Z FLEX BAIRES');
     x.en_transito=Number(x.en_transito||0); x.pedir=Number(x.pedir||0); x.compra=x.compra||''; x.proveedor=x.proveedor||'';
+    // se vende, hace falta pedir (o ya esta en cero) y no hay ninguna orden en camino
+    x.sin_pedido=(Number(x.vendidas||0)>0 && !(x.en_transito>0) && !x.eta && (x.pedir>0 || x.compra==='recomprar'));
   });
+  abProvSelect();
   var s=d.ultima_sync;
   est.textContent = s && s.cuando ? ('Stock actualizado '+abHoraLocal(s.cuando)+(s.ok===false?' · con errores':'')+' · se actualiza solo cada 8 h') : (d.foto ? ('Stock del '+abFecha(d.foto)+' · se actualiza solo cada 8 h') : 'Todavia no se sincronizo el stock');
   abPintar();
 }
-function abOrdenar(col){ if(_abOrden===col) _abAsc=!_abAsc; else { _abOrden=col; _abAsc=true; } abPintar(); }
+function abOrdenar(col){ if(_abOrden===col) _abAsc=!_abAsc; else { _abOrden=col; _abAsc=!!AB_TEXTO[col]; } abPintar(); }
 function abPintar(){
   if(!_abDatos) return;
   var q=(document.getElementById('ab-buscar').value||'').trim().toUpperCase();
   var f=document.getElementById('ab-filtro').value;
+  var pv=(document.getElementById('ab-prov')||{}).value||'', st=(document.getElementById('ab-stock')||{}).value||'';
   var filas=_abDatos.filas.filter(function(x){
     if(f==='recomprar'){ if(x.compra!=='recomprar') return false; }
     else if(f==='llegando'){ if(x.compra!=='llegando') return false; }
+    else if(f==='sin_pedido'){ if(!x.sin_pedido) return false; }
     else if(f && x.accion!==f) return false;
+    if(pv==='__sin'){ if(x.proveedor) return false; } else if(pv && x.proveedor!==pv) return false;
+    if(st==='con' && !(x.disponible>0)) return false;
+    if(st==='sin' && x.disponible>0) return false;
     if(q && x.sku.indexOf(q)===-1 && String(x.nombre||'').toUpperCase().indexOf(q)===-1) return false;
     return true;
   });
-  var cnt={recomprar:0,llegando:0,sacar:0,poner:0,mantener:0,sin_ventas:0};
-  _abDatos.filas.forEach(function(x){ if(cnt[x.accion]!=null) cnt[x.accion]++; if(x.compra&&cnt[x.compra]!=null) cnt[x.compra]++; });
-  var NOM={recomprar:'&#128722; Recomprar',llegando:'Llegando',sacar:AB_ACC.sacar,poner:AB_ACC.poner,mantener:AB_ACC.mantener,sin_ventas:AB_ACC.sin_ventas};
-  document.getElementById('ab-chips').innerHTML=['recomprar','llegando','sacar','poner','mantener','sin_ventas'].map(function(k){
+  var cnt={sin_pedido:0,recomprar:0,llegando:0,sacar:0,poner:0,mantener:0,sin_ventas:0};
+  _abDatos.filas.forEach(function(x){ if(cnt[x.accion]!=null) cnt[x.accion]++; if(x.compra&&cnt[x.compra]!=null) cnt[x.compra]++; if(x.sin_pedido) cnt.sin_pedido++; });
+  var NOM={sin_pedido:'&#9888; Sin pedido',recomprar:'&#128722; Recomprar',llegando:'Llegando',sacar:AB_ACC.sacar,poner:AB_ACC.poner,mantener:AB_ACC.mantener,sin_ventas:AB_ACC.sin_ventas};
+  var aPedir=filas.reduce(function(t,x){ return t+(x.pedir>0?x.pedir:0); },0);
+  document.getElementById('ab-chips').innerHTML=['sin_pedido','recomprar','llegando','sacar','poner','mantener','sin_ventas'].map(function(k){
     return '<button class="ab-chip'+(f===k?' on':'')+'" onclick="abFiltro(\''+k+'\')">'+NOM[k]+' <b>'+cnt[k]+'</b></button>';
-  }).join('')+'<span class="nota" style="align-self:center">'+_abDatos.filas.length+' productos · ventas de ML de los ultimos '+_abDatos.ventana_dias+' dias</span>';
+  }).join('')+'<span class="nota" style="align-self:center">'+_abDatos.filas.length+' productos · ventas de ML de los ultimos '+_abDatos.ventana_dias+' dias · en esta vista: '+filas.length+' productos, '+abN(aPedir)+' u. a pedir</span>';
   var col=_abOrden, asc=_abAsc?1:-1;
   filas.sort(function(a,b){
     var va=a[col], vb=b[col];
-    if(va===null||va===undefined) va = (typeof vb==='number')? 1e9 : '';
-    if(vb===null||vb===undefined) vb = (typeof va==='number')? 1e9 : '';
-    if(typeof va==='string') return va.localeCompare(vb)*asc;
+    var na=(va===null||va===undefined||va===''), nb=(vb===null||vb===undefined||vb==='');
+    if(na&&nb) return 0; if(na) return 1; if(nb) return -1;   // los vacios siempre al final
+    if(typeof va==='string'||typeof vb==='string') return String(va).localeCompare(String(vb))*asc;
     return (va-vb)*asc;
   });
+  document.querySelectorAll('#ab-tabla th').forEach(function(th){ var k=th.getAttribute('data-c'); th.classList.toggle('on', k===col); th.classList.toggle('desc', k===col && !_abAsc); });
+  _abVista=filas;
   var tb=document.getElementById('ab-tbody');
   var vacio=document.getElementById('ab-vacio');
   if(!filas.length){
@@ -1183,29 +1207,74 @@ function abPintar(){
   vacio.style.display='none';
   tb.innerHTML=filas.map(function(x){
     var hz = x.horizonte==='orden' ? '' : '<div class="ab-hz">plazo '+x.plazo+'d</div>';
+    var compra = x.compra ? '<span class="ab-acc '+(x.compra==='recomprar'?'sacar':'mantener')+'">'+(x.compra==='recomprar'?'Recomprar':'Llegando')+'</span>' : (x.sin_pedido ? '<span class="ab-acc sin_pedido" title="Se vende, hace falta pedir y no hay ninguna orden cargada">Sin pedido</span>' : '');
     return '<tr class="'+(_abSel===x.sku?'sel':'')+'" onclick="abAbrirSku(\''+x.sku+'\')">'
-      +'<td class="sku">'+msgEsc(x.sku)+'</td>'
-      +'<td class="nom" title="'+msgEsc(x.nombre)+'">'+msgEsc(x.nombre||'')+'</td>'
-      +'<td class="oc nom" title="'+msgEsc(x.proveedor||'')+'">'+msgEsc(x.proveedor||'')+'</td>'
-      +'<td class="num" title="stock total '+abN(x.stock)+'">'+abN(x.disponible)+'</td>'
-      +'<td class="num oc">'+abN(x.d_general)+'</td>'
-      +'<td class="num oc">'+abN(x.d_full)+'</td>'
-      +'<td class="num oc">'+abN(x.d_zflex)+'</td>'
-      +'<td class="num oc">'+abN(x.reservado)+'</td>'
-      +'<td class="num oc">'+(x.en_transito?abN(x.en_transito):'<span class="ab-hz">0</span>')+'</td>'
-      +'<td class="num">'+abN(x.vendidas)+'</td>'
-      +'<td class="num oc">'+abN(x.velocidad,2)+'</td>'
-      +'<td class="num">'+(x.cobertura===null?'∞':abN(x.cobertura)+'d')+'</td>'
-      +'<td class="oc">'+(x.eta?abFecha(x.eta):'<span class="ab-hz">sin orden</span>')+'</td>'
-      +'<td class="num">'+abN(x.faltan)+'d'+hz+'</td>'
-      +'<td class="num oc">'+(x.ratio===null?'—':abN(x.ratio,2))+'</td>'
-      +'<td class="num">'+(x.pedir?'<b>'+abN(x.pedir)+'</b>':'<span class="ab-hz">—</span>')+'</td>'
-      +'<td>'+(x.compra?'<span class="ab-acc '+(x.compra==='recomprar'?'sacar':'mantener')+'">'+(x.compra==='recomprar'?'Recomprar':'Llegando')+'</span>':'')+'</td>'
-      +'<td><span class="ab-acc '+x.accion+'">'+AB_ACC[x.accion]+'</span></td>'
+      +'<td data-c="sku" class="sku">'+msgEsc(x.sku)+'</td>'
+      +'<td data-c="nombre" class="nom" title="'+msgEsc(x.nombre)+'">'+msgEsc(x.nombre||'')+'</td>'
+      +'<td data-c="proveedor" class="oc nom" title="'+msgEsc(x.proveedor||'')+'">'+msgEsc(x.proveedor||'')+'</td>'
+      +'<td data-c="disponible" class="num" title="stock total '+abN(x.stock)+'">'+abN(x.disponible)+'</td>'
+      +'<td data-c="d_general" class="num oc">'+abN(x.d_general)+'</td>'
+      +'<td data-c="d_full" class="num oc">'+abN(x.d_full)+'</td>'
+      +'<td data-c="d_zflex" class="num oc">'+abN(x.d_zflex)+'</td>'
+      +'<td data-c="reservado" class="num oc">'+abN(x.reservado)+'</td>'
+      +'<td data-c="en_transito" class="num oc">'+(x.en_transito?abN(x.en_transito):'<span class="ab-hz">0</span>')+'</td>'
+      +'<td data-c="vendidas" class="num">'+abN(x.vendidas)+'</td>'
+      +'<td data-c="velocidad" class="num oc">'+abN(x.velocidad,2)+'</td>'
+      +'<td data-c="cobertura" class="num">'+(x.cobertura===null?'∞':abN(x.cobertura)+'d')+'</td>'
+      +'<td data-c="eta" class="oc">'+(x.eta?abFecha(x.eta):'<span class="ab-hz">sin orden</span>')+'</td>'
+      +'<td data-c="faltan" class="num">'+abN(x.faltan)+'d'+hz+'</td>'
+      +'<td data-c="ratio" class="num oc">'+(x.ratio===null?'—':abN(x.ratio,2))+'</td>'
+      +'<td data-c="pedir" class="num">'+(x.pedir?'<b>'+abN(x.pedir)+'</b>':'<span class="ab-hz">—</span>')+'</td>'
+      +'<td data-c="compra">'+compra+'</td>'
+      +'<td data-c="accion"><span class="ab-acc '+x.accion+'">'+AB_ACC[x.accion]+'</span></td>'
       +'</tr>';
   }).join('');
 }
 function abFiltro(k){ var s=document.getElementById('ab-filtro'); s.value = s.value===k ? '' : k; abPintar(); }
+// ── Abastecimiento: columnas visibles, filtro por proveedor y exportar la vista ──
+var AB_COLS=[['sku','SKU'],['nombre','Producto'],['proveedor','Proveedor'],['disponible','Disponible'],['d_general','General'],['d_full','ML Full'],['d_zflex','Z Flex'],['reservado','Reservado'],['en_transito','Transito'],['vendidas','Vendidas 15d'],['velocidad','Unidades por dia'],['cobertura','Cobertura (dias)'],['eta','Llega'],['faltan','Faltan (dias)'],['ratio','Ratio'],['pedir','Pedir'],['compra','Compra'],['accion','Accion']];
+var AB_TEXTO={sku:1,nombre:1,proveedor:1,eta:1,compra:1,accion:1};
+var _abOcultas={};
+try{ (JSON.parse(localStorage.getItem('pontecos_ab_ocultas')||'[]')||[]).forEach(function(k){ _abOcultas[k]=1; }); }catch(e){}
+function abColsCss(){
+  var st=document.getElementById('ab-cols-css'); if(!st){ st=document.createElement('style'); st.id='ab-cols-css'; document.head.appendChild(st); }
+  st.textContent=Object.keys(_abOcultas).map(function(k){ return '#ab-tabla [data-c="'+k+'"]{display:none}'; }).join('\n');
+}
+function abColsPintar(){
+  var p=document.getElementById('ab-cols-pop'); if(!p) return;
+  p.innerHTML='<div class="ab-tit" style="margin-bottom:6px">Columnas a mostrar</div>'
+    +AB_COLS.map(function(c){ return '<label><input type="checkbox" '+(_abOcultas[c[0]]?'':'checked')+' onchange="abColCambiar(\''+c[0]+'\',this.checked)"> '+c[1]+'</label>'; }).join('')
+    +'<div style="margin-top:8px"><button class="btn-gris" style="padding:5px 10px" onclick="abColsTodas()">Mostrar todas</button></div>';
+}
+function abColCambiar(k, visible){ if(visible) delete _abOcultas[k]; else _abOcultas[k]=1; try{ localStorage.setItem('pontecos_ab_ocultas', JSON.stringify(Object.keys(_abOcultas))); }catch(e){} abColsCss(); }
+function abColsTodas(){ _abOcultas={}; try{ localStorage.removeItem('pontecos_ab_ocultas'); }catch(e){} abColsCss(); abColsPintar(); }
+function abColsToggle(ev){ if(ev) ev.stopPropagation(); var p=document.getElementById('ab-cols-pop'); if(!p) return; if(!p.classList.contains('on')) abColsPintar(); p.classList.toggle('on'); }
+document.addEventListener('click', function(ev){ var p=document.getElementById('ab-cols-pop'); if(p && p.classList.contains('on') && !(ev.target.closest && ev.target.closest('#ab-cols'))) p.classList.remove('on'); });
+abColsCss();
+function abProvSelect(){
+  var s=document.getElementById('ab-prov'); if(!s||!_abDatos) return;
+  var actual=s.value, vistos={}, lista=[];
+  _abDatos.filas.forEach(function(x){ var p=x.proveedor||''; if(p && !vistos[p]){ vistos[p]=1; lista.push(p); } });
+  lista.sort(function(a,b){ return a.localeCompare(b); });
+  s.innerHTML='<option value="">Todos los proveedores</option>'+lista.map(function(p){ return '<option value="'+msgEsc(p)+'">'+msgEsc(p)+'</option>'; }).join('')+'<option value="__sin">(sin proveedor)</option>';
+  s.value=actual; if(s.value!==actual) s.value='';
+}
+function abExportar(){
+  if(!_abVista.length){ alert('No hay nada para exportar con estos filtros.'); return; }
+  var cols=AB_COLS.filter(function(c){ return !_abOcultas[c[0]]; });
+  var val=function(x,k){
+    var v=x[k];
+    if(k==='eta') return v?abFecha(v):'';
+    if(k==='compra') return v==='recomprar'?'Recomprar':(v==='llegando'?'Llegando':(x.sin_pedido?'Sin pedido':''));
+    if(k==='accion') return String(AB_ACC[v]||v||'');
+    return (v===null||v===undefined)?'':v;
+  };
+  var esc=function(v){ if(typeof v==='number') return String(v).replace('.',','); return '"'+String(v).replace(/"/g,'""')+'"'; };
+  var lineas=[cols.map(function(c){ return esc(c[1]); }).join(';')];
+  _abVista.forEach(function(x){ lineas.push(cols.map(function(c){ return esc(val(x,c[0])); }).join(';')); });
+  var blob=new Blob(['\uFEFF'+lineas.join('\r\n')],{type:'text/csv;charset=utf-8'});
+  var u=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=u; a.download='abastecimiento-'+(_abDatos.hoy||'')+'.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(u); },2000);
+}
 function abHoraLocal(iso){
   try{ var d=new Date(iso); return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }catch(e){ return ''; }
 }
