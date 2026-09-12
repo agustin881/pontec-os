@@ -103,6 +103,52 @@
 
   /* ── Mensajes: chat interno del equipo ── */
   #panel-mensajes{flex:1;display:none;min-height:0;overflow:hidden}
+
+  /* ── Abastecimiento ── */
+  #panel-abast{flex:1;display:none;flex-direction:column;min-height:0;overflow:hidden}
+  #ab-barra{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--borde);flex-shrink:0}
+  #ab-barra input,#ab-barra select{padding:8px 10px;border-radius:8px;border:1px solid var(--borde);background:#0b1220;color:var(--texto);font-size:13px}
+  #ab-buscar{width:220px}
+  #ab-chips{display:flex;gap:8px;flex-wrap:wrap;padding:8px 14px 0;flex-shrink:0}
+  .ab-chip{font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;border:1px solid var(--borde);color:var(--texto2);cursor:pointer;background:transparent}
+  .ab-chip.on{border-color:var(--accent);color:var(--texto)}
+  .ab-chip b{font-variant-numeric:tabular-nums}
+  #ab-cuerpo{flex:1;display:flex;min-height:0}
+  #ab-tabla-env{flex:1;overflow:auto;min-width:0}
+  #ab-tabla{font-size:12.5px;font-variant-numeric:tabular-nums}
+  #ab-tabla th{position:sticky;top:0;background:var(--panel);z-index:1;cursor:pointer;user-select:none;white-space:nowrap}
+  #ab-tabla th.num,#ab-tabla td.num{text-align:right}
+  #ab-tabla tbody tr{cursor:pointer}
+  #ab-tabla tbody tr:hover td{background:var(--card)}
+  #ab-tabla tbody tr.sel td{background:var(--card)}
+  #ab-tabla td.nom{max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--texto2)}
+  #ab-tabla td.sku{font-weight:700;white-space:nowrap}
+  .ab-acc{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:99px;white-space:nowrap;letter-spacing:.02em}
+  .ab-acc.sacar{background:#3a1d0c;color:#f6b284}
+  .ab-acc.poner{background:#0f2a27;color:#6fd3c7}
+  .ab-acc.mantener{background:var(--card);color:var(--texto2);border:1px solid var(--borde)}
+  .ab-acc.sin_ventas{background:transparent;color:var(--texto2);border:1px dashed var(--borde)}
+  .ab-acc.inactivo{background:transparent;color:#5b6980;border:1px solid var(--borde);text-decoration:line-through}
+  .ab-hz{font-size:10px;color:var(--texto2)}
+  #ab-lado{width:0;min-width:0;overflow:hidden;border-left:1px solid var(--borde);background:var(--panel);display:flex;flex-direction:column;transition:width .15s ease}
+  #ab-lado.on{width:360px;min-width:360px}
+  #ab-lado .cab{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--borde);font-weight:700;flex-shrink:0}
+  #ab-lado .cab .x{margin-left:auto;background:none;border:1px solid var(--borde);color:var(--texto2);border-radius:7px;padding:3px 8px;cursor:pointer}
+  #ab-lado .cuerpo{flex:1;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:14px}
+  .ab-kv{display:grid;grid-template-columns:1fr auto;gap:4px 14px;font-size:12.5px;font-variant-numeric:tabular-nums}
+  .ab-kv span:nth-child(odd){color:var(--texto2)}
+  .ab-kv span:nth-child(even){font-weight:600;text-align:right}
+  .ab-form{display:flex;flex-direction:column;gap:8px}
+  .ab-form label{font-size:11px;color:var(--texto2);display:flex;flex-direction:column;gap:3px}
+  .ab-form input,.ab-form select,.ab-form textarea{padding:8px;border-radius:7px;border:1px solid var(--borde);background:#0b1220;color:var(--texto);font-size:13px;font-family:inherit}
+  .ab-form .fila{display:flex;gap:8px}
+  .ab-form .fila label{flex:1}
+  .ab-tit{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--texto2)}
+  .ab-lista{display:flex;flex-direction:column;gap:6px;font-size:12.5px}
+  .ab-lista .it{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:7px 9px;border:1px solid var(--borde);border-radius:7px}
+  .ab-lista .it .b{font-size:11px;color:var(--rojo);background:none;border:none;cursor:pointer}
+  .ab-msg{font-size:12px;min-height:16px}
+  #ab-vacio{padding:40px 20px;text-align:center;color:var(--texto2);font-size:13px;line-height:1.6}
   #msg-lista{width:250px;min-width:250px;border-right:1px solid var(--borde);overflow:auto;background:var(--panel)}
   #msg-lista .it{display:flex;align-items:center;gap:8px;padding:11px 12px;cursor:pointer;border-bottom:1px solid var(--borde);font-size:13px;color:var(--texto2);border-left:3px solid transparent}
   #msg-lista .it:hover{background:var(--card);color:var(--texto)}
@@ -165,6 +211,10 @@
     #msg-volver{display:inline-block}
     #msg-msgs{padding:10px}
     #msg-form{padding:8px 10px}
+    #ab-tabla .oc{display:none}
+    #ab-buscar{width:100%;flex:1 1 100%}
+    #ab-lado.on{position:fixed;inset:0;width:100%;min-width:0;z-index:50;border-left:none}
+    #ab-tabla td.nom{max-width:120px}
     .bu{max-width:88%}
     #chat-form{margin-top:8px}
     /* iOS hace zoom solo si un campo tiene menos de 16px */
@@ -195,7 +245,7 @@
 <!-- ── Sistema ── -->
 <div id="os-view">
   <nav id="side" aria-label="Apps">
-    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v14</span></span></div>
+    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v15</span></span></div>
     <div id="botones"></div>
     <div class="abajo">
       <div id="quien"></div>
@@ -239,6 +289,45 @@
       </div>
     </div>
 
+    <div id="panel-abast">
+      <div id="ab-barra">
+        <input id="ab-buscar" placeholder="Buscar SKU o producto..." oninput="abPintar()">
+        <select id="ab-filtro" onchange="abPintar()">
+          <option value="">Todas las acciones</option>
+          <option value="sacar">Sacar descuento (falta stock)</option>
+          <option value="poner">Poner descuento (sobra stock)</option>
+          <option value="mantener">Mantener</option>
+          <option value="sin_ventas">Sin ventas</option>
+        </select>
+        <button class="btn-gris" onclick="abVerProveedores()">Proveedores</button>
+        <button class="btn-gris" id="ab-sync" onclick="abSincronizarUI()">Sincronizar</button>
+        <span id="ab-estado" class="nota"></span>
+      </div>
+      <div id="ab-chips"></div>
+      <div id="ab-cuerpo">
+        <div id="ab-tabla-env">
+          <table id="ab-tabla">
+            <thead><tr>
+              <th onclick="abOrdenar('sku')">SKU</th>
+              <th onclick="abOrdenar('nombre')">Producto</th>
+              <th class="num" onclick="abOrdenar('disponible')">Disp.</th>
+              <th class="num oc" onclick="abOrdenar('reservado')">Reserv.</th>
+              <th class="num" onclick="abOrdenar('vendidas')">Vend. 15d</th>
+              <th class="num oc" onclick="abOrdenar('velocidad')">u/d&iacute;a</th>
+              <th class="num" onclick="abOrdenar('cobertura')">Cobert.</th>
+              <th class="oc" onclick="abOrdenar('eta')">Llega</th>
+              <th class="num" onclick="abOrdenar('faltan')">Faltan</th>
+              <th class="num oc" onclick="abOrdenar('ratio')">Ratio</th>
+              <th onclick="abOrdenar('accion')">Acci&oacute;n</th>
+            </tr></thead>
+            <tbody id="ab-tbody"></tbody>
+          </table>
+          <div id="ab-vacio" style="display:none"></div>
+        </div>
+        <div id="ab-lado"></div>
+      </div>
+    </div>
+
     <div id="panel-mensajes">
       <div id="msg-lista"></div>
       <div id="msg-hilo">
@@ -277,9 +366,10 @@ var APPS = [
     url:'https://respondia-frontend.vercel.app/?app=preventa' },
   { id:'posventa',     nombre:'Posventa', ico:'\uD83D\uDCE6',
     url:'https://respondia-frontend.vercel.app/?app=posventa' },
-  { id:'asistente',    nombre:'Asistente', ico:'\uD83E\uDD16', panel:true }
+  { id:'asistente',    nombre:'Asistente', ico:'\uD83E\uDD16', panel:true },
+  { id:'abastecimiento', nombre:'Abastecimiento', ico:'\uD83D\uDCC8', panel:'abast' }
 ];
-var APP_NOMBRES = {rentabilidad:'Rentabilidad', logistica:'Logistica', promos:'Promociones', respondia:'RespondIA', posventa:'Posventa', asistente:'Asistente'};
+var APP_NOMBRES = {rentabilidad:'Rentabilidad', logistica:'Logistica', promos:'Promociones', respondia:'RespondIA', posventa:'Posventa', asistente:'Asistente', abastecimiento:'Abastecimiento'};
 // Que puede hacer cada usuario DENTRO del Asistente (se guarda por usuario)
 var ASIS_LISTA=['consultar','ventas','desc_poner','desc_sacar','desc_todos','smart','fotos','medidas'];
 var ASIS_NOMBRES={consultar:'Consultar publicaciones/promos', ventas:'Ver ventas y ganancias',
@@ -314,8 +404,8 @@ function pestLogPorRol(rol){
   return ['imprimir','despachar','seguimiento'];
 }
 function appsPorRol(rol){
-  if(rol==='admin') return ['rentabilidad','logistica','promos','respondia','posventa','asistente'];
-  if(rol==='encargado') return ['rentabilidad','logistica','promos','respondia','posventa','asistente'];
+  if(rol==='admin') return ['rentabilidad','logistica','promos','respondia','posventa','asistente','abastecimiento'];
+  if(rol==='encargado') return ['rentabilidad','logistica','promos','respondia','posventa','asistente','abastecimiento'];
   return ['rentabilidad','logistica'];
 }
 
@@ -466,9 +556,9 @@ function _activar(id){
 function abrirApp(id){
   var a=null; APPS.forEach(function(x){ if(x.id===id) a=x; });
   if(!a||a.off) return;
-  if(a.panel){ abrirAsistente(); try{ localStorage.setItem('pontecos_app',id); }catch(e){} return; }
+  if(a.panel){ if(a.panel==='abast') abrirAbast(); else abrirAsistente(); try{ localStorage.setItem('pontecos_app',id); }catch(e){} return; }
   _activar(id);
-  cerrarMensajes();
+  cerrarMensajes(); cerrarAbast();
   document.getElementById('panel-usuarios').style.display='none';
   document.getElementById('panel-asistente').style.display='none';
   var visor=document.getElementById('visor'); visor.style.display='';
@@ -485,7 +575,7 @@ function abrirApp(id){
 // ── Usuarios (solo admin; el backend igual lo exige) ─────────────
 function abrirUsuarios(){
   _activar('usuarios');
-  cerrarMensajes();
+  cerrarMensajes(); cerrarAbast();
   document.getElementById('panel-asistente').style.display='none';
   document.getElementById('visor').style.display='none';
   document.getElementById('abrir').style.display='none';
@@ -543,7 +633,7 @@ function toggleAppsOS(ix){
   var u=_usr[ix];
   var marcadas=Array.isArray(u.apps)?u.apps:appsPorRol(u.rol);
   var box=document.getElementById('u-apps-chk-'+ix);
-  box.innerHTML=['rentabilidad','logistica','promos','respondia','posventa','asistente'].map(function(a){
+  box.innerHTML=['rentabilidad','logistica','promos','respondia','posventa','asistente','abastecimiento'].map(function(a){
     return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;color:#c9d4e8">'
       +'<input type="checkbox" value="'+a+'"'+(marcadas.indexOf(a)>-1?' checked':'')+'> '+APP_NOMBRES[a]+'</label>';
   }).join('');
@@ -682,7 +772,7 @@ async function borrarUsuarioOS(ix){
 var _chatHist=[], _chatPend=null;
 function abrirAsistente(){
   _activar('asistente');
-  cerrarMensajes();
+  cerrarMensajes(); cerrarAbast();
   document.getElementById('visor').style.display='none';
   document.getElementById('abrir').style.display='none';
   document.getElementById('hint').style.display='none';
@@ -907,6 +997,7 @@ async function cargarHiloMsg(conv){
 }
 function abrirMensajes(conv){
   _activar('mensajes');
+  cerrarAbast();
   document.getElementById('visor').style.display='none';
   document.getElementById('abrir').style.display='none';
   document.getElementById('hint').style.display='none';
@@ -955,6 +1046,197 @@ async function enviarMensajeOS(){
 document.getElementById('msg-in').addEventListener('keydown',function(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); enviarMensajeOS(); } });
 document.getElementById('msg-in').addEventListener('input',function(){ this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,120)+'px'; });
 document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible'){ if(_msgAbierto){ _msgNoLeidos[_msgCon]=0; pintarListaMsg(); } chatLatido(); } });
+
+// ── Abastecimiento: cobertura de stock contra fecha de llegada ────
+var _abDatos=null, _abOrden='ratio', _abAsc=true, _abSel=null, _abProvs=[];
+var AB_ACC={sacar:'Sacar descuento', poner:'Poner descuento', mantener:'Mantener', sin_ventas:'Sin ventas', inactivo:'Inactivo'};
+function abN(v,d){ if(v===null||v===undefined) return '—'; return Number(v).toLocaleString('es-AR',{maximumFractionDigits:d==null?0:d}); }
+function abFecha(iso){ if(!iso) return '—'; var p=String(iso).slice(0,10).split('-'); return p[2]+'/'+p[1]; }
+async function abApi(ruta, opts){
+  var h=await authHeaders(); h['Content-Type']='application/json';
+  var r=await fetch(BACKEND_URL+ruta, Object.assign({headers:h}, opts||{}));
+  var d=await r.json().catch(function(){ return {}; });
+  if(!r.ok && !d.error) d.error='Error '+r.status;
+  return d;
+}
+function abrirAbast(){
+  _activar('abastecimiento');
+  cerrarMensajes();
+  document.getElementById('visor').style.display='none';
+  document.getElementById('abrir').style.display='none';
+  document.getElementById('hint').style.display='none';
+  document.getElementById('panel-usuarios').style.display='none';
+  document.getElementById('panel-asistente').style.display='none';
+  document.getElementById('titulo').textContent='Abastecimiento';
+  document.getElementById('panel-abast').style.display='flex';
+  if(!_abDatos) abCargar(false); else abPintar();
+}
+function cerrarAbast(){ var p=document.getElementById('panel-abast'); if(p) p.style.display='none'; }
+async function abCargar(fresco){
+  var est=document.getElementById('ab-estado'); est.textContent='Cargando...';
+  var d=await abApi('/api/abast/resumen'+(fresco?'?fresco=1':''));
+  if(d.error){ est.textContent=d.error; est.style.color='var(--rojo)'; return; }
+  est.style.color=''; _abDatos=d;
+  var s=d.ultima_sync;
+  est.textContent = s && s.cuando ? ('Stock actualizado '+abFecha(s.cuando)+' '+String(s.cuando).slice(11,16)+' UTC'+(s.faltantes?(' · faltan '+s.faltantes+' SKU'):'')) : 'Todavia no se sincronizo el stock';
+  abPintar();
+}
+function abOrdenar(col){ if(_abOrden===col) _abAsc=!_abAsc; else { _abOrden=col; _abAsc=true; } abPintar(); }
+function abPintar(){
+  if(!_abDatos) return;
+  var q=(document.getElementById('ab-buscar').value||'').trim().toUpperCase();
+  var f=document.getElementById('ab-filtro').value;
+  var filas=_abDatos.filas.filter(function(x){
+    if(f && x.accion!==f) return false;
+    if(q && x.sku.indexOf(q)===-1 && String(x.nombre||'').toUpperCase().indexOf(q)===-1) return false;
+    return true;
+  });
+  var cnt={sacar:0,poner:0,mantener:0,sin_ventas:0};
+  _abDatos.filas.forEach(function(x){ if(cnt[x.accion]!=null) cnt[x.accion]++; });
+  document.getElementById('ab-chips').innerHTML=['sacar','poner','mantener','sin_ventas'].map(function(k){
+    return '<button class="ab-chip'+(f===k?' on':'')+'" onclick="abFiltro(\''+k+'\')">'+AB_ACC[k]+' <b>'+cnt[k]+'</b></button>';
+  }).join('')+'<span class="nota" style="align-self:center">'+_abDatos.filas.length+' productos · ventas de ML de los ultimos '+_abDatos.ventana_dias+' dias</span>';
+  var col=_abOrden, asc=_abAsc?1:-1;
+  filas.sort(function(a,b){
+    var va=a[col], vb=b[col];
+    if(va===null||va===undefined) va = (typeof vb==='number')? 1e9 : '';
+    if(vb===null||vb===undefined) vb = (typeof va==='number')? 1e9 : '';
+    if(typeof va==='string') return va.localeCompare(vb)*asc;
+    return (va-vb)*asc;
+  });
+  var tb=document.getElementById('ab-tbody');
+  var vacio=document.getElementById('ab-vacio');
+  if(!filas.length){
+    tb.innerHTML=''; vacio.style.display='';
+    vacio.innerHTML = _abDatos.filas.length ? 'Nada coincide con ese filtro.' : 'Todavia no hay datos.<br>Toca <b>Sincronizar</b> para traer el stock de Contabilium (tarda un par de minutos la primera vez).';
+    return;
+  }
+  vacio.style.display='none';
+  tb.innerHTML=filas.map(function(x){
+    var hz = x.horizonte==='orden' ? '' : '<div class="ab-hz">plazo '+x.plazo+'d</div>';
+    return '<tr class="'+(_abSel===x.sku?'sel':'')+'" onclick="abAbrirSku(\''+x.sku+'\')">'
+      +'<td class="sku">'+msgEsc(x.sku)+'</td>'
+      +'<td class="nom" title="'+msgEsc(x.nombre)+'">'+msgEsc(x.nombre||'')+'</td>'
+      +'<td class="num">'+abN(x.disponible)+'</td>'
+      +'<td class="num oc">'+abN(x.reservado)+'</td>'
+      +'<td class="num">'+abN(x.vendidas)+'</td>'
+      +'<td class="num oc">'+abN(x.velocidad,2)+'</td>'
+      +'<td class="num">'+(x.cobertura===null?'∞':abN(x.cobertura)+'d')+'</td>'
+      +'<td class="oc">'+(x.eta?abFecha(x.eta):'<span class="ab-hz">sin orden</span>')+'</td>'
+      +'<td class="num">'+abN(x.faltan)+'d'+hz+'</td>'
+      +'<td class="num oc">'+(x.ratio===null?'—':abN(x.ratio,2))+'</td>'
+      +'<td><span class="ab-acc '+x.accion+'">'+AB_ACC[x.accion]+'</span></td>'
+      +'</tr>';
+  }).join('');
+}
+function abFiltro(k){ var s=document.getElementById('ab-filtro'); s.value = s.value===k ? '' : k; abPintar(); }
+async function abSincronizarUI(){
+  var b=document.getElementById('ab-sync'); b.disabled=true; b.textContent='Sincronizando...';
+  var est=document.getElementById('ab-estado'); est.textContent='Trayendo stock de Contabilium, puede tardar un par de minutos...';
+  var d=await abApi('/api/abast/sincronizar',{method:'POST',body:'{}'});
+  b.disabled=false; b.textContent='Sincronizar';
+  if(d.error){ est.textContent=d.error; est.style.color='var(--rojo)'; return; }
+  if(d.errores && d.errores.length){ est.textContent='Sincronizado con avisos: '+d.errores.slice(0,2).join(' | '); }
+  await abCargar(true);
+}
+async function abCargarProvs(){ var d=await abApi('/api/abast/proveedores'); _abProvs=d.proveedores||[]; return _abProvs; }
+function abLado(html){ var l=document.getElementById('ab-lado'); l.innerHTML=html; l.classList.add('on'); }
+function abCerrarLado(){ document.getElementById('ab-lado').classList.remove('on'); _abSel=null; abPintar(); }
+async function abAbrirSku(sku){
+  _abSel=sku; abPintar();
+  var x=_abDatos.filas.find(function(f){ return f.sku===sku; }); if(!x) return;
+  if(!_abProvs.length) await abCargarProvs();
+  var ing=await abApi('/api/abast/ingresos?sku='+encodeURIComponent(sku));
+  var ops='<option value="">(sin proveedor)</option>'+_abProvs.map(function(p){ return '<option value="'+p.id+'"'+(x.proveedor_id==p.id?' selected':'')+'>'+msgEsc(p.nombre)+' · '+p.dias_reposicion+'d</option>'; }).join('');
+  var lista=(ing.ingresos||[]).map(function(i){
+    return '<div class="it"><span>'+abFecha(i.fecha_eta)+' · '+abN(i.cantidad)+' u · '+msgEsc(i.orden||'')+' <span class="ab-hz">('+msgEsc(i.origen)+')</span></span><button class="b" onclick="abBorrarIngreso('+i.id+',\''+sku+'\')">borrar</button></div>';
+  }).join('') || '<div class="nota">No hay ordenes en camino. Sin fecha de llegada, el calculo usa el plazo de reposicion ('+x.plazo+' dias).</div>';
+  abLado(
+    '<div class="cab"><span>'+msgEsc(sku)+'</span><span class="ab-acc '+x.accion+'">'+AB_ACC[x.accion]+'</span><button class="x" onclick="abCerrarLado()">&#10005;</button></div>'
+    +'<div class="cuerpo">'
+    +'<div class="nota">'+msgEsc(x.nombre||'')+'</div>'
+    +'<div class="ab-kv">'
+    +'<span>Stock total</span><span>'+abN(x.stock)+'</span>'
+    +'<span>Reservado</span><span>'+abN(x.reservado)+'</span>'
+    +'<span>Disponible</span><span>'+abN(x.disponible)+'</span>'
+    +'<span>Vendidas en ML (15 dias)</span><span>'+abN(x.vendidas)+'</span>'
+    +'<span>Velocidad</span><span>'+abN(x.velocidad,2)+' u/dia</span>'
+    +'<span>Dias de cobertura</span><span>'+(x.cobertura===null?'∞':abN(x.cobertura))+'</span>'
+    +'<span>'+(x.horizonte==='orden'?'Llega el':'Plazo de reposicion')+'</span><span>'+(x.eta?abFecha(x.eta)+' ('+x.faltan+'d)':x.plazo+' dias')+'</span>'
+    +'<span>Ratio cobertura / faltan</span><span>'+(x.ratio===null?'—':abN(x.ratio,2))+'</span>'
+    +'<span>Venta objetivo para llegar justo</span><span>'+(x.objetivo_dia===null?'—':abN(x.objetivo_dia,2)+' u/dia')+'</span>'
+    +(x.costo?'<span>Costo (Contabilium)</span><span>$'+abN(x.costo)+'</span>':'')
+    +'</div>'
+    +'<div class="ab-tit">Ordenes en camino</div><div class="ab-lista" id="ab-ing-lista">'+lista+'</div>'
+    +'<div class="ab-form"><div class="fila"><label>Llega el<input type="date" id="ab-i-eta"></label><label>Cantidad<input type="number" id="ab-i-cant" min="0" placeholder="0"></label></div>'
+    +'<div class="fila"><label>Orden / referencia<input id="ab-i-orden" placeholder="opcional"></label><button class="btn-azul" style="align-self:flex-end" onclick="abAgregarIngreso(\''+sku+'\')">Agregar</button></div><div class="ab-msg" id="ab-i-msg"></div></div>'
+    +'<div class="ab-tit">Reglas de este producto</div>'
+    +'<div class="ab-form">'
+    +'<label>Proveedor<select id="ab-p-prov">'+ops+'</select></label>'
+    +'<div class="fila"><label>Plazo de reposicion (dias)<input type="number" id="ab-p-plazo" min="1" placeholder="usa el del proveedor" value="'+(x.plazo && x.horizonte!=='orden' && x.proveedor_id? '' : '')+'"></label>'
+    +'<label>Margen minimo %<input type="number" id="ab-p-margen" min="0" step="0.5" value="'+(x.margen_minimo_pct==null?15:x.margen_minimo_pct)+'"></label></div>'
+    +'<div class="fila"><label>Descuento maximo %<input type="number" id="ab-p-desc" min="0" step="1" value="'+(x.descuento_max_pct==null?30:x.descuento_max_pct)+'"></label>'
+    +'<label style="justify-content:flex-end;flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="ab-p-activo"'+(x.activo?' checked':'')+' style="width:auto"> Activo</label></div>'
+    +'<label>Notas<textarea id="ab-p-notas" rows="2">'+msgEsc(x.notas||'')+'</textarea></label>'
+    +'<div class="fila"><button class="btn-azul" onclick="abGuardarProducto(\''+sku+'\')">Guardar</button><span class="ab-msg" id="ab-p-msg" style="align-self:center"></span></div>'
+    +'</div></div>'
+  );
+}
+async function abGuardarProducto(sku){
+  var m=document.getElementById('ab-p-msg'); m.style.color=''; m.textContent='Guardando...';
+  var plazo=document.getElementById('ab-p-plazo').value;
+  var d=await abApi('/api/abast/productos/'+encodeURIComponent(sku),{method:'PUT',body:JSON.stringify({
+    proveedor_id:document.getElementById('ab-p-prov').value||null,
+    dias_reposicion:plazo===''?null:Number(plazo),
+    margen_minimo_pct:Number(document.getElementById('ab-p-margen').value)||0,
+    descuento_max_pct:Number(document.getElementById('ab-p-desc').value)||0,
+    activo:document.getElementById('ab-p-activo').checked,
+    notas:document.getElementById('ab-p-notas').value
+  })});
+  if(d.error){ m.style.color='var(--rojo)'; m.textContent=d.error; return; }
+  m.style.color='var(--verde)'; m.textContent='Guardado';
+  await abCargar(true); abAbrirSku(sku);
+}
+async function abAgregarIngreso(sku){
+  var m=document.getElementById('ab-i-msg'); m.style.color=''; m.textContent='';
+  var eta=document.getElementById('ab-i-eta').value; if(!eta){ m.style.color='var(--rojo)'; m.textContent='Falta la fecha'; return; }
+  var d=await abApi('/api/abast/ingresos',{method:'POST',body:JSON.stringify({sku:sku,fecha_eta:eta,cantidad:Number(document.getElementById('ab-i-cant').value)||0,orden:document.getElementById('ab-i-orden').value})});
+  if(d.error){ m.style.color='var(--rojo)'; m.textContent=d.error; return; }
+  await abCargar(true); abAbrirSku(sku);
+}
+async function abBorrarIngreso(id,sku){
+  var d=await abApi('/api/abast/ingresos/'+id,{method:'DELETE'});
+  if(d.error){ alert(d.error); return; }
+  await abCargar(true); abAbrirSku(sku);
+}
+async function abVerProveedores(){
+  _abSel=null; abPintar();
+  await abCargarProvs();
+  var lista=_abProvs.map(function(p){
+    return '<div class="it"><span><b>'+msgEsc(p.nombre)+'</b> · '+p.dias_reposicion+' dias'+(p.importado?' · importado':'')+'</span>'+(MI_ROL==='admin'?'<button class="b" onclick="abBorrarProv('+p.id+')">borrar</button>':'')+'</div>';
+  }).join('') || '<div class="nota">Todavia no cargaste proveedores. El plazo de cada uno es lo que tarda desde que pedis hasta que entra la mercaderia.</div>';
+  abLado(
+    '<div class="cab"><span>Proveedores</span><button class="x" onclick="abCerrarLado()">&#10005;</button></div>'
+    +'<div class="cuerpo"><div class="ab-lista">'+lista+'</div>'
+    +'<div class="ab-tit">Agregar proveedor</div>'
+    +'<div class="ab-form"><label>Nombre<input id="ab-pv-nom" placeholder="Ej: Fabrica Rosario"></label>'
+    +'<div class="fila"><label>Plazo de reposicion (dias)<input type="number" id="ab-pv-dias" min="1" value="30"></label>'
+    +'<label style="justify-content:flex-end;flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="ab-pv-imp" style="width:auto"> Importado</label></div>'
+    +'<div class="fila"><button class="btn-azul" onclick="abGuardarProv()">Agregar</button><span class="ab-msg" id="ab-pv-msg" style="align-self:center"></span></div></div></div>'
+  );
+}
+async function abGuardarProv(){
+  var m=document.getElementById('ab-pv-msg'); m.style.color=''; m.textContent='';
+  var d=await abApi('/api/abast/proveedores',{method:'POST',body:JSON.stringify({nombre:document.getElementById('ab-pv-nom').value,dias_reposicion:Number(document.getElementById('ab-pv-dias').value)||30,importado:document.getElementById('ab-pv-imp').checked})});
+  if(d.error){ m.style.color='var(--rojo)'; m.textContent=d.error; return; }
+  abVerProveedores();
+}
+async function abBorrarProv(id){
+  if(!confirm('Borrar este proveedor? Los productos que lo tenian quedan sin proveedor.')) return;
+  var d=await abApi('/api/abast/proveedores/'+id,{method:'DELETE'});
+  if(d.error){ alert(d.error); return; }
+  _abDatos=null; abVerProveedores(); abCargar(true);
+}
 
 // ── SSO: las apps embebidas piden la sesion y el hub se la pasa ───
 // Solo responde a los origenes de SUS apps (nunca a un tercero).
