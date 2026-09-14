@@ -153,6 +153,9 @@
   .ab-acc.subir{background:#3a1d0c;color:#f6b284}
   .ab-acc.sacar_descuento{background:#3a2f0c;color:#f6d284}
   .ab-acc.liquidar{background:#2a1040;color:#d3a6ff}
+  .ab-acc.esperar{background:#1c2a44;color:#9ec1ff}
+  .ab-acc.sin_margen{background:transparent;color:var(--texto2);border:1px dashed var(--borde)}
+  .ab-combo{color:var(--texto2);font-size:11px;white-space:nowrap}
   .ab-barras{display:flex;align-items:flex-end;gap:3px;height:70px;padding:6px 0 0}
   .ab-barras .b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;font-size:9px;color:var(--texto2);gap:2px}
   .ab-barras .b i{display:block;width:100%;background:var(--accent);border-radius:3px 3px 0 0;min-height:2px;opacity:.85}
@@ -314,7 +317,7 @@
 <!-- ── Sistema ── -->
 <div id="os-view">
   <nav id="side" aria-label="Apps">
-    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v22</span></span></div>
+    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v23</span></span></div>
     <div id="botones"></div>
     <div class="abajo">
       <div id="quien"></div>
@@ -375,6 +378,7 @@
           <option value="sobrestock">Sobrestock (demasiados dias de stock)</option>
           <option value="sug_bajar">Sugerencia: bajar precio / liquidar</option>
           <option value="sug_subir">Sugerencia: subir precio o sacar descuento</option>
+          <option value="sug_esperar">Sugerencia: esperar temporada</option>
         </select>
         <select id="ab-prov" onchange="abPintar()" title="Filtrar por proveedor"><option value="">Todos los proveedores</option></select>
         <select id="ab-stock" onchange="abPintar()"><option value="">Con y sin stock</option><option value="con">Solo con stock</option><option value="sin">Solo sin stock</option></select>
@@ -1222,7 +1226,8 @@ function abPintar(){
     else if(f==='urgente'){ if(!x.urgente) return false; }
     else if(f==='critico'){ if(!x.critico) return false; }
     else if(f==='sobrestock'){ if(!x.sobrestock) return false; }
-    else if(f==='sug_bajar'){ if(!(x.sug_accion==='bajar'||x.sug_accion==='liquidar')) return false; }
+    else if(f==='sug_bajar'){ if(!(x.sug_accion==='bajar'||x.sug_accion==='liquidar'||x.sug_accion==='sin_margen')) return false; }
+    else if(f==='sug_esperar'){ if(x.sug_accion!=='esperar') return false; }
     else if(f==='sug_subir'){ if(!(x.sug_accion==='subir'||x.sug_accion==='sacar_descuento')) return false; }
     else if(f && x.accion!==f) return false;
     if(pv==='__sin'){ if(x.proveedor) return false; } else if(pv && x.proveedor!==pv) return false;
@@ -1231,13 +1236,13 @@ function abPintar(){
     if(q && x.sku.indexOf(q)===-1 && String(x.nombre||'').toUpperCase().indexOf(q)===-1) return false;
     return true;
   });
-  var cnt={urgente:0,critico:0,sobrestock:0,sin_pedido:0,recomprar:0,llegando:0,sacar:0,poner:0,mantener:0,sin_ventas:0,sug_bajar:0,sug_subir:0};
-  _abDatos.filas.forEach(function(x){ if(cnt[x.accion]!=null) cnt[x.accion]++; if(x.compra&&cnt[x.compra]!=null) cnt[x.compra]++; if(x.sin_pedido) cnt.sin_pedido++; if(x.urgente) cnt.urgente++; if(x.critico) cnt.critico++; if(x.sobrestock) cnt.sobrestock++; if(x.sug_accion==='bajar'||x.sug_accion==='liquidar') cnt.sug_bajar++; if(x.sug_accion==='subir'||x.sug_accion==='sacar_descuento') cnt.sug_subir++; });
+  var cnt={urgente:0,critico:0,sobrestock:0,sin_pedido:0,recomprar:0,llegando:0,sacar:0,poner:0,mantener:0,sin_ventas:0,sug_bajar:0,sug_subir:0,sug_esperar:0};
+  _abDatos.filas.forEach(function(x){ if(cnt[x.accion]!=null) cnt[x.accion]++; if(x.compra&&cnt[x.compra]!=null) cnt[x.compra]++; if(x.sin_pedido) cnt.sin_pedido++; if(x.urgente) cnt.urgente++; if(x.critico) cnt.critico++; if(x.sobrestock) cnt.sobrestock++; if(x.sug_accion==='bajar'||x.sug_accion==='liquidar'||x.sug_accion==='sin_margen') cnt.sug_bajar++; if(x.sug_accion==='subir'||x.sug_accion==='sacar_descuento') cnt.sug_subir++; if(x.sug_accion==='esperar') cnt.sug_esperar++; });
   var factVista=filas.reduce(function(t,x){ return t+(x.facturado||0); },0);
-  var NOM={urgente:'&#128293; Orden urgente ('+_abCfg.urgente_dias+'d)',critico:'&#9888; Criticos ('+_abCfg.criticos_dias+'d)',sobrestock:'&#128230; Sobrestock (&gt;'+_abCfg.sobrestock_dias+'d)',sin_pedido:'Sin pedido',recomprar:'&#128722; Recomprar',llegando:'Llegando',sacar:AB_ACC.sacar,poner:AB_ACC.poner,mantener:AB_ACC.mantener,sin_ventas:AB_ACC.sin_ventas,sug_bajar:'&#128178; Bajar precio',sug_subir:'&#128200; Subir / sacar desc.'};
-  var TIP={sug_bajar:'Sobra stock: la sugerencia es bajar el precio o liquidar (con tope por margen minimo)',sug_subir:'Falta stock: sacar descuentos o subir el precio',urgente:'Al ritmo actual se queda sin stock en menos de '+_abCfg.urgente_dias+' dias y no llega nada antes',critico:'Al ritmo actual se queda sin stock en menos de '+_abCfg.criticos_dias+' dias y no llega nada antes',sobrestock:'Mas de '+_abCfg.sobrestock_dias+' dias de stock al ritmo actual (o stock sin ventas)',sin_pedido:'Se vende, hace falta pedir y no hay ninguna orden cargada'};
+  var NOM={urgente:'&#128293; Orden urgente ('+_abCfg.urgente_dias+'d)',critico:'&#9888; Criticos ('+_abCfg.criticos_dias+'d)',sobrestock:'&#128230; Sobrestock (&gt;'+_abCfg.sobrestock_dias+'d)',sin_pedido:'Sin pedido',recomprar:'&#128722; Recomprar',llegando:'Llegando',sacar:AB_ACC.sacar,poner:AB_ACC.poner,mantener:AB_ACC.mantener,sin_ventas:AB_ACC.sin_ventas,sug_bajar:'&#128178; Bajar precio',sug_subir:'&#128200; Subir / sacar desc.',sug_esperar:'&#9203; Esperar temporada'};
+  var TIP={sug_bajar:'Sobra stock: la sugerencia es bajar el precio o liquidar (con tope por margen minimo)',sug_subir:'Falta stock: sacar descuentos o subir el precio',sug_esperar:'Sobra stock pero la temporada del producto empieza en los proximos 3 meses: no bajar todavia, revisar en la fecha indicada',urgente:'Al ritmo actual se queda sin stock en menos de '+_abCfg.urgente_dias+' dias y no llega nada antes',critico:'Al ritmo actual se queda sin stock en menos de '+_abCfg.criticos_dias+' dias y no llega nada antes',sobrestock:'Mas de '+_abCfg.sobrestock_dias+' dias de stock al ritmo actual (o stock sin ventas)',sin_pedido:'Se vende, hace falta pedir y no hay ninguna orden cargada'};
   var aPedir=filas.reduce(function(t,x){ return t+(x.pedir>0?x.pedir:0); },0);
-  document.getElementById('ab-chips').innerHTML=['urgente','critico','sobrestock','sin_pedido','sug_bajar','sug_subir','recomprar','llegando','sacar','poner','mantener','sin_ventas'].map(function(k){
+  document.getElementById('ab-chips').innerHTML=['urgente','critico','sobrestock','sin_pedido','sug_bajar','sug_subir','sug_esperar','recomprar','llegando','sacar','poner','mantener','sin_ventas'].map(function(k){
     return '<button class="ab-chip'+(f===k?' on':'')+'" title="'+(TIP[k]||'')+'" onclick="abFiltro(\''+k+'\')">'+NOM[k]+' <b>'+cnt[k]+'</b></button>';
   }).join('')+'<span class="nota" style="align-self:center">'+_abDatos.filas.length+' productos · ventas de ML de los ultimos '+_abDatos.ventana_dias+' dias · en esta vista: '+filas.length+' productos, '+abN(aPedir)+' u. a pedir, $'+abN(factVista)+' facturados en 15 dias</span>';
   var col=_abOrden, asc=_abAsc?1:-1;
@@ -1284,7 +1289,7 @@ function abPintar(){
       +'<td data-c="pedir" class="num">'+(x.pedir?'<b>'+abN(x.pedir)+'</b>':'<span class="ab-hz">—</span>')+'</td>'
       +'<td data-c="quiebre_est" class="oc">'+(x.quiebre_est?abFecha(x.quiebre_est):'<span class="ab-hz">—</span>')+'</td>'
       +'<td data-c="pedir_antes">'+abPedirAntesHTML(x)+'</td>'
-      +'<td data-c="pedir_estacional" class="num">'+(x.pedir_estacional?'<b>'+abN(x.pedir_estacional)+'</b>':'<span class="ab-hz">—</span>')+'</td>'
+      +'<td data-c="pedir_estacional" class="num">'+(x.combo?'<span class="ab-combo" title="Combo: usa el stock de '+msgEsc(x.combo.base)+'. La compra se planifica en ese producto">&rarr; '+msgEsc(x.combo.base)+'</span>':(x.pedir_estacional?'<b>'+abN(x.pedir_estacional)+'</b>':'<span class="ab-hz">—</span>'))+'</td>'
       +'<td data-c="estac" class="oc"><span class="ab-hz">'+msgEsc(x.estac||'')+'</span></td>'
       +'<td data-c="precio_prom" class="num">'+(x.precio_prom?'$'+abN(x.precio_prom):'<span class="ab-hz">—</span>')+'</td>'
       +'<td data-c="margen_pct" class="num oc">'+(x.margen_pct==null?'<span class="ab-hz">—</span>':abN(x.margen_pct,1)+'%')+'</td>'
@@ -1301,16 +1306,17 @@ var AB_TEXTO={sku:1,nombre:1,proveedor:1,eta:1,compra:1,accion:1,quiebre_est:1,p
 var _abOcultas={};
 try{ var _oc=localStorage.getItem('pontecos_ab_ocultas'); if(_oc===null){ _abOcultas={estac:1,ratio:1,reservado:1}; } else { (JSON.parse(_oc||'[]')||[]).forEach(function(k){ _abOcultas[k]=1; }); } }catch(e){}
 function abPedirAntesHTML(x){
+  if(x.combo) return '<span class="ab-combo" title="Combo de '+x.combo.mult+' x '+msgEsc(x.combo.base)+': se compra el producto base">&rarr; '+msgEsc(x.combo.base)+'</span>';
   if(!x.pedir_antes) return '<span class="ab-hz">—</span>';
   var u=x.urgencia_compra;
   if(u==='ya') return '<span class="ab-acc urgente" title="Ya deberia estar pedido: al ritmo actual quiebra el '+abFecha(x.quiebre_est)+'">ya</span>';
   if(u==='esta semana') return '<span class="ab-acc critico">'+abFecha(x.pedir_antes)+'</span>';
   return abFecha(x.pedir_antes);
 }
-var AB_SUG_NOM={bajar:'Bajar',subir:'Subir',sacar_descuento:'Sacar desc.',liquidar:'Liquidar',mantener:'Mantener'};
+var AB_SUG_NOM={bajar:'Bajar',subir:'Subir',sacar_descuento:'Sacar desc.',liquidar:'Liquidar',mantener:'Mantener',esperar:'Esperar',sin_margen:'Sin margen p/ bajar'};
 function abSugHTML(x){
   var s=x.sugerencia; if(!s||s.accion==='mantener'||!s.accion) return '<span class="ab-hz">—</span>';
-  var txt=AB_SUG_NOM[s.accion]||s.accion; if(s.pct) txt+=' '+(s.pct>0?'+':'')+s.pct+'%';
+  var txt=AB_SUG_NOM[s.accion]||s.accion; if(s.pct) txt+=' '+(s.pct>0?'+':'')+s.pct+'%'; if(s.accion==='esperar'&&s.revisar) txt+=' · rev. '+abFecha(s.revisar);
   return '<span class="ab-acc '+s.accion+'" title="'+msgEsc(s.motivo||'')+(s.precio_sugerido?' → $'+abN(s.precio_sugerido):'')+'">'+txt+'</span>'+(s.precio_sugerido&&s.pct?' <span class="ab-hz">$'+abN(s.precio_sugerido)+'</span>':'');
 }
 function abColsCss(){
@@ -1429,7 +1435,9 @@ function abPlanHTML(sku, h){
   html+='<div class="ab-barras">'+ult.map(function(m){ return '<div class="b'+(m.mes===mesHoy?' hoy':'')+'" title="'+abMesNombre(m.mes)+': '+abN(m.vendidas)+' vendidas"><i style="height:'+Math.round(m.vendidas/maxv*52)+'px"></i>'+abMesNombre(m.mes).slice(0,3)+'</div>'; }).join('')
     +prox.map(function(m){ return '<div class="b fut" title="'+abMesNombre(m.mes)+': ~'+abN(m.unidades)+' estimadas"><i style="height:'+Math.round(m.unidades/maxv*52)+'px"></i>'+abMesNombre(m.mes).slice(0,3)+'</div>'; }).join('')+'</div>';
   html+='<div class="nota">Barras llenas: vendidas por mes. Punteadas: estimacion con la velocidad actual ('+abN(p.velocidad_15d,2)+' u/dia) y el indice estacional. Producto <b>'+msgEsc(e.tipo||'sin datos')+'</b>'+(e.pico?' · pico en '+abMesNombre('2000-'+String(e.pico).padStart(2,'0')).slice(0,3)+', valle en '+abMesNombre('2000-'+String(e.valle).padStart(2,'0')).slice(0,3):'')+(e.meses_con_ventas?' · '+e.meses_con_ventas+' meses con ventas':'')+'.</div>';
-  if(p.velocidad_15d>0){
+  if(x.combo){
+    html+='<div>Este combo es <b>'+x.combo.mult+' x '+msgEsc(x.combo.base)+'</b> y usa su stock: las ventas del combo ya estan sumadas en '+msgEsc(x.combo.base)+' y la compra se planifica ahi. <a href="#" onclick="abAbrirSku(\''+msgEsc(x.combo.base)+'\');return false">Ver '+msgEsc(x.combo.base)+'</a></div>';
+  } else if(p.velocidad_15d>0){
     html+='<div>Al ritmo actual '+(p.quiebre_est?'se queda sin stock el <b class="'+(p.urgencia==='ya'?'r':(p.urgencia==='esta semana'?'a':'g'))+'">'+abFechaLarga(p.quiebre_est)+'</b>':'<b class="g">no se queda sin stock en el proximo año</b>')+'.'
       +(p.pedir_antes?' Con '+p.plazo+' dias de reposicion hay que pedir <b class="'+(p.urgencia==='ya'?'r':'a')+'">'+(p.urgencia==='ya'?'ya':'antes del '+abFechaLarga(p.pedir_antes))+'</b>.':'')+'</div>';
     html+='<div>Cantidad sugerida: <b>'+abN(p.cantidad)+' u</b> para cubrir '+p.compra_dias+' dias de venta desde que llega ('+abFechaLarga(p.llegada)+' → '+abFechaLarga(p.cubre_hasta)+'), descontando stock y ordenes en camino.</div>';
