@@ -149,6 +149,17 @@
   .ab-acc.sobrestock{background:#0f2a27;color:#6fd3c7}
   .ab-hist table td.num,.ab-hist table th.num{text-align:right}
   .ab-hist .cm-tabla{max-height:260px}
+  .ab-acc.bajar{background:#0f2a27;color:#6fd3c7}
+  .ab-acc.subir{background:#3a1d0c;color:#f6b284}
+  .ab-acc.sacar_descuento{background:#3a2f0c;color:#f6d284}
+  .ab-acc.liquidar{background:#2a1040;color:#d3a6ff}
+  .ab-barras{display:flex;align-items:flex-end;gap:3px;height:70px;padding:6px 0 0}
+  .ab-barras .b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;font-size:9px;color:var(--texto2);gap:2px}
+  .ab-barras .b i{display:block;width:100%;background:var(--accent);border-radius:3px 3px 0 0;min-height:2px;opacity:.85}
+  .ab-barras .b.fut i{background:transparent;border:1px dashed var(--accent)}
+  .ab-barras .b.hoy i{background:var(--verde)}
+  .ab-plan{border:1px solid var(--borde);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;font-size:12.5px}
+  .ab-plan b.g{color:var(--verde)} .ab-plan b.r{color:var(--rojo)} .ab-plan b.a{color:#f6d284}
   #ab-lado{width:0;min-width:0;overflow:hidden;border-left:1px solid var(--borde);background:var(--panel);display:flex;flex-direction:column;transition:width .15s ease}
   #ab-lado.on{width:360px;min-width:360px}
   #panel-abast.solo-lectura .ab-form, #panel-abast.solo-lectura .ab-lista .b{display:none}
@@ -303,7 +314,7 @@
 <!-- ── Sistema ── -->
 <div id="os-view">
   <nav id="side" aria-label="Apps">
-    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v21</span></span></div>
+    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v22</span></span></div>
     <div id="botones"></div>
     <div class="abajo">
       <div id="quien"></div>
@@ -362,6 +373,8 @@
           <option value="urgente">Orden urgente (quiebra en pocos dias y nada llega antes)</option>
           <option value="critico">Criticos (quiebra dentro del plazo configurado)</option>
           <option value="sobrestock">Sobrestock (demasiados dias de stock)</option>
+          <option value="sug_bajar">Sugerencia: bajar precio / liquidar</option>
+          <option value="sug_subir">Sugerencia: subir precio o sacar descuento</option>
         </select>
         <select id="ab-prov" onchange="abPintar()" title="Filtrar por proveedor"><option value="">Todos los proveedores</option></select>
         <select id="ab-stock" onchange="abPintar()"><option value="">Con y sin stock</option><option value="con">Solo con stock</option><option value="sin">Solo sin stock</option></select>
@@ -387,12 +400,20 @@
               <th data-c="reservado" class="num oc" onclick="abOrdenar('reservado')">Reserv.</th>
               <th data-c="en_transito" class="num oc" onclick="abOrdenar('en_transito')" title="Pendiente de recepcion en Contabilium + ordenes en camino cargadas">Tr&aacute;nsito</th>
               <th data-c="vendidas" class="num" onclick="abOrdenar('vendidas')">Vend. 15d</th>
+              <th data-c="facturado" class="num" onclick="abOrdenar('facturado')" title="Facturado en ML en los ultimos 15 dias, con IVA (lo que pago el comprador)">Fact. 15d</th>
               <th data-c="velocidad" class="num oc" onclick="abOrdenar('velocidad')">u/d&iacute;a</th>
               <th data-c="cobertura" class="num" onclick="abOrdenar('cobertura')">Cobert.</th>
               <th data-c="eta" class="oc" onclick="abOrdenar('eta')">Llega</th>
               <th data-c="faltan" class="num" onclick="abOrdenar('faltan')">Faltan</th>
               <th data-c="ratio" class="num oc" onclick="abOrdenar('ratio')">Ratio</th>
               <th data-c="pedir" class="num" onclick="abOrdenar('pedir')" title="Cuanto pedir para cubrir plazo + colchon con la velocidad actual">Pedir</th>
+              <th data-c="quiebre_est" class="oc" onclick="abOrdenar('quiebre_est')" title="Fecha estimada en que se queda sin stock (velocidad actual + estacionalidad + lo que llega)">Quiebre est.</th>
+              <th data-c="pedir_antes" onclick="abOrdenar('pedir_antes')" title="Ultimo dia para hacer el pedido y que llegue antes del quiebre (quiebre - plazo del proveedor)">Pedir antes</th>
+              <th data-c="pedir_estacional" class="num" onclick="abOrdenar('pedir_estacional')" title="Cantidad sugerida para cubrir la cobertura objetivo desde que llega, con estacionalidad">Pedir (est.)</th>
+              <th data-c="estac" class="oc" onclick="abOrdenar('estac')" title="Estacionalidad segun la historia del producto y del negocio">Estac.</th>
+              <th data-c="precio_prom" class="num" onclick="abOrdenar('precio_prom')" title="Precio promedio de venta en ML (ultimas ventas, con IVA)">Precio</th>
+              <th data-c="margen_pct" class="num oc" onclick="abOrdenar('margen_pct')" title="Margen estimado: precio - comision - envio neto - costo - costo financiero">Margen</th>
+              <th data-c="sug_pct" onclick="abOrdenar('sug_pct')" title="Sugerencia de precio segun stock vs plazo, con tope por margen minimo">Sug. precio</th>
               <th data-c="compra" onclick="abOrdenar('compra')" title="Se vende y esta sin stock (o no llega al plazo de reposicion)">Compra</th>
               <th data-c="accion" onclick="abOrdenar('accion')">Acci&oacute;n</th>
             </tr></thead>
@@ -1134,7 +1155,7 @@ document.addEventListener('visibilitychange',function(){ if(document.visibilityS
 
 // ── Abastecimiento: cobertura de stock contra fecha de llegada ────
 var _abDatos=null, _abOrden='vendidas', _abAsc=false, _abSel=null, _abProvs=[], _abVista=[];
-var _abCfg={urgente_dias:30, criticos_dias:90, sobrestock_dias:180}, _abCfgPuede=false;
+var _abCfg={urgente_dias:30, criticos_dias:90, sobrestock_dias:180, compra_dias:60}, _abCfgPuede=false;
 var AB_ACC={sacar:'Sacar descuento', poner:'Poner descuento', mantener:'Mantener', sin_ventas:'Sin ventas', inactivo:'Inactivo'};
 function abN(v,d){ if(v===null||v===undefined) return '—'; return Number(v).toLocaleString('es-AR',{maximumFractionDigits:d==null?0:d}); }
 function abFecha(iso){ if(!iso) return '—'; var p=String(iso).slice(0,10).split('-'); return p[2]+'/'+p[1]; }
@@ -1177,6 +1198,10 @@ async function abCargar(fresco){
     x.en_transito=Number(x.en_transito||0); x.pedir=Number(x.pedir||0); x.compra=x.compra||''; x.proveedor=x.proveedor||'';
     // se vende, hace falta pedir (o ya esta en cero) y no hay ninguna orden en camino
     x.sin_pedido=(Number(x.vendidas||0)>0 && !(x.en_transito>0) && !x.eta && (x.pedir>0 || x.compra==='recomprar'));
+    x.facturado=Number(x.facturado||0); x.pedir_estacional=Number(x.pedir_estacional||0);
+    x.sug_pct=(x.sugerencia && x.sugerencia.accion!=='mantener') ? Number(x.sugerencia.pct||0) : null;
+    x.sug_accion=x.sugerencia ? x.sugerencia.accion : '';
+    x.estac=x.estacionalidad ? (x.estacionalidad.tipo||'') : '';
     abVistasFila(x);
   });
   abProvSelect();
@@ -1197,6 +1222,8 @@ function abPintar(){
     else if(f==='urgente'){ if(!x.urgente) return false; }
     else if(f==='critico'){ if(!x.critico) return false; }
     else if(f==='sobrestock'){ if(!x.sobrestock) return false; }
+    else if(f==='sug_bajar'){ if(!(x.sug_accion==='bajar'||x.sug_accion==='liquidar')) return false; }
+    else if(f==='sug_subir'){ if(!(x.sug_accion==='subir'||x.sug_accion==='sacar_descuento')) return false; }
     else if(f && x.accion!==f) return false;
     if(pv==='__sin'){ if(x.proveedor) return false; } else if(pv && x.proveedor!==pv) return false;
     if(st==='con' && !(x.disponible>0)) return false;
@@ -1204,14 +1231,15 @@ function abPintar(){
     if(q && x.sku.indexOf(q)===-1 && String(x.nombre||'').toUpperCase().indexOf(q)===-1) return false;
     return true;
   });
-  var cnt={urgente:0,critico:0,sobrestock:0,sin_pedido:0,recomprar:0,llegando:0,sacar:0,poner:0,mantener:0,sin_ventas:0};
-  _abDatos.filas.forEach(function(x){ if(cnt[x.accion]!=null) cnt[x.accion]++; if(x.compra&&cnt[x.compra]!=null) cnt[x.compra]++; if(x.sin_pedido) cnt.sin_pedido++; if(x.urgente) cnt.urgente++; if(x.critico) cnt.critico++; if(x.sobrestock) cnt.sobrestock++; });
-  var NOM={urgente:'&#128293; Orden urgente ('+_abCfg.urgente_dias+'d)',critico:'&#9888; Criticos ('+_abCfg.criticos_dias+'d)',sobrestock:'&#128230; Sobrestock (&gt;'+_abCfg.sobrestock_dias+'d)',sin_pedido:'Sin pedido',recomprar:'&#128722; Recomprar',llegando:'Llegando',sacar:AB_ACC.sacar,poner:AB_ACC.poner,mantener:AB_ACC.mantener,sin_ventas:AB_ACC.sin_ventas};
-  var TIP={urgente:'Al ritmo actual se queda sin stock en menos de '+_abCfg.urgente_dias+' dias y no llega nada antes',critico:'Al ritmo actual se queda sin stock en menos de '+_abCfg.criticos_dias+' dias y no llega nada antes',sobrestock:'Mas de '+_abCfg.sobrestock_dias+' dias de stock al ritmo actual (o stock sin ventas)',sin_pedido:'Se vende, hace falta pedir y no hay ninguna orden cargada'};
+  var cnt={urgente:0,critico:0,sobrestock:0,sin_pedido:0,recomprar:0,llegando:0,sacar:0,poner:0,mantener:0,sin_ventas:0,sug_bajar:0,sug_subir:0};
+  _abDatos.filas.forEach(function(x){ if(cnt[x.accion]!=null) cnt[x.accion]++; if(x.compra&&cnt[x.compra]!=null) cnt[x.compra]++; if(x.sin_pedido) cnt.sin_pedido++; if(x.urgente) cnt.urgente++; if(x.critico) cnt.critico++; if(x.sobrestock) cnt.sobrestock++; if(x.sug_accion==='bajar'||x.sug_accion==='liquidar') cnt.sug_bajar++; if(x.sug_accion==='subir'||x.sug_accion==='sacar_descuento') cnt.sug_subir++; });
+  var factVista=filas.reduce(function(t,x){ return t+(x.facturado||0); },0);
+  var NOM={urgente:'&#128293; Orden urgente ('+_abCfg.urgente_dias+'d)',critico:'&#9888; Criticos ('+_abCfg.criticos_dias+'d)',sobrestock:'&#128230; Sobrestock (&gt;'+_abCfg.sobrestock_dias+'d)',sin_pedido:'Sin pedido',recomprar:'&#128722; Recomprar',llegando:'Llegando',sacar:AB_ACC.sacar,poner:AB_ACC.poner,mantener:AB_ACC.mantener,sin_ventas:AB_ACC.sin_ventas,sug_bajar:'&#128178; Bajar precio',sug_subir:'&#128200; Subir / sacar desc.'};
+  var TIP={sug_bajar:'Sobra stock: la sugerencia es bajar el precio o liquidar (con tope por margen minimo)',sug_subir:'Falta stock: sacar descuentos o subir el precio',urgente:'Al ritmo actual se queda sin stock en menos de '+_abCfg.urgente_dias+' dias y no llega nada antes',critico:'Al ritmo actual se queda sin stock en menos de '+_abCfg.criticos_dias+' dias y no llega nada antes',sobrestock:'Mas de '+_abCfg.sobrestock_dias+' dias de stock al ritmo actual (o stock sin ventas)',sin_pedido:'Se vende, hace falta pedir y no hay ninguna orden cargada'};
   var aPedir=filas.reduce(function(t,x){ return t+(x.pedir>0?x.pedir:0); },0);
-  document.getElementById('ab-chips').innerHTML=['urgente','critico','sobrestock','sin_pedido','recomprar','llegando','sacar','poner','mantener','sin_ventas'].map(function(k){
+  document.getElementById('ab-chips').innerHTML=['urgente','critico','sobrestock','sin_pedido','sug_bajar','sug_subir','recomprar','llegando','sacar','poner','mantener','sin_ventas'].map(function(k){
     return '<button class="ab-chip'+(f===k?' on':'')+'" title="'+(TIP[k]||'')+'" onclick="abFiltro(\''+k+'\')">'+NOM[k]+' <b>'+cnt[k]+'</b></button>';
-  }).join('')+'<span class="nota" style="align-self:center">'+_abDatos.filas.length+' productos · ventas de ML de los ultimos '+_abDatos.ventana_dias+' dias · en esta vista: '+filas.length+' productos, '+abN(aPedir)+' u. a pedir</span>';
+  }).join('')+'<span class="nota" style="align-self:center">'+_abDatos.filas.length+' productos · ventas de ML de los ultimos '+_abDatos.ventana_dias+' dias · en esta vista: '+filas.length+' productos, '+abN(aPedir)+' u. a pedir, $'+abN(factVista)+' facturados en 15 dias</span>';
   var col=_abOrden, asc=_abAsc?1:-1;
   filas.sort(function(a,b){
     var va=a[col], vb=b[col];
@@ -1247,12 +1275,20 @@ function abPintar(){
       +'<td data-c="reservado" class="num oc">'+abN(x.reservado)+'</td>'
       +'<td data-c="en_transito" class="num oc">'+(x.en_transito?abN(x.en_transito):'<span class="ab-hz">0</span>')+'</td>'
       +'<td data-c="vendidas" class="num">'+abN(x.vendidas)+'</td>'
+      +'<td data-c="facturado" class="num">'+(x.facturado?'$'+abN(x.facturado):'<span class="ab-hz">—</span>')+'</td>'
       +'<td data-c="velocidad" class="num oc">'+abN(x.velocidad,2)+'</td>'
       +'<td data-c="cobertura" class="num">'+(x.cobertura===null?'∞':abN(x.cobertura)+'d')+'</td>'
       +'<td data-c="eta" class="oc">'+(x.eta?abFecha(x.eta):'<span class="ab-hz">sin orden</span>')+'</td>'
       +'<td data-c="faltan" class="num">'+abN(x.faltan)+'d'+hz+'</td>'
       +'<td data-c="ratio" class="num oc">'+(x.ratio===null?'—':abN(x.ratio,2))+'</td>'
       +'<td data-c="pedir" class="num">'+(x.pedir?'<b>'+abN(x.pedir)+'</b>':'<span class="ab-hz">—</span>')+'</td>'
+      +'<td data-c="quiebre_est" class="oc">'+(x.quiebre_est?abFecha(x.quiebre_est):'<span class="ab-hz">—</span>')+'</td>'
+      +'<td data-c="pedir_antes">'+abPedirAntesHTML(x)+'</td>'
+      +'<td data-c="pedir_estacional" class="num">'+(x.pedir_estacional?'<b>'+abN(x.pedir_estacional)+'</b>':'<span class="ab-hz">—</span>')+'</td>'
+      +'<td data-c="estac" class="oc"><span class="ab-hz">'+msgEsc(x.estac||'')+'</span></td>'
+      +'<td data-c="precio_prom" class="num">'+(x.precio_prom?'$'+abN(x.precio_prom):'<span class="ab-hz">—</span>')+'</td>'
+      +'<td data-c="margen_pct" class="num oc">'+(x.margen_pct==null?'<span class="ab-hz">—</span>':abN(x.margen_pct,1)+'%')+'</td>'
+      +'<td data-c="sug_pct">'+abSugHTML(x)+'</td>'
       +'<td data-c="compra">'+compra+'</td>'
       +'<td data-c="accion"><span class="ab-acc '+x.accion+'">'+AB_ACC[x.accion]+'</span></td>'
       +'</tr>';
@@ -1260,10 +1296,23 @@ function abPintar(){
 }
 function abFiltro(k){ var s=document.getElementById('ab-filtro'); s.value = s.value===k ? '' : k; abPintar(); }
 // ── Abastecimiento: columnas visibles, filtro por proveedor y exportar la vista ──
-var AB_COLS=[['sku','SKU'],['nombre','Producto'],['proveedor','Proveedor'],['disponible','Disponible'],['d_general','General'],['d_full','ML Full'],['d_zflex','Z Flex'],['reservado','Reservado'],['en_transito','Transito'],['vendidas','Vendidas 15d'],['velocidad','Unidades por dia'],['cobertura','Cobertura (dias)'],['eta','Llega'],['faltan','Faltan (dias)'],['ratio','Ratio'],['pedir','Pedir'],['compra','Compra'],['accion','Accion']];
-var AB_TEXTO={sku:1,nombre:1,proveedor:1,eta:1,compra:1,accion:1};
+var AB_COLS=[['sku','SKU'],['nombre','Producto'],['proveedor','Proveedor'],['disponible','Disponible'],['d_general','General'],['d_full','ML Full'],['d_zflex','Z Flex'],['reservado','Reservado'],['en_transito','Transito'],['vendidas','Vendidas 15d'],['facturado','Facturado 15d (con IVA)'],['velocidad','Unidades por dia'],['cobertura','Cobertura (dias)'],['eta','Llega'],['faltan','Faltan (dias)'],['ratio','Ratio'],['pedir','Pedir'],['quiebre_est','Quiebre estimado'],['pedir_antes','Pedir antes de'],['pedir_estacional','Pedir (con estacionalidad)'],['estac','Estacionalidad'],['precio_prom','Precio promedio'],['margen_pct','Margen %'],['sug_pct','Sugerencia de precio'],['compra','Compra'],['accion','Accion']];
+var AB_TEXTO={sku:1,nombre:1,proveedor:1,eta:1,compra:1,accion:1,quiebre_est:1,pedir_antes:1,estac:1};
 var _abOcultas={};
-try{ (JSON.parse(localStorage.getItem('pontecos_ab_ocultas')||'[]')||[]).forEach(function(k){ _abOcultas[k]=1; }); }catch(e){}
+try{ var _oc=localStorage.getItem('pontecos_ab_ocultas'); if(_oc===null){ _abOcultas={estac:1,ratio:1,reservado:1}; } else { (JSON.parse(_oc||'[]')||[]).forEach(function(k){ _abOcultas[k]=1; }); } }catch(e){}
+function abPedirAntesHTML(x){
+  if(!x.pedir_antes) return '<span class="ab-hz">—</span>';
+  var u=x.urgencia_compra;
+  if(u==='ya') return '<span class="ab-acc urgente" title="Ya deberia estar pedido: al ritmo actual quiebra el '+abFecha(x.quiebre_est)+'">ya</span>';
+  if(u==='esta semana') return '<span class="ab-acc critico">'+abFecha(x.pedir_antes)+'</span>';
+  return abFecha(x.pedir_antes);
+}
+var AB_SUG_NOM={bajar:'Bajar',subir:'Subir',sacar_descuento:'Sacar desc.',liquidar:'Liquidar',mantener:'Mantener'};
+function abSugHTML(x){
+  var s=x.sugerencia; if(!s||s.accion==='mantener'||!s.accion) return '<span class="ab-hz">—</span>';
+  var txt=AB_SUG_NOM[s.accion]||s.accion; if(s.pct) txt+=' '+(s.pct>0?'+':'')+s.pct+'%';
+  return '<span class="ab-acc '+s.accion+'" title="'+msgEsc(s.motivo||'')+(s.precio_sugerido?' → $'+abN(s.precio_sugerido):'')+'">'+txt+'</span>'+(s.precio_sugerido&&s.pct?' <span class="ab-hz">$'+abN(s.precio_sugerido)+'</span>':'');
+}
 function abColsCss(){
   var st=document.getElementById('ab-cols-css'); if(!st){ st=document.createElement('style'); st.id='ab-cols-css'; document.head.appendChild(st); }
   st.textContent=Object.keys(_abOcultas).map(function(k){ return '#ab-tabla [data-c="'+k+'"]{display:none}'; }).join('\n');
@@ -1295,6 +1344,8 @@ function abExportar(){
     if(k==='eta') return v?abFecha(v):'';
     if(k==='compra') return [v==='recomprar'?'Recomprar':(v==='llegando'?'Llegando':(x.sin_pedido?'Sin pedido':'')), x.urgente?'Urgente':(x.critico?'Critico':(x.sobrestock?'Sobrestock':''))].filter(Boolean).join(' + ');
     if(k==='accion') return String(AB_ACC[v]||v||'');
+    if(k==='quiebre_est'||k==='pedir_antes') return v?abFechaLarga(v):'';
+    if(k==='sug_pct'){ var sg=x.sugerencia; return (sg&&sg.accion&&sg.accion!=='mantener') ? ((AB_SUG_NOM[sg.accion]||sg.accion)+(sg.pct?' '+(sg.pct>0?'+':'')+sg.pct+'%':'')+(sg.precio_sugerido?' -> $'+sg.precio_sugerido:'')) : ''; }
     return (v===null||v===undefined)?'':v;
   };
   var esc=function(v){ if(typeof v==='number') return String(v).replace('.',','); return '"'+String(v).replace(/"/g,'""')+'"'; };
@@ -1319,20 +1370,23 @@ function abVistasPintar(){
     +'<label>&#128293; Orden urgente: se queda sin stock en menos de<input type="number" id="ab-v-urg" min="1" max="3650" value="'+_abCfg.urgente_dias+'"> dias y nada llega antes</label>'
     +'<label>&#9888; Critico: se queda sin stock en menos de<input type="number" id="ab-v-cri" min="1" max="3650" value="'+_abCfg.criticos_dias+'"> dias y nada llega antes</label>'
     +'<label>&#128230; Sobrestock: mas de<input type="number" id="ab-v-sob" min="1" max="3650" value="'+_abCfg.sobrestock_dias+'"> dias de stock (o stock sin ventas)</label>'
+    +'<label>&#128722; Al comprar, cubrir<input type="number" id="ab-v-com" min="7" max="3650" value="'+(_abCfg.compra_dias||60)+'"> dias de venta desde que llega (columna "Pedir (est.)")</label>'
     +'<div class="cm-btns" style="margin-top:10px"><button class="btn-azul" onclick="abVistasGuardar()">Guardar</button><span id="ab-v-msg" class="ab-msg"></span></div>';
 }
 function abVistasToggle(ev){ if(ev) ev.stopPropagation(); var p=document.getElementById('ab-vistas-pop'); if(!p) return; if(!p.classList.contains('on')) abVistasPintar(); p.classList.toggle('on'); }
 document.addEventListener('click', function(ev){ var p=document.getElementById('ab-vistas-pop'); if(p && p.classList.contains('on') && !(ev.target.closest && ev.target.closest('#ab-vistas'))) p.classList.remove('on'); });
 async function abVistasGuardar(){
   var m=document.getElementById('ab-v-msg'); m.style.color=''; m.textContent='Guardando...';
-  var v={urgente_dias:Number(document.getElementById('ab-v-urg').value), criticos_dias:Number(document.getElementById('ab-v-cri').value), sobrestock_dias:Number(document.getElementById('ab-v-sob').value)};
-  if(!(v.urgente_dias>0&&v.criticos_dias>0&&v.sobrestock_dias>0)){ m.style.color='var(--rojo)'; m.textContent='Cargá dias validos'; return; }
+  var v={urgente_dias:Number(document.getElementById('ab-v-urg').value), criticos_dias:Number(document.getElementById('ab-v-cri').value), sobrestock_dias:Number(document.getElementById('ab-v-sob').value), compra_dias:Number(document.getElementById('ab-v-com').value)};
+  if(!(v.urgente_dias>0&&v.criticos_dias>0&&v.sobrestock_dias>0&&v.compra_dias>0)){ m.style.color='var(--rojo)'; m.textContent='Cargá dias validos'; return; }
   var d=await abApi('/api/abast/config',{method:'PUT',body:JSON.stringify({vistas:v})});
   if(d.error){ m.style.color='var(--rojo)'; m.textContent=d.error; return; }
+  var cambioCompra=(d.vistas&&d.vistas.compra_dias)!==_abCfg.compra_dias;
   _abCfg=Object.assign(_abCfg, d.vistas||v);
   _abDatos.filas.forEach(abVistasFila);
   m.style.color='var(--verde)'; m.textContent='Guardado';
   abPintar();
+  if(cambioCompra) abCargar(true);   // las cantidades a pedir las calcula el servidor
 }
 // ── Historial por producto: ventas por mes y quiebres (para mirar el año pasado y estimar lo que se perdio) ──
 var _abHistMeses=13;
@@ -1347,27 +1401,58 @@ async function abHistorial(sku, meses){
   if(document.getElementById('ab-hist')!==c || _abSel!==sku) return;
   _abHistDatos=h;
   var t=h.totales||{};
-  var html='<div class="ab-kv">'
+  var html=abPlanHTML(sku, h)+'<div class="ab-tit">Ventas y quiebres</div><div class="ab-kv">'
     +'<span>Vendidas en ML ('+h.meses.length+' meses)</span><span>'+abN(t.vendidas)+' u</span>'
     +'<span>Dias sin stock (desde que hay foto)</span><span>'+abN(t.dias_sin_stock)+(t.dias_con_foto?' de '+abN(t.dias_con_foto):'')+'</span>'
     +'<span>Venta perdida estimada por quiebre</span><span>'+(t.venta_perdida_est?'~'+abN(t.venta_perdida_est)+' u':'—')+'</span>'
     +'<span>Velocidad con stock</span><span>'+abN(t.velocidad_con_stock,2)+' u/dia</span>'
+    +'<span>Facturado en el periodo (con IVA)</span><span>$'+abN(t.monto)+'</span>'
     +'</div>'
     +'<div class="nota">Ventas registradas desde '+abFechaLarga(h.primera_venta)+' · foto de stock diaria desde '+abFechaLarga(h.primera_foto)+'. La venta perdida = dias sin stock &times; velocidad de los dias con stock del mismo mes.</div>'
-    +'<div class="cm-tabla"><table><tr><th>Mes</th><th class="num">Vendidas</th><th class="num">Ordenes</th><th class="num">Dias sin stock</th><th class="num">Perdidas est.</th></tr>'
-    +h.meses.slice().reverse().map(function(m){ return '<tr><td>'+abMesNombre(m.mes)+'</td><td class="num">'+abN(m.vendidas)+'</td><td class="num">'+abN(m.ordenes)+'</td><td class="num">'+(m.dias_con_foto?abN(m.dias_sin_stock):'<span class="ab-hz">sin foto</span>')+'</td><td class="num">'+(m.venta_perdida_est?'~'+abN(m.venta_perdida_est):'—')+'</td></tr>'; }).join('')
+    +'<div class="cm-tabla"><table><tr><th>Mes</th><th class="num">Vendidas</th><th class="num">Facturado</th><th class="num">Precio prom.</th><th class="num">Dias sin stock</th><th class="num">Perdidas est.</th></tr>'
+    +h.meses.slice().reverse().map(function(m){ return '<tr><td>'+abMesNombre(m.mes)+'</td><td class="num">'+abN(m.vendidas)+'</td><td class="num">'+(m.monto?'$'+abN(m.monto):'—')+'</td><td class="num">'+(m.precio_prom?'$'+abN(m.precio_prom):'—')+'</td><td class="num">'+(m.dias_con_foto?abN(m.dias_sin_stock):'<span class="ab-hz">sin foto</span>')+'</td><td class="num">'+(m.venta_perdida_est?'~'+abN(m.venta_perdida_est):'—')+'</td></tr>'; }).join('')
     +'</table></div>'
     +'<div class="cm-btns"><button class="btn-gris" onclick="abHistorial(\''+sku+'\','+(_abHistMeses>=24?13:24)+')">'+(_abHistMeses>=24?'Ver 13 meses':'Ver 24 meses')+'</button><button class="btn-gris" onclick="abHistorialCsv()">Descargar dia por dia (Excel)</button></div>';
   c.innerHTML=html;
 }
 var _abHistDatos=null;
+// Plan de compra + estacionalidad + precio (viene con el historial)
+function abPlanHTML(sku, h){
+  var x=(_abDatos&&_abDatos.filas||[]).find(function(f){ return f.sku===sku; })||{};
+  var p=h.plan||{}, e=h.estacionalidad||{};
+  var html='';
+  // barras: ultimos 12 meses reales + proximos 6 estimados
+  var ult=(h.meses||[]).slice(-12); var prox=(p.proximos_meses||[]).slice(1,7);
+  var maxv=Math.max(1, Math.max.apply(null, ult.map(function(m){ return m.vendidas; }).concat(prox.map(function(m){ return m.unidades; }))));
+  var mesHoy=(p.proximos_meses&&p.proximos_meses[0])?p.proximos_meses[0].mes:'';
+  html+='<div class="ab-tit">Estacionalidad y plan de compra</div><div class="ab-plan">';
+  html+='<div class="ab-barras">'+ult.map(function(m){ return '<div class="b'+(m.mes===mesHoy?' hoy':'')+'" title="'+abMesNombre(m.mes)+': '+abN(m.vendidas)+' vendidas"><i style="height:'+Math.round(m.vendidas/maxv*52)+'px"></i>'+abMesNombre(m.mes).slice(0,3)+'</div>'; }).join('')
+    +prox.map(function(m){ return '<div class="b fut" title="'+abMesNombre(m.mes)+': ~'+abN(m.unidades)+' estimadas"><i style="height:'+Math.round(m.unidades/maxv*52)+'px"></i>'+abMesNombre(m.mes).slice(0,3)+'</div>'; }).join('')+'</div>';
+  html+='<div class="nota">Barras llenas: vendidas por mes. Punteadas: estimacion con la velocidad actual ('+abN(p.velocidad_15d,2)+' u/dia) y el indice estacional. Producto <b>'+msgEsc(e.tipo||'sin datos')+'</b>'+(e.pico?' · pico en '+abMesNombre('2000-'+String(e.pico).padStart(2,'0')).slice(0,3)+', valle en '+abMesNombre('2000-'+String(e.valle).padStart(2,'0')).slice(0,3):'')+(e.meses_con_ventas?' · '+e.meses_con_ventas+' meses con ventas':'')+'.</div>';
+  if(p.velocidad_15d>0){
+    html+='<div>Al ritmo actual '+(p.quiebre_est?'se queda sin stock el <b class="'+(p.urgencia==='ya'?'r':(p.urgencia==='esta semana'?'a':'g'))+'">'+abFechaLarga(p.quiebre_est)+'</b>':'<b class="g">no se queda sin stock en el proximo año</b>')+'.'
+      +(p.pedir_antes?' Con '+p.plazo+' dias de reposicion hay que pedir <b class="'+(p.urgencia==='ya'?'r':'a')+'">'+(p.urgencia==='ya'?'ya':'antes del '+abFechaLarga(p.pedir_antes))+'</b>.':'')+'</div>';
+    html+='<div>Cantidad sugerida: <b>'+abN(p.cantidad)+' u</b> para cubrir '+p.compra_dias+' dias de venta desde que llega ('+abFechaLarga(p.llegada)+' → '+abFechaLarga(p.cubre_hasta)+'), descontando stock y ordenes en camino.</div>';
+  } else {
+    html+='<div class="nota">Sin ventas en los ultimos 15 dias: no hay plan de compra.</div>';
+  }
+  // precio y margen (de la fila del resumen)
+  var sg=x.sugerencia;
+  if(x.precio_prom){
+    html+='<div style="margin-top:4px">Precio promedio <b>$'+abN(x.precio_prom)+'</b>'+(x.margen_pct!=null?' · margen estimado <b>'+abN(x.margen_pct,1)+'%</b>':' · sin costo cargado para calcular margen')+(x.comision_pct!=null?' · comision ML '+abN(x.comision_pct,1)+'%':'')+'</div>';
+    if(sg) html+='<div>Sugerencia: '+(sg.accion==='mantener'||!sg.accion?'<b>mantener el precio</b>':abSugHTML(x))+' <span class="nota">'+msgEsc(sg.motivo||'')+(sg.margen_sug_pct!=null&&sg.pct?' · margen resultante '+abN(sg.margen_sug_pct,1)+'%':'')+'</span></div>';
+  }
+  html+='</div>';
+  return html;
+}
 function abHistorialCsv(){
   var h=_abHistDatos; if(!h) return;
   var esc=function(v){ if(typeof v==='number') return String(v).replace('.',','); return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'; };
-  var lineas=[['Fecha','Vendidas ML','Ordenes','Disponible (foto)','En transito'].map(esc).join(';')];
-  h.dias.forEach(function(d){ lineas.push([abFechaLarga(d.fecha), d.vendidas, d.ordenes, d.disponible===null?'':d.disponible, d.en_transito===null?'':d.en_transito].map(esc).join(';')); });
-  lineas.push(''); lineas.push(['Mes','Vendidas','Ordenes','Dias sin stock','Perdidas est.'].map(esc).join(';'));
-  h.meses.forEach(function(m){ lineas.push([abMesNombre(m.mes), m.vendidas, m.ordenes, m.dias_con_foto?m.dias_sin_stock:'', m.venta_perdida_est].map(esc).join(';')); });
+  var lineas=[['Fecha','Vendidas ML','Ordenes','Facturado c/IVA','Disponible (foto)','En transito'].map(esc).join(';')];
+  h.dias.forEach(function(d){ lineas.push([abFechaLarga(d.fecha), d.vendidas, d.ordenes, d.monto||0, d.disponible===null?'':d.disponible, d.en_transito===null?'':d.en_transito].map(esc).join(';')); });
+  lineas.push(''); lineas.push(['Mes','Vendidas','Ordenes','Facturado c/IVA','Precio prom.','Dias sin stock','Perdidas est.'].map(esc).join(';'));
+  h.meses.forEach(function(m){ lineas.push([abMesNombre(m.mes), m.vendidas, m.ordenes, m.monto||0, m.precio_prom||'', m.dias_con_foto?m.dias_sin_stock:'', m.venta_perdida_est].map(esc).join(';')); });
+  if(h.plan){ lineas.push(''); lineas.push(['Plan de compra','Quiebre est.','Pedir antes de','Cantidad sugerida','Llega','Cubre hasta'].map(esc).join(';')); lineas.push(['', h.plan.quiebre_est?abFechaLarga(h.plan.quiebre_est):'', h.plan.pedir_antes?abFechaLarga(h.plan.pedir_antes):'', h.plan.cantidad||0, h.plan.llegada?abFechaLarga(h.plan.llegada):'', h.plan.cubre_hasta?abFechaLarga(h.plan.cubre_hasta):''].map(esc).join(';')); }
   var blob=new Blob(['\uFEFF'+lineas.join('\r\n')],{type:'text/csv;charset=utf-8'});
   var u=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=u; a.download='historial-'+h.sku+'.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(u); },2000);
 }
