@@ -317,7 +317,7 @@
 <!-- ── Sistema ── -->
 <div id="os-view">
   <nav id="side" aria-label="Apps">
-    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v23</span></span></div>
+    <div id="brand">P<span class="lbl-b">ONTEC <span>OS</span> <span style="font-size:9px;color:var(--texto2);font-weight:400">v24</span></span></div>
     <div id="botones"></div>
     <div class="abajo">
       <div id="quien"></div>
@@ -480,11 +480,12 @@ var APPS = [
 ];
 var APP_NOMBRES = {rentabilidad:'Rentabilidad', logistica:'Logistica', promos:'Promociones', respondia:'RespondIA', posventa:'Posventa', asistente:'Asistente', abastecimiento:'Abastecimiento'};
 // Que puede hacer cada usuario DENTRO del Asistente (se guarda por usuario)
-var ASIS_LISTA=['consultar','ventas','desc_poner','desc_sacar','desc_todos','smart','fotos','medidas'];
+var ASIS_LISTA=['consultar','ventas','desc_poner','desc_sacar','desc_todos','smart','fotos','medidas','precios'];
 var ASIS_NOMBRES={consultar:'Consultar publicaciones/promos', ventas:'Ver ventas y ganancias',
   desc_poner:'Poner descuentos', desc_sacar:'Sacar descuentos',
   desc_todos:'\u26A0 Sacar TODOS los descuentos', smart:'Campanas SMART',
-  fotos:'Copiar fotos', medidas:'Cargar medidas en ML'};
+  fotos:'Copiar fotos', medidas:'Cargar medidas en ML',
+  precios:'\u26A0 Cambiar precios en Contabilium'};
 function asisPorRolOS(rol){
   if(rol==='admin') return ASIS_LISTA.slice();
   if(rol==='encargado') return ['consultar','ventas'];
@@ -763,7 +764,7 @@ function toggleAppsOS(ix){
   var abox=document.getElementById('u-asis-chk-'+ix);
   var marcA=Array.isArray(u.acciones)?u.acciones:asisPorRolOS(u.rol);
   abox.innerHTML=ASIS_LISTA.map(function(a){
-    var pel=(a==='desc_todos');
+    var pel=(a==='desc_todos'||a==='precios');
     return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;color:'+(pel?'#f87171':'#c9d4e8')+'">'
       +'<input type="checkbox" value="'+a+'"'+(marcA.indexOf(a)>-1?' checked':'')+'> '+ASIS_NOMBRES[a]+'</label>';
   }).join('');
